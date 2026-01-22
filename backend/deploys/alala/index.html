@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>alala</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+/* CSS Reset & Normalization */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* CSS Custom Properties */
+:root {
+  --color-bg: #0a0a0a;
+  --color-bg-secondary: #1a1a1a;
+  --color-bg-tertiary: #2a2a2a;
+  --color-text: #e5e5e5;
+  --color-text-secondary: #b0b0b0;
+  --color-text-muted: #707070;
+  --color-accent: #d4af37;
+  --color-accent-dark: #b8941f;
+  --color-accent-light: #f4d958;
+  --color-border: #333333;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+  
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-xxl: 4rem;
+  
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+  --shadow: 0 4px 20px var(--color-shadow);
+  --shadow-lg: 0 8px 40px var(--color-shadow);
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* Header & Navigation */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-brand h1 {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.2rem;
+}
+
+.nav-subtitle {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav-menu {
+  display: flex;
+  gap: var(--spacing-lg);
+}
+
+.nav-menu a {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  font-size: 0.95rem;
+  position: relative;
+  transition: var(--transition);
+}
+
+.nav-menu a:hover {
+  color: var(--color-accent);
+}
+
+.nav-menu a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  transition: var(--transition);
+}
+
+.nav-menu a:hover::after {
+  width: 100%;
+}
+
+/* Hero Section */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xxl) var(--spacing-md);
+  gap: var(--spacing-xxl);
+  margin-top: 80px;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 600px;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+}
+
+.hero-description {
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xl);
+  line-height: 1.6;
+}
+
+.cta-button {
+  display: inline-block;
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cta-button:hover {
+  background-color: var(--color-accent-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.hero-image {
+  flex: 1;
+  max-width: 500px;
+}
+
+.hero-image img {
+  width: 100%;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Section Styling */
+.section-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: var(--spacing-xxl);
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: var(--color-accent);
+}
+
+/* Gallery Section */
+.gallery-section {
+  padding: var(--spacing-xxl) 0;
+  background-color: var(--color-bg-secondary);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  aspect-ratio: 4/3;
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.gallery-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.gallery-category {
+  color: var(--color-text);
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.gallery-item:hover .gallery-overlay {
+  opacity: 1;
+}
+
+.gallery-item:hover .gallery-image {
+  transform: scale(1.05);
+}
+
+/* About Section */
+.about-section {
+  padding: var(--spacing-xxl) 0;
+}
+
+.about-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-xxl);
+  align-items: center;
+}
+
+.about-text .section-title {
+  text-align: left;
+  margin-bottom: var(--spacing-lg);
+}
+
+.about-description {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.7;
+}
+
+.about-skills {
+  margin-top: var(--spacing-lg);
+}
+
+.about-skills h3 {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-sm);
+}
+
+.skills-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-xs);
+}
+
+.skills-list li {
+  padding: var(--spacing-xs) 0;
+  color: var(--color-text-secondary);
+  position: relative;
+  padding-left: var(--spacing-md);
+}
+
+.skills-list li::before {
+  content: '•';
+  color: var(--color-accent);
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.photographer-image {
+  width: 100%;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+/* Contact Section */
+.contact-section {
+  padding: var(--spacing-xxl) 0;
+  background-color: var(--color-bg-secondary);
+}
+
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xxl);
+  margin-top: var(--spacing-lg);
+}
+
+.contact-info h3 {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-md);
+}
+
+.contact-description {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.contact-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.contact-label {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.contact-value {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* Form Styling */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-label {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  color: var(--color-text);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-button {
+  padding: var(--spacing-md) var(--spacing-xl);
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: var(--transition);
+  margin-top: var(--spacing-sm);
+}
+
+.form-button:hover {
+  background-color: var(--color-accent-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--color-bg);
+  padding: var(--spacing-xl) 0 var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-lg);
+}
+
+.footer-brand h3 {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xs);
+}
+
+.footer-brand p {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.footer-social {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.social-link {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  color: var(--color-accent);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-bottom p {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  display: none;
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.lightbox.active {
+  display: flex;
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: var(--border-radius);
+}
+
+.lightbox-close
+  </style>
+</head>
+<body>
+<header class="header">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <h1>Alex Morgan</h1>
+      <span class="nav-subtitle">Photography</span>
+    </div>
+    <ul class="nav-menu">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <section id="home" class="hero-section">
+    <div class="hero-content">
+      <h2 class="hero-title">Capturing Moments That Matter</h2>
+      <p class="hero-description">Professional photographer specializing in portraits, landscapes, and urban photography</p>
+      <a href="#gallery" class="cta-button">View My Work</a>
+    </div>
+    <div class="hero-image">
+      <img src="https://picsum.photos/800/600" alt="Featured photography work">
+    </div>
+  </section>
+
+  <section id="gallery" class="gallery-section">
+    <div class="container">
+      <h2 class="section-title">Portfolio</h2>
+      <div class="gallery-grid">
+        <div class="gallery-item" data-lightbox="portfolio">
+          <img src="https://picsum.photos/400/300?random=1" alt="Portrait photography session" class="gallery-image">
+          <div class="gallery-overlay">
+            <span class="gallery-category">Portraits</span>
+          </div>
+        </div>
+        <div class="gallery-item" data-lightbox="portfolio">
+          <img src="https://picsum.photos/400/300?random=2" alt="Landscape mountain view" class="gallery-image">
+          <div class="gallery-overlay">
+            <span class="gallery-category">Landscapes</span>
+          </div>
+        </div>
+        <div class="gallery-item" data-lightbox="portfolio">
+          <img src="https://picsum.photos/400/300?random=3" alt="Urban architecture photography" class="gallery-image">
+          <div class="gallery-overlay">
+            <span class="gallery-category">Urban</span>
+          </div>
+        </div>
+        <div class="gallery-item" data-lightbox="portfolio">
+          <img src="https://picsum.photos/400/300?random=4" alt="Wedding couple photography" class="gallery-image">
+          <div class="gallery-overlay">
+            <span class="gallery-category">Wedding</span>
+          </div>
+        </div>
+        <div class="gallery-item" data-lightbox="portfolio">
+          <img src="https://picsum.photos/400/300?random=5" alt="Nature wildlife photography" class="gallery-image">
+          <div class="gallery-overlay">
+            <span class="gallery-category">Nature</span>
+          </div>
+        </div>
+        <div class="gallery-item" data-lightbox="portfolio">
+          <img src="https://picsum.photos/400/300?random=6" alt="Event photography coverage" class="gallery-image">
+          <div class="gallery-overlay">
+            <span class="gallery-category">Events</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text">
+          <h2 class="section-title">About Me</h2>
+          <p class="about-description">
+            With over 8 years of experience in professional photography, I specialize in capturing authentic moments and creating timeless images. My passion for visual storytelling drives me to find the perfect balance between technical excellence and artistic vision.
+          </p>
+          <p class="about-description">
+            Based in San Francisco, I work with clients ranging from individuals seeking personal portraits to corporations needing commercial photography. Every project is approached with dedication, creativity, and attention to detail.
+          </p>
+          <div class="about-skills">
+            <h3>Specialties</h3>
+            <ul class="skills-list">
+              <li>Portrait Photography</li>
+              <li>Wedding & Events</li>
+              <li>Commercial Photography</li>
+              <li>Landscape & Nature</li>
+              <li>Photo Editing & Retouching</li>
+            </ul>
+          </div>
+        </div>
+        <div class="about-image">
+          <img src="https://picsum.photos/500/600?random=7" alt="Professional photographer Alex Morgan" class="photographer-image">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <h2 class="section-title">Let's Work Together</h2>
+      <div class="contact-content">
+        <div class="contact-info">
+          <h3>Get In Touch</h3>
+          <p class="contact-description">Ready to create something amazing? Let's discuss your photography needs and bring your vision to life.</p>
+          <div class="contact-details">
+            <div class="contact-item">
+              <span class="contact-label">Email:</span>
+              <span class="contact-value">hello@alexmorgan.photo</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-label">Phone:</span>
+              <span class="contact-value">(555) 123-4567</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-label">Location:</span>
+              <span class="contact-value">San Francisco, CA</span>
+            </div>
+          </div>
+        </div>
+        <form class="contact-form">
+          <div class="form-group">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" id="name" name="name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="email" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="project-type" class="form-label">Project Type</label>
+            <select id="project-type" name="project-type" class="form-select">
+              <option value="">Select a project type</option>
+              <option value="portrait">Portrait Session</option>
+              <option value="wedding">Wedding</option>
+              <option value="commercial">Commercial</option>
+              <option value="event">Event Coverage</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message" class="form-label">Message</label>
+            <textarea id="message" name="message" class="form-textarea" rows="5" placeholder="Tell me about your project..."></textarea>
+          </div>
+          <button type="submit" class="form-button">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>Alex Morgan Photography</h3>
+        <p>Capturing life's precious moments</p>
+      </div>
+      <div class="footer-social">
+        <a href="#" class="social-link">Instagram</a>
+        <a href="#" class="social-link">Facebook</a>
+        <a href="#" class="social-link">Twitter</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Alex Morgan Photography. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<div id="lightbox" class="lightbox">
+  <div class="lightbox-content">
+    <span class="lightbox-close">&times;</span>
+    <img src="" alt="" class="lightbox-image">
+    <div class="lightbox-nav">
+      <button class="lightbox-prev">&larr;</button>
+      <button class="lightbox-next">&rarr;</button>
+    </div>
+  </div>
+</div>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Smooth scroll for anchor links
+    const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    anchorLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Lightbox functionality
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.querySelector('.lightbox-image');
+    const lightboxClose = document.querySelector('.lightbox-close');
+    const lightboxPrev = document.querySelector('.lightbox-prev');
+    const lightboxNext = document.querySelector('.lightbox-next');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    let currentImageIndex = 0;
+
+    const images = Array.from(galleryItems).map(item => {
+        const img = item.querySelector('.gallery-image');
+        return {
+            src: img.src,
+            alt: img.alt
+        };
+    });
+
+    const openLightbox = (index) => {
+        currentImageIndex = index;
+        lightboxImage.src = images[index].src;
+        lightboxImage.alt = images[index].alt;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeLightbox = () => {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    const showPrevImage = () => {
+        currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+        lightboxImage.src = images[currentImageIndex].src;
+        lightboxImage.alt = images[currentImageIndex].alt;
+    };
+
+    const showNextImage = () => {
+        currentImageIndex = (currentImageIndex + 1) % images.length;
+        lightboxImage.src = images[currentImageIndex].src;
+        lightboxImage.alt = images[currentImageIndex].alt;
+    };
+
+    galleryItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            openLightbox(index);
+        });
+    });
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', showPrevImage);
+    lightboxNext.addEventListener('click', showNextImage);
+
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+            closeLightbox();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (lightbox.classList.contains('active')) {
+            switch (e.key) {
+                case 'Escape':
+                    closeLightbox();
+                    break;
+                case 'ArrowLeft':
+                    showPrevImage();
+                    break;
+                case 'ArrowRight':
+                    showNextImage();
+                    break;
+            }
+        }
+    });
+
+    // Form validation and submission
+    const contactForm = document.querySelector('.contact-form');
+    const formInputs = contactForm.querySelectorAll('.form-input, .form-select, .form-textarea');
+
+    const showError = (input, message) => {
+        const formGroup = input.closest('.form-group');
+        let errorElement = formGroup.querySelector('.form-error');
+        
+        if (!errorElement) {
+            errorElement = document.createElement('span');
+            errorElement.className = 'form-error';
+            formGroup.appendChild(errorElement);
+        }
+        
+        errorElement.textContent = message;
+        input.classList.add('error');
+    };
+
+    const clearError = (input) => {
+        const formGroup = input.closest('.form-group');
+        const errorElement = formGroup.querySelector('.form-error');
+        
+        if (errorElement) {
+            errorElement.remove();
+        }
+        
+        input.classList.remove('error');
+    };
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    formInputs.forEach(input => {
+        input.addEventListener('blur', () => {
+            validateField(input);
+        });
+
+        input.addEventListener('input', () => {
+            if (input.classList.contains('error')) {
+                clearError(input);
+            }
+        });
+    });
+
+    const validateField = (input) => {
+        const value = input.value.trim();
+
+        if (input.hasAttribute('required') && !value) {
+            showError(input, 'This field is required');
+            return false;
+        }
+
+        if (input.type === 'email' && value && !validateEmail(value)) {
+            showError(input, 'Please enter a valid email address');
+            return false;
+        }
+
+        clearError(input);
+        return true;
+    };
+
+    contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        let isValid = true;
+        formInputs.forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+
+        if (isValid) {
+            const formData = new FormData(contactForm);
+            const submitButton = contactForm.querySelector('.form-button');
+            const originalText = submitButton.textContent;
+            
+            submitButton.textContent = 'Sending...';
+            submitButton.disabled = true;
+
+            // Simulate form submission
+            setTimeout(() => {
+                alert('Thank you for your message! I\'ll get back to you soon.');
+                contactForm.reset();
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }, 2000);
+        }
+    });
+
+    // Scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    const animateElements = document.querySelectorAll('.section-title, .gallery-item, .about-text, .about-image, .contact-info, .contact-form');
+    animateElements.forEach(el => {
+        observer.observe(el);
+    });
+
+    // Gallery item hover effects
+    galleryItems.forEach(item => {
+        const overlay = item.querySelector('.gallery-overlay');
+        
+        item.addEventListener('mouseenter', () => {
+            overlay.style.opacity = '1';
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            overlay.style.opacity = '0';
+        });
+    });
+
+    // Header scroll effect
+    const header = document.querySelector('.header');
+    let lastScrollY = window.scrollY;
+
+    window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+        
+        if (currentScrollY > 100) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        
+        lastScrollY = currentScrollY;
+    });
+
+    // Lazy loading for images
+    const images = document.querySelectorAll('img');
+    const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                }
+                imageObserver.unobserve(img);
+            }
+        });
+    });
+
+    images.forEach(img => {
+        if (img.dataset.src) {
+            imageObserver.observe(img);
+        }
+    });
+});
+  </script>
+</body>
+</html>
