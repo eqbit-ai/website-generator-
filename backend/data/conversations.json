@@ -1,0 +1,23 @@
+[
+  {
+    "id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "customer_id": "f61cb6cf-7638-4704-90ce-45d9caf11392",
+    "status": "active",
+    "started_at": "2026-01-22T17:10:56.728Z",
+    "ended_at": null
+  },
+  {
+    "id": "78ee660c-09e0-4fcf-88b0-1179a2f77fff",
+    "customer_id": "f61cb6cf-7638-4704-90ce-45d9caf11392",
+    "status": "active",
+    "started_at": "2026-01-23T10:12:57.261Z",
+    "ended_at": null
+  },
+  {
+    "id": "979d3501-cd88-4c13-a83e-06280dcea357",
+    "customer_id": "f61cb6cf-7638-4704-90ce-45d9caf11392",
+    "status": "active",
+    "started_at": "2026-01-23T15:04:03.905Z",
+    "ended_at": null
+  }
+]

@@ -1,0 +1,163 @@
+[
+  {
+    "id": "cd2ad09f-e041-4297-9318-470af8bf1cf7",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "assistant",
+    "content": "Hello Ashutosh Nanda! What brings you here today?",
+    "created_at": "2026-01-22T17:10:56.729Z"
+  },
+  {
+    "id": "0238cf39-f60b-4b7a-a343-4e06bcf71469",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "user",
+    "content": "hi",
+    "created_at": "2026-01-22T17:11:02.167Z"
+  },
+  {
+    "id": "85f92fb6-6a27-48e8-aeab-c2820510f9ed",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "assistant",
+    "content": "Hey! How can I help you out?",
+    "created_at": "2026-01-22T17:11:02.167Z"
+  },
+  {
+    "id": "25d98028-af69-446b-bd6f-36bfa90a6344",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "user",
+    "content": "i am 17 years old can i get visa?",
+    "created_at": "2026-01-22T17:11:18.052Z"
+  },
+  {
+    "id": "ff5697e6-684d-4109-94dd-537f5f0fdf91",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "assistant",
+    "content": "It depends on what type of visa and which country you're applying to. Most student visas allow 17-year-olds to apply, but you'd typically need parental consent and meet other requirements. What kind of visa are you looking for?",
+    "created_at": "2026-01-22T17:11:18.052Z"
+  },
+  {
+    "id": "49ef7b38-a6a7-4c99-93e5-9aa7e54e38e9",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "user",
+    "content": "What are your business hours?",
+    "created_at": "2026-01-22T17:16:14.735Z"
+  },
+  {
+    "id": "7cfecdd6-e6e6-4eb6-90e3-d37188c43832",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "assistant",
+    "content": "I don't have specific business hours info for our company right now. Can you let me know what service you're trying to reach us about? That way I can point you in the right direction.",
+    "created_at": "2026-01-22T17:16:14.736Z"
+  },
+  {
+    "id": "bbfb1074-e0a7-4239-a7e7-3767bc66f225",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "user",
+    "content": "do i need to present physically?",
+    "created_at": "2026-01-22T17:16:52.225Z"
+  },
+  {
+    "id": "0fc2d4dd-2037-476d-8ebd-49b0b82b01ad",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "assistant",
+    "content": "For visa applications? Yeah, usually you'll need to show up in person for biometrics (fingerprints, photo) and sometimes an interview. Some countries let you submit docs online first, but the physical appointment is typically required. Which country's visa are you applying for?",
+    "created_at": "2026-01-22T17:16:52.226Z"
+  },
+  {
+    "id": "5bd0ab14-2612-4788-9bb8-4348b37f838e",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "user",
+    "content": "do i need to present physically?",
+    "created_at": "2026-01-22T17:19:50.587Z"
+  },
+  {
+    "id": "139eab11-6250-42da-bacc-52631bcec379",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "assistant",
+    "content": "Nope, you don't need to be physically present to set up a company here. Everything can be handled remotely for incorporation at Meydan Free Zone.",
+    "created_at": "2026-01-22T17:19:50.588Z"
+  },
+  {
+    "id": "1675ef81-d284-40af-bb19-a99909aa4c70",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "user",
+    "content": "i am 17 can i get visa?",
+    "created_at": "2026-01-22T17:20:12.298Z"
+  },
+  {
+    "id": "705b1b8a-69fe-4ab4-bb43-557715f4faa6",
+    "conversation_id": "e23852c8-1199-42d9-b3f6-80a1870829df",
+    "role": "assistant",
+    "content": "No, you need to be at least 18 to get a visa here in the UAE - whether it's for employment or as an investor/partner. You'll have to wait until your 18th birthday to apply.",
+    "created_at": "2026-01-22T17:20:12.299Z"
+  },
+  {
+    "id": "8609b5bd-e544-4cc5-93cb-af9695cc09a1",
+    "conversation_id": "78ee660c-09e0-4fcf-88b0-1179a2f77fff",
+    "role": "assistant",
+    "content": "Hi Ashutosh Nanda! What can I assist you with?",
+    "created_at": "2026-01-23T10:12:57.262Z"
+  },
+  {
+    "id": "63c21b1a-909e-448e-886d-a96f451f87f2",
+    "conversation_id": "78ee660c-09e0-4fcf-88b0-1179a2f77fff",
+    "role": "user",
+    "content": "hi",
+    "created_at": "2026-01-23T10:12:59.232Z"
+  },
+  {
+    "id": "3b933756-7214-4c29-89ea-4a0f740e4ff6",
+    "conversation_id": "78ee660c-09e0-4fcf-88b0-1179a2f77fff",
+    "role": "assistant",
+    "content": "Hey Ashutosh Nanda! How can I help you today?",
+    "created_at": "2026-01-23T10:12:59.233Z"
+  },
+  {
+    "id": "4fb538f1-a9b2-4964-b5f9-df57189d4a69",
+    "conversation_id": "78ee660c-09e0-4fcf-88b0-1179a2f77fff",
+    "role": "user",
+    "content": "do i need to present physically to apply?",
+    "created_at": "2026-01-23T10:13:28.185Z"
+  },
+  {
+    "id": "920df5a4-2f03-41a1-8c7c-96431ff37729",
+    "conversation_id": "78ee660c-09e0-4fcf-88b0-1179a2f77fff",
+    "role": "assistant",
+    "content": "No, physical presence is not required to set up a company at Meydan Free Zone. You can apply without being physically present.",
+    "created_at": "2026-01-23T10:13:28.186Z"
+  },
+  {
+    "id": "449ed350-6e96-4262-af20-67b5367bf4ec",
+    "conversation_id": "979d3501-cd88-4c13-a83e-06280dcea357",
+    "role": "assistant",
+    "content": "Hi Ashutosh Nanda! What can I assist you with?",
+    "created_at": "2026-01-23T15:04:03.905Z"
+  },
+  {
+    "id": "b9d964f8-80e6-4a69-99f5-435aa020dc01",
+    "conversation_id": "979d3501-cd88-4c13-a83e-06280dcea357",
+    "role": "user",
+    "content": "hello",
+    "created_at": "2026-01-23T15:04:09.742Z"
+  },
+  {
+    "id": "453cd17d-1003-48f3-9e18-b09293aaf53d",
+    "conversation_id": "979d3501-cd88-4c13-a83e-06280dcea357",
+    "role": "assistant",
+    "content": "Hey Ashutosh Nanda! How can I help you today?",
+    "created_at": "2026-01-23T15:04:09.743Z"
+  },
+  {
+    "id": "e451d710-46df-46ec-afc3-95161e304866",
+    "conversation_id": "979d3501-cd88-4c13-a83e-06280dcea357",
+    "role": "user",
+    "content": "i am 61 can i get employee visa?",
+    "created_at": "2026-01-23T15:04:30.584Z"
+  },
+  {
+    "id": "95e08150-7512-4ec1-8305-eff59dbe0d2f",
+    "conversation_id": "979d3501-cd88-4c13-a83e-06280dcea357",
+    "role": "assistant",
+    "content": "Based on our visa requirements, the maximum age criteria to apply for an employee visa is 60 years. Since you're 61, you would exceed the age limit for an employee visa. However, if you're looking to invest in a company, there's no age limitation for an investor/partner visa - you just need to have AED 50,000 share capital in the company.",
+    "created_at": "2026-01-23T15:04:30.585Z"
+  }
+]

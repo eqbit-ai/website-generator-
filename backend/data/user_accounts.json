@@ -1,0 +1,40 @@
+[
+  {
+    "id": "5231c4ae-f731-47fd-ab08-105eb545fc40",
+    "name": "Ashutosh Nanda",
+    "email": "ashuken266@gmail.com",
+    "phone": "+15053784204",
+    "account_number": "ACC1769103409350",
+    "status": "active",
+    "balance": "$1,234.56",
+    "last_transaction": "2026-01-22T17:36:49.350Z",
+    "google_auth_secret": "HX2B3SIQIB7MKAACWL3PEE4PELZYBK22",
+    "google_auth_enabled": true,
+    "created_at": "2026-01-22T17:36:49.350Z"
+  },
+  {
+    "id": "cf678611-378b-49c3-92f1-482803147804",
+    "name": "Test User",
+    "email": "test@test.com",
+    "phone": "+1234567890",
+    "account_number": "ACC1769104029369",
+    "status": "active",
+    "balance": "$1,234.56",
+    "last_transaction": "2026-01-22T17:47:09.369Z",
+    "google_auth_secret": null,
+    "google_auth_enabled": false,
+    "created_at": "2026-01-22T17:47:09.372Z"
+  },
+  {
+    "id": "e4740fb2-347d-4085-9d20-2ea81f951d9e",
+    "name": "Ashu",
+    "email": "ashu@test.com",
+    "phone": "+918284852687",
+    "account_number": "ACC-48333242",
+    "status": "Active",
+    "balance": "$1,234.56",
+    "plan": "Premium",
+    "created_at": "2026-01-23T06:05:33.242Z",
+    "google_auth_secret": "YXHPKZ673XBKCPLF"
+  }
+]

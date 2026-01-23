@@ -1,494 +1,259 @@
 // backend/server.js
+// Complete backend server
 
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const Anthropic = require('@anthropic-ai/sdk');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-// Vercel token
-const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-
-// Middleware
+// ============================================
+// MIDDLEWARE
+// ============================================
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// Health check
+// ============================================
+// DATABASE
+// ============================================
+const db = require('./database');
+
+// ============================================
+// SERVICES
+// ============================================
+let knowledgeService;
+try {
+    knowledgeService = require('./services/knowledgeService');
+    console.log(`📚 Knowledge base: ${knowledgeService.getStats().totalChunks} chunks loaded`);
+} catch (e) {
+    console.log('⚠️ Knowledge service not available:', e.message);
+}
+
+// ============================================
+// ROUTES
+// ============================================
+
+// Voice routes (Vapi)
+try {
+    const voiceRoutes = require('./routes/voice');
+    app.use('/api/voice', voiceRoutes);
+    console.log('✅ Voice routes loaded');
+} catch (e) {
+    console.log('⚠️ Voice routes error:', e.message);
+}
+
+// Chat routes
+try {
+    const chatRoutes = require('./routes/chat');
+    app.use('/api/chat', chatRoutes);
+    console.log('✅ Chat routes loaded');
+} catch (e) {
+    console.log('⚠️ Chat routes not available:', e.message);
+}
+
+// Knowledge routes
+try {
+    const knowledgeRoutes = require('./routes/knowledge');
+    app.use('/api/knowledge', knowledgeRoutes);
+    console.log('✅ Knowledge routes loaded');
+} catch (e) {
+    console.log('⚠️ Knowledge routes not available:', e.message);
+}
+
+// Admin routes
+try {
+    const adminRoutes = require('./routes/admin');
+    app.use('/api/admin', adminRoutes);
+    console.log('✅ Admin routes loaded');
+} catch (e) {
+    console.log('⚠️ Admin routes not available:', e.message);
+}
+
+// ============================================
+// STATIC FILES
+// ============================================
+const audioDir = path.join(__dirname, 'audio');
+if (!fs.existsSync(audioDir)) {
+    fs.mkdirSync(audioDir, { recursive: true });
+}
+app.use('/audio', express.static(audioDir));
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
+
+// ============================================
+// HEALTH CHECK
+// ============================================
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
 });
 
 // ============================================
-// WEBSITE GENERATION - SPLIT APPROACH
+// WEBSITE GENERATION (Anthropic)
 // ============================================
-
-// Step 1: Generate HTML structure
-async function generateHTML(prompt, options) {
-    const systemPrompt = `You are an expert web developer specializing in semantic HTML5.
-
-YOUR TASK: Generate ONLY the HTML body content for a website.
-
-REQUIREMENTS:
-- Use semantic HTML5 tags (header, nav, main, section, article, footer)
-- Include proper class names for styling
-- Add placeholder text content that matches the website purpose
-- Use https://picsum.photos/WIDTH/HEIGHT for images (e.g., https://picsum.photos/800/600)
-- Include proper alt text for images
-- Structure content logically with sections
-- Add id attributes for navigation anchors
-- DO NOT include <html>, <head>, or <body> tags - only the inner content
-
-OUTPUT: Return ONLY raw HTML code, no markdown, no code blocks, no explanations.`;
-
-    const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: systemPrompt,
-        messages: [
-            {
-                role: 'user',
-                content: `Create HTML for: ${prompt}\n\nReturn ONLY the HTML code.`
-            }
-        ],
-    });
-
-    let html = message.content[0].text.trim();
-    html = html.replace(/^```html?\n?/i, '').replace(/\n?```$/i, '').trim();
-
-    return html;
+let anthropic = null;
+if (process.env.ANTHROPIC_API_KEY) {
+    try {
+        const Anthropic = require('@anthropic-ai/sdk');
+        anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        console.log('✅ Anthropic Claude ready');
+    } catch (e) {
+        console.log('⚠️ Anthropic not available:', e.message);
+    }
 }
 
-// Step 2: Generate CSS based on HTML
-async function generateCSS(html, prompt, options) {
-    const systemPrompt = `You are an expert CSS developer specializing in modern, responsive design.
-
-YOUR TASK: Generate complete CSS for the provided HTML.
-
-REQUIREMENTS:
-- Start with CSS reset/normalization
-- Use CSS custom properties (variables) for colors and spacing
-- Implement mobile-first responsive design
-- Use flexbox and CSS grid for layouts
-- Add smooth transitions and hover effects
-- Include @import for Google Fonts at the very top
-- Create a cohesive color scheme that matches the website purpose
-- Add subtle animations for visual polish
-- Ensure accessibility (good contrast, focus states)
-- Style all elements present in the HTML
-
-OUTPUT: Return ONLY raw CSS code, no markdown, no code blocks, no explanations.`;
-
-    const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: systemPrompt,
-        messages: [
-            {
-                role: 'user',
-                content: `Website type: ${prompt}
-
-HTML to style:
-${html}
-
-Style preferences: ${options.style || 'modern, clean, professional'}
-Color scheme: ${options.colors || 'choose appropriate colors for the website type'}
-
-Return ONLY the CSS code.`
-            }
-        ],
-    });
-
-    let css = message.content[0].text.trim();
-    css = css.replace(/^```css?\n?/i, '').replace(/\n?```$/i, '').trim();
-
-    return css;
-}
-
-// Step 3: Generate JavaScript
-async function generateJS(html, prompt) {
-    const systemPrompt = `You are an expert JavaScript developer.
-
-YOUR TASK: Generate vanilla JavaScript for interactivity.
-
-REQUIREMENTS:
-- Use modern ES6+ syntax
-- Add smooth scroll for anchor links
-- Add mobile menu toggle if navigation exists
-- Add form validation if forms exist
-- Add scroll animations (intersection observer)
-- Add any other relevant interactivity based on the HTML
-- Wrap code in DOMContentLoaded event listener
-- Keep code clean and well-organized
-
-OUTPUT: Return ONLY raw JavaScript code, no markdown, no code blocks, no explanations.
-If no JavaScript is needed, return just: // No JavaScript required`;
-
-    const message = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2048,
-        system: systemPrompt,
-        messages: [
-            {
-                role: 'user',
-                content: `Website type: ${prompt}
-
-HTML:
-${html}
-
-Generate appropriate JavaScript. Return ONLY the code.`
-            }
-        ],
-    });
-
-    let js = message.content[0].text.trim();
-    js = js.replace(/^```javascript?\n?/i, '').replace(/\n?```$/i, '').trim();
-
-    return js;
-}
-
-// Main generate endpoint
 app.post('/api/generate/website', async (req, res) => {
     try {
         const { prompt, options = {} } = req.body;
 
-        if (!prompt || !prompt.trim()) {
+        if (!prompt) {
             return res.status(400).json({ error: 'Prompt is required' });
         }
 
-        console.log('='.repeat(50));
-        console.log('Generating website for:', prompt.substring(0, 100));
-        console.log('='.repeat(50));
+        if (!anthropic) {
+            return res.status(500).json({ error: 'Anthropic not configured' });
+        }
 
-        console.log('Step 1/3: Generating HTML...');
-        const html = await generateHTML(prompt, options);
-        console.log('HTML generated:', html.length, 'characters');
+        console.log('🎨 Generating website:', prompt.substring(0, 50));
 
-        console.log('Step 2/3: Generating CSS...');
-        const css = await generateCSS(html, prompt, options);
-        console.log('CSS generated:', css.length, 'characters');
-
-        console.log('Step 3/3: Generating JavaScript...');
-        const js = await generateJS(html, prompt);
-        console.log('JavaScript generated:', js.length, 'characters');
-
-        console.log('='.repeat(50));
-        console.log('Website generation complete!');
-        console.log('='.repeat(50));
-
-        res.json({
-            success: true,
-            website: {
-                html,
-                css,
-                js,
-                title: prompt.substring(0, 50),
-                description: `Website generated from: ${prompt}`
-            }
+        // Generate HTML
+        const htmlResponse = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 4096,
+            system: 'Generate only HTML body content. No html/head/body tags. Use https://picsum.photos for images. Return raw HTML only.',
+            messages: [{ role: 'user', content: `Create HTML for: ${prompt}` }]
         });
+        let html = htmlResponse.content[0].text.replace(/^```html?\n?/i, '').replace(/\n?```$/i, '').trim();
+
+        // Generate CSS
+        const cssResponse = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 4096,
+            system: 'Generate complete CSS with responsive design. Include Google Fonts @import. Return raw CSS only.',
+            messages: [{ role: 'user', content: `Style this HTML (${options.style || 'modern'} style):\n${html}` }]
+        });
+        let css = cssResponse.content[0].text.replace(/^```css?\n?/i, '').replace(/\n?```$/i, '').trim();
+
+        // Generate JS
+        const jsResponse = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 2048,
+            system: 'Generate vanilla JavaScript for interactivity. Return raw JS only.',
+            messages: [{ role: 'user', content: `Add interactivity to:\n${html}` }]
+        });
+        let js = jsResponse.content[0].text.replace(/^```javascript?\n?/i, '').replace(/\n?```$/i, '').trim();
+
+        res.json({ success: true, website: { html, css, js } });
 
     } catch (error) {
-        console.error('Error generating website:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message || 'Failed to generate website'
-        });
+        console.error('❌ Generate error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
 // ============================================
-// UPDATE WEBSITE
+// VERCEL DEPLOYMENT
 // ============================================
-
-app.post('/api/generate/update', async (req, res) => {
-    try {
-        const { currentCode, instructions } = req.body;
-
-        if (!instructions || !instructions.trim()) {
-            return res.status(400).json({ error: 'Instructions are required' });
-        }
-
-        console.log('Updating website with instructions:', instructions.substring(0, 100));
-
-        const systemPrompt = `You are an expert web developer. Update the provided code based on the instructions.
-
-IMPORTANT:
-- Maintain the existing structure where not affected by changes
-- Keep all existing functionality
-- Only modify what the instructions ask for
-- Return ONLY the code, no markdown, no explanations`;
-
-        // Update HTML
-        const htmlMessage = await anthropic.messages.create({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 4096,
-            system: systemPrompt,
-            messages: [
-                {
-                    role: 'user',
-                    content: `Current HTML:\n${currentCode.html}\n\nInstructions: ${instructions}\n\nReturn the updated HTML only.`
-                }
-            ],
-        });
-        let html = htmlMessage.content[0].text.trim();
-        html = html.replace(/^```html?\n?/i, '').replace(/\n?```$/i, '').trim();
-
-        // Update CSS
-        const cssMessage = await anthropic.messages.create({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 4096,
-            system: systemPrompt,
-            messages: [
-                {
-                    role: 'user',
-                    content: `Current CSS:\n${currentCode.css}\n\nUpdated HTML:\n${html}\n\nInstructions: ${instructions}\n\nReturn the updated CSS only.`
-                }
-            ],
-        });
-        let css = cssMessage.content[0].text.trim();
-        css = css.replace(/^```css?\n?/i, '').replace(/\n?```$/i, '').trim();
-
-        // Update JS if needed
-        let js = currentCode.js || '';
-        if (instructions.toLowerCase().includes('javascript') ||
-            instructions.toLowerCase().includes('interactive') ||
-            instructions.toLowerCase().includes('animation') ||
-            instructions.toLowerCase().includes('click') ||
-            instructions.toLowerCase().includes('form')) {
-            const jsMessage = await anthropic.messages.create({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 2048,
-                system: systemPrompt,
-                messages: [
-                    {
-                        role: 'user',
-                        content: `Current JavaScript:\n${currentCode.js || '// none'}\n\nUpdated HTML:\n${html}\n\nInstructions: ${instructions}\n\nReturn the updated JavaScript only.`
-                    }
-                ],
-            });
-            js = jsMessage.content[0].text.trim();
-            js = js.replace(/^```javascript?\n?/i, '').replace(/\n?```$/i, '').trim();
-        }
-
-        res.json({
-            success: true,
-            website: {
-                html,
-                css,
-                js,
-                title: 'Updated Website',
-                description: `Updated with: ${instructions.substring(0, 100)}`
-            }
-        });
-
-    } catch (error) {
-        console.error('Error updating website:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message || 'Failed to update website'
-        });
-    }
-});
-
-// ============================================
-// REAL VERCEL DEPLOYMENT
-// ============================================
-
 app.post('/api/deploy', async (req, res) => {
     try {
         const { projectName, html, css, js } = req.body;
 
-        if (!projectName) {
-            return res.status(400).json({ error: 'Project name is required' });
+        if (!projectName || !html) {
+            return res.status(400).json({ error: 'Project name and HTML required' });
         }
 
-        if (!html) {
-            return res.status(400).json({ error: 'HTML content is required' });
+        if (!process.env.VERCEL_TOKEN) {
+            return res.status(500).json({ error: 'Vercel token not configured' });
         }
 
-        if (!VERCEL_TOKEN) {
-            return res.status(500).json({ error: 'Vercel token not configured. Add VERCEL_TOKEN to .env file.' });
-        }
-
-        console.log('='.repeat(50));
-        console.log('Deploying to Vercel:', projectName);
-        console.log('='.repeat(50));
-
-        // Create full HTML file
         const fullHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Website created with AI Website Generator">
   <title>${projectName}</title>
-  <style>
-${css || ''}
-  </style>
+  <style>${css || ''}</style>
 </head>
 <body>
 ${html}
-  <script>
-${js || ''}
-  </script>
+  <script>${js || ''}</script>
 </body>
 </html>`;
 
-        // Sanitize project name for Vercel
-        const sanitizedName = projectName
-            .toLowerCase()
-            .replace(/[^a-z0-9-]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '')
-            .substring(0, 50);
+        const sanitizedName = projectName.toLowerCase().replace(/[^a-z0-9-]/g, '-').substring(0, 50);
 
-        // Create deployment using Vercel API
-        const deploymentResponse = await fetch('https://api.vercel.com/v13/deployments', {
+        const response = await fetch('https://api.vercel.com/v13/deployments', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${VERCEL_TOKEN}`,
-                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.VERCEL_TOKEN}`,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 name: sanitizedName,
-                files: [
-                    {
-                        file: 'index.html',
-                        data: Buffer.from(fullHTML).toString('base64'),
-                        encoding: 'base64'
-                    }
-                ],
-                projectSettings: {
-                    framework: null
-                },
+                files: [{ file: 'index.html', data: Buffer.from(fullHTML).toString('base64'), encoding: 'base64' }],
+                projectSettings: { framework: null },
                 target: 'production'
             })
         });
 
-        const deploymentData = await deploymentResponse.json();
+        const data = await response.json();
 
-        if (!deploymentResponse.ok) {
-            console.error('Vercel API Error:', deploymentData);
-            throw new Error(deploymentData.error?.message || 'Failed to deploy to Vercel');
+        if (!response.ok) {
+            throw new Error(data.error?.message || 'Deployment failed');
         }
 
-        console.log('Deployment created:', deploymentData.id);
-        console.log('URL:', deploymentData.url);
-
-        // Wait for deployment to be ready (poll status)
-        let deploymentUrl = `https://${deploymentData.url}`;
-        let isReady = false;
-        let attempts = 0;
-        const maxAttempts = 30; // 30 seconds max wait
-
-        while (!isReady && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
-
-            const statusResponse = await fetch(`https://api.vercel.com/v13/deployments/${deploymentData.id}`, {
-                headers: {
-                    'Authorization': `Bearer ${VERCEL_TOKEN}`,
-                }
-            });
-
-            const statusData = await statusResponse.json();
-
-            if (statusData.readyState === 'READY') {
-                isReady = true;
-                deploymentUrl = `https://${statusData.url}`;
-                console.log('Deployment is ready!');
-            } else if (statusData.readyState === 'ERROR') {
-                throw new Error('Deployment failed on Vercel');
-            }
-
-            attempts++;
-        }
-
-        if (!isReady) {
-            console.log('Deployment still processing, returning URL anyway');
-        }
-
-        // Also save locally as backup
-        const deploysDir = path.join(__dirname, 'deploys');
-        if (!fs.existsSync(deploysDir)) {
-            fs.mkdirSync(deploysDir, { recursive: true });
-        }
-        const projectDir = path.join(deploysDir, sanitizedName);
-        if (!fs.existsSync(projectDir)) {
-            fs.mkdirSync(projectDir, { recursive: true });
-        }
-        fs.writeFileSync(path.join(projectDir, 'index.html'), fullHTML);
-
-        console.log('='.repeat(50));
-        console.log('Deployment successful!');
-        console.log('URL:', deploymentUrl);
-        console.log('='.repeat(50));
-
-        res.json({
-            success: true,
-            url: deploymentUrl,
-            deploymentId: deploymentData.id,
-            message: 'Website deployed successfully to Vercel!'
-        });
+        res.json({ success: true, url: `https://${data.url}`, deploymentId: data.id });
 
     } catch (error) {
-        console.error('Deploy error:', error);
-        res.status(500).json({
-            success: false,
-            error: error.message || 'Deployment failed'
-        });
+        console.error('❌ Deploy error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
 // ============================================
-// DOMAIN SEARCH (Mock - for real, integrate with registrar API)
+// ERROR HANDLING
 // ============================================
+app.use((err, req, res, next) => {
+    console.error('❌ Server error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+});
 
-app.get('/api/domains/search', async (req, res) => {
-    try {
-        const { query } = req.query;
-
-        if (!query) {
-            return res.status(400).json({ error: 'Search query is required' });
-        }
-
-        const cleanDomain = query.toLowerCase().replace(/[^a-z0-9-]/g, '');
-
-        // Mock domain results
-        // For real implementation, use Namecheap/GoDaddy/Cloudflare API
-        const extensions = ['.com', '.io', '.co', '.dev', '.app', '.site'];
-        const domains = extensions.map(ext => ({
-            name: cleanDomain + ext,
-            available: Math.random() > 0.3,
-            price: ext === '.com' ? 12.99 : ext === '.io' ? 39.99 : ext === '.dev' ? 14.99 : 9.99
-        }));
-
-        res.json({
-            success: true,
-            domains
-        });
-
-    } catch (error) {
-        console.error('Domain search error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Domain search failed'
-        });
-    }
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not found' });
 });
 
 // ============================================
 // START SERVER
 // ============================================
-
 app.listen(PORT, () => {
-    console.log(`🚀 Backend server running on http://localhost:${PORT}`);
-    console.log(`📦 Vercel deployment: ${VERCEL_TOKEN ? 'Enabled' : 'Disabled (add VERCEL_TOKEN to .env)'}`);
+    console.log('');
+    console.log('='.repeat(50));
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log('='.repeat(50));
+    console.log('');
+    console.log('📞 Voice Agent:');
+    console.log(`   POST /api/voice/initiate - Start a call`);
+    console.log(`   POST /api/voice/vapi/function - Vapi webhook`);
+    console.log(`   GET  /api/voice/health - Check status`);
+    console.log(`   GET  /api/voice/debug - See active calls`);
+    console.log('');
+    console.log('🔧 Config:');
+    console.log(`   Vapi: ${process.env.VAPI_API_KEY ? '✅' : '❌'}`);
+    console.log(`   Twilio: ${process.env.TWILIO_ACCOUNT_SID ? '✅' : '❌'}`);
+    console.log(`   Base URL: ${process.env.BASE_URL || '❌ NOT SET'}`);
+    console.log('');
+    console.log('='.repeat(50));
 });
+
+module.exports = app;

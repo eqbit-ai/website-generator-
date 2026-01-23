@@ -1,0 +1,14 @@
+{
+    "watch": [
+        "*.js",
+        "routes/*.js",
+        "services/*.js"
+    ],
+    "ignore": [
+        "data/*",
+        "uploads/*",
+        "audio/*",
+        "*.json"
+    ],
+    "ext": "js"
+}

@@ -1,4 +1,5 @@
 // src/components/DeployModal.jsx
+import config from '../config';
 
 import React, { useState } from 'react';
 import { X, Rocket, Globe, Check, Loader2, ExternalLink, Copy } from 'lucide-react';
@@ -28,7 +29,8 @@ const DeployModal = ({ isOpen, onClose, html, css, js }) => {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:3001/api/deploy', {
+            const response = await fetch(`${config.apiUrl}/api/deploy`, {
+
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -61,7 +63,8 @@ const DeployModal = ({ isOpen, onClose, html, css, js }) => {
         setDomainResults([]);
 
         try {
-            const response = await fetch(`http://localhost:3001/api/domains/search?query=${encodeURIComponent(domainSearch)}`);
+            const response = await fetch(`${config.apiUrl}/api/domains/search?query=${encodeURIComponent(domainSearch)}`)
+
             const data = await response.json();
 
             if (data.success) {
