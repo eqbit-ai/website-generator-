@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import WebsiteGenerator from './components/WebsiteGenerator';
 import Chatbot from './components/Chatbot';
 import KnowledgeBase from './components/KnowledgeBase';
@@ -94,6 +95,7 @@ function App() {
         <Route path="/" element={<MainApp />} />
         <Route path="/setup-2fa" element={<TwoFactorPage />} />
       </Routes>
+      <Analytics />
     </Router>
   );
 }

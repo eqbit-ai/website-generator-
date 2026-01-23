@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, User, Bot, X, MessageCircle, Minimize2 } from 'lucide-react';
+import config from '../config';
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
