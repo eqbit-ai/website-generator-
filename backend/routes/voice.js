@@ -618,14 +618,17 @@ router.post('/initiate', async (req, res) => {
 
         const vapiData = await vapiRes.json();
         if (vapiData.id) {
-            // Store phone with multiple keys for OTP function calls
+            // Store phone AND OTP with multiple keys for OTP function calls
             if (!global.phoneStore) global.phoneStore = new Map();
-            global.phoneStore.set(vapiData.id, cleanPhone); // Vapi call ID
-            global.phoneStore.set(callId, cleanPhone); // Our internal call ID
-            if (sessionId) global.phoneStore.set(sessionId, cleanPhone); // Chat session ID
+            const callData = { phone: cleanPhone, otp };
+            global.phoneStore.set(vapiData.id, callData); // Vapi call ID
+            global.phoneStore.set(callId, callData); // Our internal call ID
+            if (sessionId) global.phoneStore.set(sessionId, callData); // Chat session ID
+            global.phoneStore.set(cleanPhone, callData); // Also by phone number
 
             console.log(`✅ Vapi call created: ${vapiData.id}`);
-            console.log(`📱 Phone stored with keys: vapiId=${vapiData.id}, callId=${callId}${sessionId ? `, sessionId=${sessionId}` : ''}`);
+            console.log(`📱 Phone & OTP stored with keys: vapiId=${vapiData.id}, callId=${callId}${sessionId ? `, sessionId=${sessionId}` : ''}, phone=${cleanPhone}`);
+            console.log(`🔐 OTP ${otp} stored globally for verification`);
             res.json({ success: true, callId, otp });
         } else {
             res.status(500).json({ error: vapiData.message || 'Failed to start call' });

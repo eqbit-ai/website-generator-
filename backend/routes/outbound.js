@@ -221,7 +221,19 @@ router.post('/send-otp', async (req, res) => {
     let cleanPhone = phone.replace(/[^\d+]/g, '');
     if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
 
-    const otp = generateOTP();
+    // Get OTP from global.phoneStore (generated at call initiation)
+    let otp;
+    const storedData = global.phoneStore?.get(cleanPhone);
+    if (storedData && typeof storedData === 'object' && storedData.otp) {
+        otp = storedData.otp;
+        console.log('✅ Retrieved stored OTP:', otp, 'for', cleanPhone);
+    } else {
+        // Fallback: generate new OTP only if not found
+        console.log('⚠️ No stored OTP found, generating new one');
+        otp = generateOTP();
+    }
+
+    // Store in otpStore for verification
     otpStore.set(cleanPhone, { otp, expires: Date.now() + 300000, attempts: 0 });
 
     console.log('📱 OTP:', otp, 'for', cleanPhone);

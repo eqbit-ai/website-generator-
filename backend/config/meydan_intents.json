@@ -52,7 +52,7 @@
       "name": "Maximum Managers",
       "category": "company",
       "response": "A maximum of 1 manager is permitted on the license.",
-      "keywords": ["how many managers", "maximum managers", "manager limit", "number of managers"]
+      "keywords": ["how many managers", "maximum managers", "manager limit", "number of managers", "can i have managers", "managers allowed", "manager allowed", "add manager", "multiple managers"]
     },
     {
       "name": "Free Activities During Incorporation",
@@ -82,7 +82,7 @@
       "name": "After License Application Submission",
       "category": "company",
       "response": "After submitting the new license application on the Meydan portal, the shareholders, manager, and directors will receive an email to complete KYC, Accept/Reject, and Compliance form (if applicable). Only once these tasks are completed, our team will receive the application to review and proceed.",
-      "keywords": ["after submission", "next step", "what happens next", "after applying", "license application process"]
+      "keywords": ["after submission", "next step", "what happens next", "after applying", "license application process", "after submitting", "what will happen", "after i submit", "after application", "submission process", "once submitted"]
     },
     {
       "name": "License Validity Period",
@@ -106,7 +106,7 @@
       "name": "License Grace Period",
       "category": "company",
       "response": "A 30-day grace period is provided from the license expiry date to renew the license.",
-      "keywords": ["grace period", "after expiry", "expired license", "renewal grace", "late renewal"]
+      "keywords": ["grace period", "after expiry", "expired license", "renewal grace", "late renewal", "is there grace", "grace time", "grace days", "after license expires", "renewal deadline"]
     },
     {
       "name": "License Penalty Fee",

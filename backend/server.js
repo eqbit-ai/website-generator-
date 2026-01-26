@@ -90,6 +90,15 @@ try {
     console.log('⚠️ Admin routes not available:', e.message);
 }
 
+// Logs routes
+try {
+    const { router: logsRouter } = require('./routes/logs');
+    app.use('/api/logs', logsRouter);
+    console.log('✅ Logs routes loaded');
+} catch (e) {
+    console.log('⚠️ Logs routes not available:', e.message);
+}
+
 // ============================================
 // STATIC FILES
 // ============================================

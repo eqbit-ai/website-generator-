@@ -4,6 +4,17 @@
 const express = require('express');
 const router = express.Router();
 
+// Logs service
+let logChatMessage;
+try {
+    const logsModule = require('./logs');
+    logChatMessage = logsModule.logChatMessage;
+} catch (e) {
+    console.log('⚠️ Logs service not available');
+    // Fallback logger
+    logChatMessage = () => { };
+}
+
 // ============================
 // SERVICES
 // ============================
@@ -144,17 +155,65 @@ function extractEmail(message) {
 function checkIntent(message) {
     if (!message || !intents.length) return null;
 
-    const q = message.toLowerCase();
+    const q = message.toLowerCase().trim();
+    const qWords = q.split(/\s+/); // Split query into words
+
     for (const intent of intents) {
         if (!intent || !intent.response || !intent.keywords) continue;
 
         for (const keyword of intent.keywords) {
-            if (q.includes(keyword.toLowerCase())) {
+            const kw = keyword.toLowerCase();
+
+            // 1. Exact phrase match
+            if (q.includes(kw)) {
+                console.log(`✅ Intent matched (exact): "${intent.name}" via keyword "${keyword}"`);
+                return intent.response;
+            }
+
+            // 2. Word-level matching - check if all important words from keyword appear in query
+            const kwWords = kw.split(/\s+/).filter(w => w.length > 2); // Ignore short words like "is", "a"
+            const allWordsPresent = kwWords.every(kwWord =>
+                qWords.some(qWord => {
+                    // Fuzzy match: allow 1 character difference for typos
+                    if (qWord === kwWord) return true;
+                    if (qWord.includes(kwWord) || kwWord.includes(qWord)) return true;
+                    if (kwWord.length > 4 && levenshteinDistance(qWord, kwWord) <= 1) return true;
+                    return false;
+                })
+            );
+
+            if (allWordsPresent && kwWords.length > 0) {
+                console.log(`✅ Intent matched (word-level): "${intent.name}" via keyword "${keyword}"`);
                 return intent.response;
             }
         }
     }
     return null;
+}
+
+// Simple Levenshtein distance for typo tolerance
+function levenshteinDistance(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
 }
 
 // Trigger Vapi outbound call
@@ -234,6 +293,9 @@ router.post('/start', (req, res) => {
     // Store phone for potential Vapi call
     global.phoneStore.set(sessionId, customerPhone);
 
+    // Log the greeting message
+    logChatMessage(sessionId, 'assistant', greeting, customerName, customerEmail, customerPhone);
+
     console.log(`💬 Chat started: ${customerName} (${customerEmail}, ${customerPhone})`);
 
     res.json({
@@ -264,6 +326,9 @@ router.post('/message', async (req, res) => {
         content: message,
         time: formatTime()
     });
+
+    // Log user message
+    logChatMessage(sessionId, 'user', message, session.name, session.email, session.phone);
 
     let response = null;
 
@@ -381,6 +446,9 @@ What would you like to know? Or if you'd prefer to speak with someone directly, 
         content: response,
         time: formatTime()
     });
+
+    // Log assistant response
+    logChatMessage(sessionId, 'assistant', response, session.name, session.email, session.phone);
 
     res.json({
         success: true,

@@ -22,22 +22,22 @@ const Logs = ({ onClose }) => {
         setError(null);
 
         try {
-            // Fetch chat logs
-            const chatRes = await fetch(`${API_URL}/api/chat/logs?limit=50`).catch(() => ({ ok: false }));
+            // Fetch chat logs from unified logs API
+            const chatRes = await fetch(`${API_URL}/api/logs/all?type=chat&limit=100`).catch(() => ({ ok: false }));
             if (chatRes.ok) {
                 const data = await chatRes.json();
                 setChatLogs(data.logs || []);
             }
 
-            // Fetch voice logs
-            const voiceRes = await fetch(`${API_URL}/api/outbound/logs?limit=50`).catch(() => ({ ok: false }));
+            // Fetch voice logs from unified logs API
+            const voiceRes = await fetch(`${API_URL}/api/logs/all?type=voice&limit=100`).catch(() => ({ ok: false }));
             if (voiceRes.ok) {
                 const data = await voiceRes.json();
                 setVoiceLogs(data.logs || []);
             }
 
             // Fetch sessions
-            const sessionsRes = await fetch(`${API_URL}/api/chat/sessions`).catch(() => ({ ok: false }));
+            const sessionsRes = await fetch(`${API_URL}/api/logs/sessions`).catch(() => ({ ok: false }));
             if (sessionsRes.ok) {
                 const data = await sessionsRes.json();
                 setSessions(data.sessions || []);
@@ -127,7 +127,8 @@ const Logs = ({ onClose }) => {
                                     <div key={idx} className="log-item">
                                         <div className="log-item-header">
                                             <span className="log-item-type chat">
-                                                {log.role === 'user' ? 'User' : 'Assistant'}
+                                                {log.role === 'user' ? '👤 User' : '🤖 Assistant'}
+                                                {log.userName && ` - ${log.userName}`}
                                             </span>
                                             <span className="log-item-time">
                                                 <Clock size={12} style={{ marginRight: 4 }} />
@@ -137,9 +138,11 @@ const Logs = ({ onClose }) => {
                                         <div className="log-item-content">
                                             {log.content || log.message || 'No content'}
                                         </div>
-                                        {log.sessionId && (
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                                                Session: {log.sessionId}
+                                        {(log.userEmail || log.userPhone || log.sessionId) && (
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 6, display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                                {log.userEmail && <span>📧 {log.userEmail}</span>}
+                                                {log.userPhone && <span>📱 {log.userPhone}</span>}
+                                                {log.sessionId && <span>Session: {log.sessionId}</span>}
                                             </div>
                                         )}
                                     </div>
@@ -195,20 +198,21 @@ const Logs = ({ onClose }) => {
                                     <div key={idx} className="log-item">
                                         <div className="log-item-header">
                                             <span className="log-item-type">
-                                                {session.name || 'Anonymous'}
+                                                👤 {session.userName || 'Anonymous'}
                                             </span>
                                             <span className="log-item-time">
-                                                {session.messageCount || 0} messages
+                                                {session.messages?.length || 0} messages
                                             </span>
                                         </div>
                                         <div className="log-item-content">
                                             Session: {session.sessionId || session.id || 'Unknown'}
                                         </div>
-                                        {session.phone && (
-                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                                                Phone: {session.phone}
-                                            </div>
-                                        )}
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 6, display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                            {session.userEmail && <span>📧 {session.userEmail}</span>}
+                                            {session.userPhone && <span>📱 {session.userPhone}</span>}
+                                            {session.startTime && <span>Started: {formatTime(session.startTime)}</span>}
+                                            {session.lastActivity && <span>Last: {formatTime(session.lastActivity)}</span>}
+                                        </div>
                                     </div>
                                 ))
                             )}
