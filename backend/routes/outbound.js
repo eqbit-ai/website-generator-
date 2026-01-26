@@ -44,14 +44,20 @@ function logVoice(action, data) {
 }
 
 function getPhone(body) {
-    // Try to get phone from multiple sources
-    const callId = body?.call?.id;
-    const sessionId = body?.call?.assistantOverrides?.variableValues?.sessionId;
-    const customerPhone = body?.call?.customer?.number ||
-                         body?.call?.assistantOverrides?.variableValues?.customerPhone ||
-                         body?.call?.metadata?.customerPhone;
+    // Vapi sends call data in body.message.call or body.call
+    const call = body?.message?.call || body?.call;
 
-    console.log('🔍 Looking for phone - callId:', callId, 'sessionId:', sessionId, 'customerPhone:', customerPhone);
+    const callId = call?.id;
+    const sessionId = call?.assistantOverrides?.variableValues?.sessionId || call?.metadata?.sessionId;
+    const customerPhone = call?.customer?.number ||
+                         call?.assistantOverrides?.variableValues?.customerPhone ||
+                         call?.metadata?.customerPhone;
+
+    console.log('🔍 Looking for phone:');
+    console.log('  - callId:', callId);
+    console.log('  - sessionId:', sessionId);
+    console.log('  - customerPhone from call:', customerPhone);
+    console.log('  - phoneStore keys:', Array.from(global.phoneStore?.keys() || []));
 
     // 1. Try direct customer phone from Vapi call object
     if (customerPhone) {
@@ -60,11 +66,11 @@ function getPhone(body) {
     }
 
     // 2. Try phoneStore with various keys
-    if (callId && global.phoneStore.has(callId)) {
+    if (callId && global.phoneStore?.has(callId)) {
         console.log('✅ Found phone in store by callId:', global.phoneStore.get(callId));
         return global.phoneStore.get(callId);
     }
-    if (sessionId && global.phoneStore.has(sessionId)) {
+    if (sessionId && global.phoneStore?.has(sessionId)) {
         console.log('✅ Found phone in store by sessionId:', global.phoneStore.get(sessionId));
         return global.phoneStore.get(sessionId);
     }
@@ -76,6 +82,7 @@ function getPhone(body) {
     }
 
     console.log('❌ Phone not found anywhere');
+    console.log('Full body structure:', JSON.stringify(body, null, 2).substring(0, 500));
     return null;
 }
 

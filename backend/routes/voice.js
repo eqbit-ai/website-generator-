@@ -40,6 +40,37 @@ try {
     console.log('✅ Voice: Knowledge service ready');
 } catch (e) { }
 
+// Load intents for KB search
+const fs = require('fs');
+const path = require('path');
+let intentsData = [];
+try {
+    // Try multiple paths for Railway compatibility
+    const possiblePaths = [
+        path.join(__dirname, '..', 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'config', 'meydan_intents.json')
+    ];
+
+    let intentsPath = null;
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            intentsPath = p;
+            break;
+        }
+    }
+
+    if (intentsPath) {
+        const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
+        intentsData = data.intents || [];
+        console.log(`✅ Voice: Loaded ${intentsData.length} intents from ${intentsPath}`);
+    } else {
+        console.log('❌ Voice: Intents file not found in any location');
+    }
+} catch (e) {
+    console.log('⚠️ Voice: Could not load intents:', e.message);
+}
+
 // Storage
 const callStore = new Map();
 if (!global.voiceLogs) global.voiceLogs = [];
@@ -74,44 +105,71 @@ function searchKnowledgeBase(query) {
         };
     }
 
-    if (!knowledgeService) {
-        return {
-            found: false,
-            answer: "I'm having trouble accessing information. Would you like to speak with a team member?"
-        };
-    }
-
     try {
-        if (typeof knowledgeService.findBestResponse === 'function') {
-            const result = knowledgeService.findBestResponse(query);
-            if (result.found && result.response) {
-                console.log('✅ KB found answer');
-                return {
-                    found: true,
-                    answer: result.response,
-                    instruction: "Use ONLY this information to answer the customer."
-                };
+        // 1. Check intents first (fast keyword matching)
+        if (intentsData.length > 0) {
+            const q = query.toLowerCase();
+            for (const intent of intentsData) {
+                if (!intent || !intent.response || !intent.keywords) continue;
+
+                for (const keyword of intent.keywords) {
+                    if (q.includes(keyword.toLowerCase())) {
+                        console.log(`✅ Found intent: ${intent.name}`);
+                        return {
+                            found: true,
+                            answer: intent.response
+                        };
+                    }
+                }
             }
         }
 
-        if (typeof knowledgeService.searchChunks === 'function') {
-            const results = knowledgeService.searchChunks(query, 3);
-            if (results?.length > 0 && results[0].score > 0.05) {
-                return {
-                    found: true,
-                    answer: results[0].content,
-                    instruction: "Use this information to answer."
-                };
+        // 2. Try knowledgeService methods
+        if (knowledgeService) {
+            if (typeof knowledgeService.findBestResponse === 'function') {
+                const result = knowledgeService.findBestResponse(query);
+                if (result.found && result.response) {
+                    console.log('✅ KB found answer via findBestResponse');
+                    return {
+                        found: true,
+                        answer: result.response
+                    };
+                }
+            }
+
+            if (typeof knowledgeService.searchChunks === 'function') {
+                const results = knowledgeService.searchChunks(query, 3);
+                if (results?.length > 0 && results[0].score > 0.05) {
+                    console.log(`✅ KB found answer via searchChunks (score: ${results[0].score})`);
+                    return {
+                        found: true,
+                        answer: results[0].content
+                    };
+                }
+            }
+
+            // Try search() method (TF-IDF)
+            if (typeof knowledgeService.search === 'function') {
+                const results = knowledgeService.search(query, 1);
+                if (results?.length > 0 && results[0].score > 0.05) {
+                    console.log(`✅ KB found answer via search (score: ${results[0].score})`);
+                    return {
+                        found: true,
+                        answer: results[0].content
+                    };
+                }
             }
         }
 
+        // 3. No match found
+        console.log('❌ No KB match found');
         return {
             found: false,
-            answer: "I don't have specific information about that. Is there something else I can help with?"
+            answer: "I don't have specific information about that. Would you like me to connect you with our team?"
         };
 
     } catch (error) {
-        console.log('KB error:', error.message);
+        console.log('❌ KB error:', error.message);
         return {
             found: false,
             answer: "I'm having trouble looking that up. Would you like me to connect you with someone?"
@@ -136,6 +194,16 @@ router.post('/vapi/function', (req, res) => {
         const messageType = body.message?.type;
 
         console.log('📨 Type:', messageType);
+
+        // Debug: Log what Vapi is sending
+        if (body.message?.call) {
+            console.log('📞 Call object:', JSON.stringify({
+                id: body.message.call.id,
+                customer: body.message.call.customer,
+                assistantId: body.message.call.assistantId,
+                variableValues: body.message.call.assistantOverrides?.variableValues
+            }, null, 2));
+        }
 
         if (messageType === 'tool-calls') {
             const toolCalls = body.message?.toolCalls || [];
@@ -203,6 +271,37 @@ function executeFunction(funcName, params, callId) {
         callData = Array.from(callStore.values()).pop();
     }
 
+    // Get Verification Method
+    if (name.includes('getverification') || name.includes('verificationmethod')) {
+        console.log('🔐 Get verification method');
+        return 'Ask: "Would you prefer to verify via SMS or Google Authenticator?"';
+    }
+
+    // Send OTP
+    if (name.includes('sendotp') || name.includes('sendsms') || name.includes('sendcode')) {
+        console.log('📱 Send OTP request');
+        if (!callData) {
+            return 'ERROR: System error - no call data found.';
+        }
+        // OTP was already sent during call initiation
+        const phone = callData.phone || 'your phone';
+        return `SUCCESS: Code sent to ${phone}. Ask customer to enter the 6-digit code on their keypad.`;
+    }
+
+    // Verify OTP
+    if (name.includes('verifyotp') || name.includes('verifysms') || name.includes('smscode')) {
+        console.log('🔐 Verify OTP:', params.code);
+        if (!callData) return 'ERROR: System error - no call data found.';
+        return verifySmsCode(callData, params.code);
+    }
+
+    // Verify TOTP (Google Auth)
+    if (name.includes('verifytotp') || name.includes('verifygoogle') || name.includes('googleauth')) {
+        console.log('🔐 Verify Google Auth:', params.code);
+        if (!callData) return 'ERROR: System error - no call data found.';
+        return verifyGoogleAuth(callData, params.code);
+    }
+
     // Knowledge Base Search
     if (name.includes('search') || name.includes('knowledge') || name.includes('faq') || name.includes('query')) {
         const query = params.query || params.question || params.text || '';
@@ -217,18 +316,6 @@ function executeFunction(funcName, params, callId) {
     // Customer lookup by phone
     if (name.includes('lookupphone') || name.includes('customerbyphone')) {
         return lookupCustomerByPhone(callData, params.phone);
-    }
-
-    // SMS verification
-    if (name.includes('verifysms') || name.includes('smscode')) {
-        if (!callData) return { verified: false, message: "System error." };
-        return verifySmsCode(callData, params.code);
-    }
-
-    // Google Auth verification
-    if (name.includes('verifygoogle') || name.includes('googleauth') || name.includes('verifytotp')) {
-        if (!callData) return { verified: false, message: "System error." };
-        return verifyGoogleAuth(callData, params.code);
     }
 
     // Account info
