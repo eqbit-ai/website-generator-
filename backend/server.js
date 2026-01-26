@@ -99,6 +99,15 @@ try {
     console.log('⚠️ Logs routes not available:', e.message);
 }
 
+// Generator routes (NEW - Premium website generator with conversation context)
+try {
+    const generatorRoutes = require('./routes/generator');
+    app.use('/api/generator', generatorRoutes);
+    console.log('✅ Generator routes loaded');
+} catch (e) {
+    console.log('⚠️ Generator routes not available:', e.message);
+}
+
 // ============================================
 // STATIC FILES
 // ============================================

@@ -1,12 +1,12 @@
 // src/components/WebsiteGenerator.jsx
 
 import React, { useState } from 'react';
-import { Download, Code, Eye, RefreshCw, Rocket } from 'lucide-react';
+import { Download, Code, Eye, RefreshCw, Rocket, Sparkles } from 'lucide-react';
 import PromptInput from './PromptInput';
 import Preview from './Preview';
 import CodeEditor from './CodeEditor';
 import DeployModal from './DeployModal';
-import { generateWebsite } from '../services/api';
+import { generateWebsite, clearSession } from '../services/api';
 
 const WebsiteGenerator = () => {
     const [html, setHtml] = useState('');
@@ -17,17 +17,35 @@ const WebsiteGenerator = () => {
     const [error, setError] = useState(null);
     const [showDeployModal, setShowDeployModal] = useState(false);
 
-    const handleGenerate = async (prompt) => {
+    // NEW: Session tracking for iterations
+    const [sessionId, setSessionId] = useState(null);
+    const [isNewDesign, setIsNewDesign] = useState(true);
+    const [designStyle, setDesignStyle] = useState(null);
+    const [loadingMessage, setLoadingMessage] = useState('');
+
+    const handleGenerate = async (prompt, style = null) => {
         setIsLoading(true);
         setError(null);
+        setLoadingMessage('Generating your premium website...');
 
         try {
-            const result = await generateWebsite(prompt);
+            const result = await generateWebsite(prompt, sessionId, style);
 
             if (result.success) {
                 setHtml(result.website.html);
                 setCss(result.website.css);
                 setJs(result.website.js || '');
+
+                // Update session info
+                setSessionId(result.sessionId);
+                setIsNewDesign(result.isNewDesign);
+                setDesignStyle(result.style);
+
+                if (result.isNewDesign) {
+                    console.log(`✨ New ${result.style} design created with ${result.palette} palette`);
+                } else {
+                    console.log(`🔄 Design updated (maintaining ${result.style} style)`);
+                }
             } else {
                 setError(result.error || 'Failed to generate website. Please try again.');
             }
@@ -36,6 +54,7 @@ const WebsiteGenerator = () => {
             setError(err.message || 'An error occurred. Please try again.');
         } finally {
             setIsLoading(false);
+            setLoadingMessage('');
         }
     };
 
@@ -67,11 +86,24 @@ ${js}
         URL.revokeObjectURL(url);
     };
 
-    const handleReset = () => {
+    const handleReset = async () => {
+        // Clear session on backend
+        if (sessionId) {
+            try {
+                await clearSession(sessionId);
+            } catch (err) {
+                console.error('Failed to clear session:', err);
+            }
+        }
+
+        // Reset all state
         setHtml('');
         setCss('');
         setJs('');
         setError(null);
+        setSessionId(null);
+        setIsNewDesign(true);
+        setDesignStyle(null);
     };
 
     return (
@@ -86,13 +118,20 @@ ${js}
                     <p className="generator-subtitle">
                         Describe your dream website and watch it come to life
                     </p>
+                    {designStyle && (
+                        <div className="design-status">
+                            <Sparkles size={14} />
+                            <span className="style-badge">{designStyle}</span>
+                            {!isNewDesign && <span className="iteration-badge">Iteration Mode</span>}
+                        </div>
+                    )}
                 </div>
                 <div className="header-actions">
                     {html && (
                         <>
                             <button className="action-button" onClick={handleReset}>
                                 <RefreshCw size={18} />
-                                Reset
+                                New Design
                             </button>
                             <button className="action-button primary" onClick={handleExport}>
                                 <Download size={18} />
@@ -111,11 +150,22 @@ ${js}
             <div className="generator-main">
                 {/* Left Panel - Prompt Input */}
                 <aside className="generator-sidebar">
-                    <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+                    <PromptInput
+                        onGenerate={handleGenerate}
+                        isLoading={isLoading}
+                        loadingMessage={loadingMessage}
+                    />
 
                     {error && (
                         <div className="error-message">
                             {error}
+                        </div>
+                    )}
+
+                    {html && !isNewDesign && (
+                        <div className="iteration-tip">
+                            💡 <strong>Tip:</strong> Your next prompt will improve the current design.
+                            Say "make new design" to start fresh.
                         </div>
                     )}
                 </aside>

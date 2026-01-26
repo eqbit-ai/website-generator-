@@ -3,21 +3,22 @@
 import React, { useState } from 'react';
 import { Wand2, Loader2 } from 'lucide-react';
 
-const PromptInput = ({ onGenerate, isLoading }) => {
+const PromptInput = ({ onGenerate, isLoading, loadingMessage }) => {
     const [prompt, setPrompt] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (prompt.trim() && !isLoading) {
             onGenerate(prompt);
+            setPrompt(''); // Clear prompt after submission
         }
     };
 
     const examplePrompts = [
-        "A modern portfolio website for a photographer",
-        "A landing page for a SaaS startup",
-        "A restaurant website with menu section",
-        "A personal blog with dark theme",
+        "A premium landing page for a tech startup",
+        "A luxury hotel website with booking section",
+        "A creative portfolio for a graphic designer",
+        "An elegant e-commerce site for jewelry",
     ];
 
     return (
@@ -26,9 +27,10 @@ const PromptInput = ({ onGenerate, isLoading }) => {
                 <textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Describe the website you want to create..."
+                    placeholder="Describe your website or request changes to the current design..."
                     className="prompt-textarea"
                     rows={4}
+                    disabled={isLoading}
                 />
                 <button
                     type="submit"
@@ -38,7 +40,7 @@ const PromptInput = ({ onGenerate, isLoading }) => {
                     {isLoading ? (
                         <>
                             <Loader2 className="icon spinning" size={20} />
-                            Generating...
+                            {loadingMessage || 'Generating...'}
                         </>
                     ) : (
                         <>
