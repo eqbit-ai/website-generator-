@@ -11,6 +11,21 @@ const router = express.Router();
 let knowledgeService;
 try { knowledgeService = require('../services/knowledgeService'); } catch (e) { }
 
+// Load intents from config
+const fs = require('fs');
+const path = require('path');
+let intents = [];
+try {
+    const intentsPath = path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json');
+    if (fs.existsSync(intentsPath)) {
+        const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
+        intents = data.intents || [];
+        console.log(`✅ Chat: Loaded ${intents.length} intents`);
+    }
+} catch (e) {
+    console.log('⚠️ Chat: Could not load intents:', e.message);
+}
+
 let anthropic = null;
 if (process.env.ANTHROPIC_API_KEY) {
     try {
@@ -100,6 +115,23 @@ function extractPhone(message) {
 function extractEmail(message) {
     const match = message.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
     return match ? match[0].toLowerCase() : null;
+}
+
+// Check if message matches any intent
+function checkIntent(message) {
+    if (!message || !intents.length) return null;
+
+    const q = message.toLowerCase();
+    for (const intent of intents) {
+        if (!intent || !intent.response || !intent.keywords) continue;
+
+        for (const keyword of intent.keywords) {
+            if (q.includes(keyword.toLowerCase())) {
+                return intent.response;
+            }
+        }
+    }
+    return null;
 }
 
 // Trigger Vapi outbound call
@@ -246,13 +278,20 @@ router.post('/message', async (req, res) => {
         response = `I'll connect you with our voice agent. Please provide your phone number with country code.`;
     }
 
-    // 5️⃣ Knowledge Base + AI
+    // 5️⃣ Check intents first
+    if (!response) {
+        response = checkIntent(message);
+    }
+
+    // 6️⃣ Knowledge Base + AI (TF-IDF chunks)
     if (!response && knowledgeService && anthropic) {
         try {
-            const results = knowledgeService.search(message, 1);
+            const results = knowledgeService.search(message, 3);
 
-            if (results.length > 0 && results[0].score > 0.1) {
-                const kbContext = results[0].content;
+            // Lower threshold to 0.05 to catch more results
+            if (results.length > 0 && results[0].score > 0.05) {
+                // Combine top results for better context
+                const kbContext = results.slice(0, 2).map(r => r.content).join('\n\n');
 
                 const ai = await anthropic.messages.create({
                     model: 'claude-sonnet-4-20250514',
@@ -283,7 +322,7 @@ Important: Provide complete, helpful answers. Don't be overly brief or generic. 
         }
     }
 
-    // 6️⃣ Fallback (LAST)
+    // 7️⃣ Fallback (LAST)
     if (!response) {
         response = `I can help you with information about:
 

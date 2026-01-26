@@ -182,12 +182,17 @@
         },
         {
             "name": "Visa Age Requirements",
-            "response": "The minimum age for a visa is 18 years. The maximum age is 65 years for employees and 70 years for investors.",
+            "response": "The minimum age for an employment visa is 18 years. The maximum age is 65 years for employees and 70 years for investors.",
             "keywords": [
                 "visa age",
                 "age requirement",
                 "minimum age",
-                "maximum age"
+                "maximum age",
+                "age for visa",
+                "age for employee visa",
+                "age for employment visa",
+                "employee visa age",
+                "employment visa age"
             ],
             "category": "visa"
         },

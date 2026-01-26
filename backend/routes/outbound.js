@@ -87,6 +87,21 @@ function getQuery(body) {
     return body?.query || body?.question || '';
 }
 
+// Load intents for KB search
+const fs = require('fs');
+const path = require('path');
+let intentsData = [];
+try {
+    const intentsPath = path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json');
+    if (fs.existsSync(intentsPath)) {
+        const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
+        intentsData = data.intents || [];
+        console.log(`✅ Outbound: Loaded ${intentsData.length} intents for KB`);
+    }
+} catch (e) {
+    console.log('⚠️ Outbound: Could not load intents:', e.message);
+}
+
 // Search Knowledge Base (for Vapi)
 router.post('/search-knowledge-base', async (req, res) => {
     const toolCallId = getToolCallId(req.body);
@@ -102,15 +117,42 @@ router.post('/search-knowledge-base', async (req, res) => {
         })));
     }
 
-    // Try to use knowledge route
-    try {
-        const knowledgeRoute = require('./knowledge');
-        // Ideally we'd call search directly here
-    } catch (e) { }
+    // Search intents
+    const q = query.toLowerCase();
+    for (const intent of intentsData) {
+        if (!intent || !intent.response || !intent.keywords) continue;
 
+        for (const keyword of intent.keywords) {
+            if (q.includes(keyword.toLowerCase())) {
+                console.log(`✅ Found intent: ${intent.name}`);
+                return res.json(respond(toolCallId, JSON.stringify({
+                    found: true,
+                    answer: intent.response
+                })));
+            }
+        }
+    }
+
+    // If no intent match, try knowledgeService chunks
+    try {
+        const knowledgeService = require('../services/knowledgeService');
+        const results = knowledgeService.search(query, 1);
+
+        if (results.length > 0 && results[0].score > 0.05) {
+            console.log(`✅ Found in KB chunks (score: ${results[0].score})`);
+            return res.json(respond(toolCallId, JSON.stringify({
+                found: true,
+                answer: results[0].content
+            })));
+        }
+    } catch (e) {
+        console.log('⚠️ KB service error:', e.message);
+    }
+
+    // No match found
     return res.json(respond(toolCallId, JSON.stringify({
         found: false,
-        answer: "Let me connect you with a team member who can help with that."
+        answer: "I don't have specific information about that. Would you like me to connect you with our team?"
     })));
 });
 

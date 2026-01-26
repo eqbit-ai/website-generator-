@@ -458,6 +458,9 @@ router.post('/initiate', async (req, res) => {
             console.log('👤 Updated user:', email);
         }
 
+        // Determine source (form or chatbot)
+        const callSource = purpose === 'Chat-initiated call' ? 'chatbot' : 'form';
+
         callStore.set(callId, {
             callId,
             type: 'outgoing',
@@ -468,10 +471,10 @@ router.post('/initiate', async (req, res) => {
             otpExpires: Date.now() + 300000,
             smsVerified: false,
             googleVerified: false,
-            source: 'form'
+            source: callSource
         });
 
-        logVoice(callId, 'outgoing_call', { phone: cleanPhone, source: 'form' });
+        logVoice(callId, 'outgoing_call', { phone: cleanPhone, source: callSource });
 
         // Send SMS
         if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
@@ -487,8 +490,12 @@ router.post('/initiate', async (req, res) => {
             }
         }
 
-        // Use form-specific assistant if available
-        const assistantId = VAPI_ASSISTANT_ID;
+        // Use chatbot-specific assistant if call is from chatbot, otherwise use default
+        const assistantId = callSource === 'chatbot' && VAPI_CHATBOT_ASSISTANT_ID
+            ? VAPI_CHATBOT_ASSISTANT_ID
+            : VAPI_ASSISTANT_ID;
+
+        console.log(`📞 Using assistant: ${assistantId} (source: ${callSource})`);
 
         const vapiRes = await fetch('https://api.vapi.ai/call/phone', {
             method: 'POST',
@@ -506,6 +513,11 @@ router.post('/initiate', async (req, res) => {
 
         const vapiData = await vapiRes.json();
         if (vapiData.id) {
+            // Store phone with Vapi call ID for OTP function calls
+            if (!global.phoneStore) global.phoneStore = new Map();
+            global.phoneStore.set(vapiData.id, cleanPhone);
+
+            console.log(`✅ Vapi call created: ${vapiData.id}, phone stored for OTP`);
             res.json({ success: true, callId, otp });
         } else {
             res.status(500).json({ error: vapiData.message || 'Failed to start call' });
