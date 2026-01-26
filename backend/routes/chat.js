@@ -37,6 +37,9 @@ const chatSessions = new Map();
 if (!global.phoneStore) global.phoneStore = new Map();
 if (!global.chatLogs) global.chatLogs = [];
 
+// For triggering Vapi calls
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
+
 // ============================
 // HELPERS
 // ============================
@@ -57,13 +60,13 @@ function getConversationalResponse(message, name) {
     const m = message.toLowerCase().trim();
 
     if (/^(hi|hello|hey|hiya)\.?!?$/.test(m)) {
-        return `Hey ${name}! 👋 How can I help you today?`;
+        return `Hello ${name}! How can I assist you today?`;
     }
     if (/^(thanks|thank you|thx|ty)\.?!?$/.test(m)) {
-        return `You're welcome! 😊 Anything else I can help with?`;
+        return `You're welcome! Is there anything else I can help you with?`;
     }
     if (/^(bye|goodbye|see you)\.?!?$/.test(m)) {
-        return `Goodbye! Take care 👋`;
+        return `Goodbye ${name}, have a great day!`;
     }
     return null;
 }
@@ -94,6 +97,34 @@ function extractPhone(message) {
     return phone;
 }
 
+function extractEmail(message) {
+    const match = message.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    return match ? match[0].toLowerCase() : null;
+}
+
+// Trigger Vapi outbound call
+async function triggerVapiCall(name, email, phone) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/voice/initiate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name,
+                email,
+                phone,
+                purpose: 'Chat-initiated call',
+                message: 'User requested a call via chatbot'
+            })
+        });
+
+        const data = await response.json();
+        return data.success ? data : null;
+    } catch (error) {
+        console.error('❌ Failed to trigger Vapi call:', error.message);
+        return null;
+    }
+}
+
 // ============================
 // ROUTES
 // ============================
@@ -104,12 +135,15 @@ router.post('/start', (req, res) => {
     const customerName = name || 'there';
     const sessionId = 'chat_' + Date.now();
 
-    const greeting = `Hello ${customerName}! 👋 Welcome to Meydan Free Zone. How can I help you today?`;
+    const greeting = `Hello ${customerName}! Welcome to Meydan Free Zone. How can I assist you today?`;
 
     const session = {
         id: sessionId,
         name: customerName,
         awaitingPhone: false,
+        awaitingEmail: false,
+        phone: null,
+        email: null,
         messages: [{
             role: 'assistant',
             content: greeting,
@@ -143,6 +177,9 @@ router.post('/message', async (req, res) => {
             id: sessionId,
             name: 'Guest',
             awaitingPhone: false,
+            awaitingEmail: false,
+            phone: null,
+            email: null,
             messages: []
         };
         chatSessions.set(sessionId, session);
@@ -160,28 +197,56 @@ router.post('/message', async (req, res) => {
     // 1️⃣ Small talk
     response = getConversationalResponse(message, session.name);
 
-    // 2️⃣ Phone capture flow
+    // 2️⃣ Email capture flow
+    if (!response && session.awaitingEmail) {
+        const email = extractEmail(message);
+        if (email) {
+            session.awaitingEmail = false;
+            session.email = email;
+
+            // Now we have name, phone, and email - trigger Vapi call!
+            response = `Perfect! Connecting you with our voice agent now...`;
+
+            // Trigger call asynchronously
+            triggerVapiCall(session.name, session.email, session.phone)
+                .then(result => {
+                    if (result) {
+                        console.log(`✅ Vapi call initiated for ${session.name} at ${session.phone}`);
+                    } else {
+                        console.log(`❌ Failed to initiate call for ${session.name}`);
+                    }
+                })
+                .catch(err => console.error('Call trigger error:', err));
+
+            response += `\n\nOur voice agent will call you at ${session.phone} in a few moments. Please answer the call to proceed with verification. You'll receive an SMS with a verification code shortly.`;
+
+        } else {
+            response = `Please provide a valid email address.\nExample: yourname@example.com`;
+        }
+    }
+
+    // 3️⃣ Phone capture flow
     if (!response && session.awaitingPhone) {
         const phone = extractPhone(message);
         if (phone) {
             session.awaitingPhone = false;
+            session.awaitingEmail = true;
+            session.phone = phone;
             global.phoneStore.set(session.id, phone);
 
-            response = `✅ Got it! Our team will call you shortly at ${phone} 📞  
-Is there anything else I can help you with meanwhile?`;
+            response = `Great! And what's your email address?`;
         } else {
-            response = `Please share a valid phone number with country code.  
-Example: +971501234567`;
+            response = `Please provide a valid phone number with country code.\nExample: +971501234567 or +918284852687`;
         }
     }
 
-    // 3️⃣ Call intent
+    // 4️⃣ Call intent
     if (!response && wantsCall(message)) {
         session.awaitingPhone = true;
-        response = `📞 Sure! Please share your phone number with country code so our team can call you.`;
+        response = `I'll connect you with our voice agent. Please provide your phone number with country code.`;
     }
 
-    // 4️⃣ Knowledge Base + AI
+    // 5️⃣ Knowledge Base + AI
     if (!response && knowledgeService && anthropic) {
         try {
             const results = knowledgeService.search(message, 1);
@@ -191,13 +256,23 @@ Example: +971501234567`;
 
                 const ai = await anthropic.messages.create({
                     model: 'claude-sonnet-4-20250514',
-                    max_tokens: 200,
-                    system: `You are a helpful, human-sounding assistant for Meydan Free Zone.
-Answer ONLY using the information below.
-Be clear and concise.
+                    max_tokens: 300,
+                    system: `You are a professional, knowledgeable business consultant for Meydan Free Zone in Dubai.
 
-KNOWLEDGE:
-${kbContext}`,
+Your communication style:
+- Professional yet warm and approachable
+- Clear, concise, and informative
+- Natural conversational tone (avoid robotic responses)
+- Use minimal emojis (max 1 per response, and only when truly appropriate)
+- Focus on providing accurate information and genuine help
+
+Answer questions using ONLY the information provided in the knowledge base below.
+If the question is outside the knowledge base, politely indicate that and suggest they speak with a team member for more specific information.
+
+KNOWLEDGE BASE:
+${kbContext}
+
+Important: Provide complete, helpful answers. Don't be overly brief or generic. Show expertise.`,
                     messages: [{ role: 'user', content: message }]
                 });
 
@@ -208,15 +283,15 @@ ${kbContext}`,
         }
     }
 
-    // 5️⃣ Fallback (LAST)
+    // 6️⃣ Fallback (LAST)
     if (!response) {
-        response = `I can help with:
+        response = `I can help you with information about:
 
-🏢 Company setup  
-📋 Visas  
-📞 Speaking with our team  
+• Company setup and business licenses
+• Visa and immigration services
+• Meydan Free Zone facilities and services
 
-What would you like to know?`;
+What would you like to know? Or if you'd prefer to speak with someone directly, just let me know and I can arrange a call.`;
     }
 
     // Save assistant response
