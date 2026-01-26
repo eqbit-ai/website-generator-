@@ -150,6 +150,23 @@ try {
     console.log('⚠️ Outbound: Could not load intents:', e.message);
 }
 
+// Normalize numbers (convert spelled-out to digits)
+function normalizeNumbers(text) {
+    const numberMap = {
+        'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+        'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
+        'ten': '10', 'eleven': '11', 'twelve': '12', 'thirteen': '13',
+        'fourteen': '14', 'fifteen': '15', 'sixteen': '16', 'seventeen': '17',
+        'eighteen': '18', 'nineteen': '19', 'twenty': '20'
+    };
+
+    let normalized = text.toLowerCase();
+    for (const [word, digit] of Object.entries(numberMap)) {
+        normalized = normalized.replace(new RegExp(word, 'g'), digit);
+    }
+    return normalized;
+}
+
 // Search Knowledge Base (for Vapi)
 router.post('/search-knowledge-base', async (req, res) => {
     const toolCallId = getToolCallId(req.body);
@@ -165,14 +182,20 @@ router.post('/search-knowledge-base', async (req, res) => {
         })));
     }
 
+    // Normalize query (lowercase + convert spelled-out numbers to digits)
+    const q = normalizeNumbers(query.toLowerCase());
+    console.log('📝 Normalized query:', q);
+
     // Search intents
-    const q = query.toLowerCase();
+    let checkedIntents = 0;
     for (const intent of intentsData) {
         if (!intent || !intent.response || !intent.keywords) continue;
+        checkedIntents++;
 
         for (const keyword of intent.keywords) {
-            if (q.includes(keyword.toLowerCase())) {
-                console.log(`✅ Found intent: ${intent.name}`);
+            const kw = keyword.toLowerCase();
+            if (q.includes(kw)) {
+                console.log(`✅ Found intent: "${intent.name}" via keyword "${keyword}"`);
                 return res.json(respond(toolCallId, JSON.stringify({
                     found: true,
                     answer: intent.response
@@ -180,6 +203,8 @@ router.post('/search-knowledge-base', async (req, res) => {
             }
         }
     }
+
+    console.log(`❌ No intent matched (checked ${checkedIntents} intents)`);
 
     // If no intent match, try knowledgeService chunks
     try {
