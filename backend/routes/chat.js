@@ -16,11 +16,27 @@ const fs = require('fs');
 const path = require('path');
 let intents = [];
 try {
-    const intentsPath = path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json');
-    if (fs.existsSync(intentsPath)) {
+    // Try multiple paths for Railway compatibility
+    const possiblePaths = [
+        path.join(__dirname, '..', 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'config', 'meydan_intents.json')
+    ];
+
+    let intentsPath = null;
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            intentsPath = p;
+            break;
+        }
+    }
+
+    if (intentsPath) {
         const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
         intents = data.intents || [];
-        console.log(`✅ Chat: Loaded ${intents.length} intents`);
+        console.log(`✅ Chat: Loaded ${intents.length} intents from ${intentsPath}`);
+    } else {
+        console.log('❌ Chat: Intents file not found in any location');
     }
 } catch (e) {
     console.log('⚠️ Chat: Could not load intents:', e.message);
@@ -93,13 +109,20 @@ function wantsCall(message) {
         'ring me',
         'talk to someone',
         'talk to a person',
+        'speak to someone',
+        'speak to a person',
+        'speak with someone',
         'speak with team',
         'speaking with team',
         'human agent',
         'real person',
         'live agent',
         'callback',
-        'call back'
+        'call back',
+        'can someone call',
+        'someone call me',
+        'get a call',
+        'phone call'
     ].some(p => m.includes(p));
 }
 
@@ -135,7 +158,7 @@ function checkIntent(message) {
 }
 
 // Trigger Vapi outbound call
-async function triggerVapiCall(name, email, phone) {
+async function triggerVapiCall(name, email, phone, sessionId) {
     try {
         const response = await fetch(`${BASE_URL}/api/voice/initiate`, {
             method: 'POST',
@@ -144,6 +167,7 @@ async function triggerVapiCall(name, email, phone) {
                 name,
                 email,
                 phone,
+                sessionId,
                 purpose: 'Chat-initiated call',
                 message: 'User requested a call via chatbot'
             })
@@ -163,8 +187,29 @@ async function triggerVapiCall(name, email, phone) {
 
 // Start chat
 router.post('/start', (req, res) => {
-    const { name } = req.body;
-    const customerName = name || 'there';
+    const { name, email, phone } = req.body;
+
+    // Require name, email, and phone
+    if (!name || !email || !phone) {
+        return res.status(400).json({
+            error: 'Name, email, and phone number are required',
+            missing: {
+                name: !name,
+                email: !email,
+                phone: !phone
+            }
+        });
+    }
+
+    const customerName = name.trim();
+    const customerEmail = email.trim().toLowerCase();
+    let customerPhone = phone.trim();
+
+    // Ensure phone has country code
+    if (!customerPhone.startsWith('+')) {
+        customerPhone = '+' + customerPhone;
+    }
+
     const sessionId = 'chat_' + Date.now();
 
     const greeting = `Hello ${customerName}! Welcome to Meydan Free Zone. How can I assist you today?`;
@@ -172,10 +217,10 @@ router.post('/start', (req, res) => {
     const session = {
         id: sessionId,
         name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
         awaitingPhone: false,
         awaitingEmail: false,
-        phone: null,
-        email: null,
         messages: [{
             role: 'assistant',
             content: greeting,
@@ -185,6 +230,11 @@ router.post('/start', (req, res) => {
     };
 
     chatSessions.set(sessionId, session);
+
+    // Store phone for potential Vapi call
+    global.phoneStore.set(sessionId, customerPhone);
+
+    console.log(`💬 Chat started: ${customerName} (${customerEmail}, ${customerPhone})`);
 
     res.json({
         success: true,
@@ -205,16 +255,7 @@ router.post('/message', async (req, res) => {
 
     let session = chatSessions.get(sessionId);
     if (!session) {
-        session = {
-            id: sessionId,
-            name: 'Guest',
-            awaitingPhone: false,
-            awaitingEmail: false,
-            phone: null,
-            email: null,
-            messages: []
-        };
-        chatSessions.set(sessionId, session);
+        return res.status(404).json({ error: 'Session not found. Please start a new chat.' });
     }
 
     // Save user message
@@ -229,53 +270,22 @@ router.post('/message', async (req, res) => {
     // 1️⃣ Small talk
     response = getConversationalResponse(message, session.name);
 
-    // 2️⃣ Email capture flow
-    if (!response && session.awaitingEmail) {
-        const email = extractEmail(message);
-        if (email) {
-            session.awaitingEmail = false;
-            session.email = email;
-
-            // Now we have name, phone, and email - trigger Vapi call!
-            response = `Perfect! Connecting you with our voice agent now...`;
-
-            // Trigger call asynchronously
-            triggerVapiCall(session.name, session.email, session.phone)
-                .then(result => {
-                    if (result) {
-                        console.log(`✅ Vapi call initiated for ${session.name} at ${session.phone}`);
-                    } else {
-                        console.log(`❌ Failed to initiate call for ${session.name}`);
-                    }
-                })
-                .catch(err => console.error('Call trigger error:', err));
-
-            response += `\n\nOur voice agent will call you at ${session.phone} in a few moments. Please answer the call to proceed with verification. You'll receive an SMS with a verification code shortly.`;
-
-        } else {
-            response = `Please provide a valid email address.\nExample: yourname@example.com`;
-        }
-    }
-
-    // 3️⃣ Phone capture flow
-    if (!response && session.awaitingPhone) {
-        const phone = extractPhone(message);
-        if (phone) {
-            session.awaitingPhone = false;
-            session.awaitingEmail = true;
-            session.phone = phone;
-            global.phoneStore.set(session.id, phone);
-
-            response = `Great! And what's your email address?`;
-        } else {
-            response = `Please provide a valid phone number with country code.\nExample: +971501234567 or +918284852687`;
-        }
-    }
-
-    // 4️⃣ Call intent
+    // 2️⃣ Call intent - Trigger call immediately since we have all info
     if (!response && wantsCall(message)) {
-        session.awaitingPhone = true;
-        response = `I'll connect you with our voice agent. Please provide your phone number with country code.`;
+        response = `Perfect! Connecting you with our voice agent now...`;
+
+        // Trigger call asynchronously - we already have name, email, phone from session
+        triggerVapiCall(session.name, session.email, session.phone, sessionId)
+            .then(result => {
+                if (result) {
+                    console.log(`✅ Vapi call initiated for ${session.name} at ${session.phone}`);
+                } else {
+                    console.log(`❌ Failed to initiate call for ${session.name}`);
+                }
+            })
+            .catch(err => console.error('Call trigger error:', err));
+
+        response += `\n\nOur voice agent will call you at ${session.phone} in a few moments. Please answer the call to proceed with verification. You'll receive an SMS with a verification code shortly.`;
     }
 
     // 5️⃣ Check intents first

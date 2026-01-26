@@ -44,13 +44,38 @@ function logVoice(action, data) {
 }
 
 function getPhone(body) {
-    const sessionId = body?.call?.metadata?.sessionId;
+    // Try to get phone from multiple sources
     const callId = body?.call?.id;
+    const sessionId = body?.call?.assistantOverrides?.variableValues?.sessionId;
+    const customerPhone = body?.call?.customer?.number ||
+                         body?.call?.assistantOverrides?.variableValues?.customerPhone ||
+                         body?.call?.metadata?.customerPhone;
 
-    if (sessionId && global.phoneStore.has(sessionId)) return global.phoneStore.get(sessionId);
-    if (callId && global.phoneStore.has(callId)) return global.phoneStore.get(callId);
-    if (body?.call?.metadata?.customerPhone) return body.call.metadata.customerPhone;
-    if (body?.phoneNumber) return body.phoneNumber;
+    console.log('🔍 Looking for phone - callId:', callId, 'sessionId:', sessionId, 'customerPhone:', customerPhone);
+
+    // 1. Try direct customer phone from Vapi call object
+    if (customerPhone) {
+        console.log('✅ Found phone in call object:', customerPhone);
+        return customerPhone;
+    }
+
+    // 2. Try phoneStore with various keys
+    if (callId && global.phoneStore.has(callId)) {
+        console.log('✅ Found phone in store by callId:', global.phoneStore.get(callId));
+        return global.phoneStore.get(callId);
+    }
+    if (sessionId && global.phoneStore.has(sessionId)) {
+        console.log('✅ Found phone in store by sessionId:', global.phoneStore.get(sessionId));
+        return global.phoneStore.get(sessionId);
+    }
+
+    // 3. Try body phoneNumber
+    if (body?.phoneNumber) {
+        console.log('✅ Found phone in body.phoneNumber:', body.phoneNumber);
+        return body.phoneNumber;
+    }
+
+    console.log('❌ Phone not found anywhere');
     return null;
 }
 
@@ -92,11 +117,27 @@ const fs = require('fs');
 const path = require('path');
 let intentsData = [];
 try {
-    const intentsPath = path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json');
-    if (fs.existsSync(intentsPath)) {
+    // Try multiple paths for Railway compatibility
+    const possiblePaths = [
+        path.join(__dirname, '..', 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'config', 'meydan_intents.json')
+    ];
+
+    let intentsPath = null;
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            intentsPath = p;
+            break;
+        }
+    }
+
+    if (intentsPath) {
         const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
         intentsData = data.intents || [];
-        console.log(`✅ Outbound: Loaded ${intentsData.length} intents for KB`);
+        console.log(`✅ Outbound: Loaded ${intentsData.length} intents from ${intentsPath}`);
+    } else {
+        console.log('❌ Outbound: Intents file not found in any location');
     }
 } catch (e) {
     console.log('⚠️ Outbound: Could not load intents:', e.message);

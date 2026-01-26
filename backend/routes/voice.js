@@ -418,7 +418,7 @@ router.post('/incoming', async (req, res) => {
 
 router.post('/initiate', async (req, res) => {
     try {
-        const { name, email, phone, message, purpose } = req.body;
+        const { name, email, phone, message, purpose, sessionId } = req.body;
         if (!name || !email || !phone) return res.status(400).json({ error: 'Name, email, and phone required' });
 
         let cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
@@ -505,7 +505,12 @@ router.post('/initiate', async (req, res) => {
                 phoneNumberId: VAPI_PHONE_NUMBER_ID,
                 customer: { number: cleanPhone, name },
                 assistantOverrides: {
-                    variableValues: { customerName: name, callId },
+                    variableValues: {
+                        customerName: name,
+                        callId,
+                        customerPhone: cleanPhone,
+                        sessionId: sessionId || callId
+                    },
                     serverUrl: `${process.env.BASE_URL}/api/voice/vapi/function`
                 }
             })
@@ -513,11 +518,14 @@ router.post('/initiate', async (req, res) => {
 
         const vapiData = await vapiRes.json();
         if (vapiData.id) {
-            // Store phone with Vapi call ID for OTP function calls
+            // Store phone with multiple keys for OTP function calls
             if (!global.phoneStore) global.phoneStore = new Map();
-            global.phoneStore.set(vapiData.id, cleanPhone);
+            global.phoneStore.set(vapiData.id, cleanPhone); // Vapi call ID
+            global.phoneStore.set(callId, cleanPhone); // Our internal call ID
+            if (sessionId) global.phoneStore.set(sessionId, cleanPhone); // Chat session ID
 
-            console.log(`✅ Vapi call created: ${vapiData.id}, phone stored for OTP`);
+            console.log(`✅ Vapi call created: ${vapiData.id}`);
+            console.log(`📱 Phone stored with keys: vapiId=${vapiData.id}, callId=${callId}${sessionId ? `, sessionId=${sessionId}` : ''}`);
             res.json({ success: true, callId, otp });
         } else {
             res.status(500).json({ error: vapiData.message || 'Failed to start call' });

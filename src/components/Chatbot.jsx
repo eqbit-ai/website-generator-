@@ -13,6 +13,8 @@ const Chatbot = () => {
     const [loading, setLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
     const [userName, setUserName] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const [userPhone, setUserPhone] = useState('');
     const [showForm, setShowForm] = useState(true);
     const messagesEndRef = useRef(null);
 
@@ -26,14 +28,21 @@ const Chatbot = () => {
 
     const startChat = async (e) => {
         e.preventDefault();
-        if (!userName.trim()) return;
+        if (!userName.trim() || !userEmail.trim() || !userPhone.trim()) {
+            alert('Please fill in all fields');
+            return;
+        }
 
         setLoading(true);
         try {
             const res = await fetch(`${API_URL}/api/chat/start`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: userName.trim() })
+                body: JSON.stringify({
+                    name: userName.trim(),
+                    email: userEmail.trim(),
+                    phone: userPhone.trim()
+                })
             });
 
             if (res.ok) {
@@ -45,9 +54,13 @@ const Chatbot = () => {
                     time: data.time
                 }]);
                 setShowForm(false);
+            } else {
+                const error = await res.json();
+                alert(error.error || 'Failed to start chat');
             }
         } catch (e) {
             console.error('Start chat error:', e);
+            alert('Failed to start chat. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -101,6 +114,8 @@ const Chatbot = () => {
         setSessionId(null);
         setShowForm(true);
         setUserName('');
+        setUserEmail('');
+        setUserPhone('');
     };
 
     if (!isOpen) {
@@ -146,7 +161,7 @@ const Chatbot = () => {
                 <div className="chatbot-form-container">
                     <div className="chatbot-welcome">
                         <h4>Welcome! 👋</h4>
-                        <p>Please enter your name to start chatting</p>
+                        <p>Please enter your details to start chatting</p>
                     </div>
                     <form className="chatbot-form" onSubmit={startChat}>
                         <div className="chatbot-input-group">
@@ -157,12 +172,36 @@ const Chatbot = () => {
                                 onChange={(e) => setUserName(e.target.value)}
                                 placeholder="Enter your name"
                                 autoFocus
+                                required
                             />
+                        </div>
+                        <div className="chatbot-input-group">
+                            <label>Email Address</label>
+                            <input
+                                type="email"
+                                value={userEmail}
+                                onChange={(e) => setUserEmail(e.target.value)}
+                                placeholder="your.email@example.com"
+                                required
+                            />
+                        </div>
+                        <div className="chatbot-input-group">
+                            <label>Phone Number</label>
+                            <input
+                                type="tel"
+                                value={userPhone}
+                                onChange={(e) => setUserPhone(e.target.value)}
+                                placeholder="+971501234567"
+                                required
+                            />
+                            <small style={{fontSize: '11px', color: '#666', marginTop: '4px'}}>
+                                Include country code (e.g., +971 for UAE, +91 for India)
+                            </small>
                         </div>
                         <button
                             type="submit"
                             className="chatbot-start-button"
-                            disabled={!userName.trim() || loading}
+                            disabled={!userName.trim() || !userEmail.trim() || !userPhone.trim() || loading}
                         >
                             {loading ? 'Starting...' : 'Start Chat'}
                         </button>
