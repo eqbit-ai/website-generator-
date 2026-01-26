@@ -211,10 +211,12 @@ router.post('/send-otp', async (req, res) => {
 
     if (!phone && req.body.phoneNumber) phone = req.body.phoneNumber;
 
-    console.log('📱 Send OTP to:', phone);
+    console.log('\n🔵 SEND-OTP CALLED');
+    console.log('📱 Phone:', phone);
     logVoice('send-otp', { phone });
 
     if (!phone) {
+        console.log('❌ No phone found');
         return res.json(respond(toolCallId, 'ERROR: Phone number not found.'));
     }
 
@@ -223,20 +225,26 @@ router.post('/send-otp', async (req, res) => {
 
     // Get OTP from global.phoneStore (generated at call initiation)
     let otp;
+    console.log(`🔍 Checking phoneStore for: ${cleanPhone}`);
+    console.log(`📦 phoneStore keys:`, Array.from(global.phoneStore?.keys() || []));
+
     const storedData = global.phoneStore?.get(cleanPhone);
+    console.log(`📦 storedData:`, storedData);
+
     if (storedData && typeof storedData === 'object' && storedData.otp) {
         otp = storedData.otp;
-        console.log('✅ Retrieved stored OTP:', otp, 'for', cleanPhone);
+        console.log(`✅ Retrieved stored OTP: ${otp} for ${cleanPhone}`);
     } else {
         // Fallback: generate new OTP only if not found
-        console.log('⚠️ No stored OTP found, generating new one');
+        console.log(`⚠️ No stored OTP found in phoneStore for ${cleanPhone}`);
+        console.log('⚠️ Generating NEW OTP (this might cause double OTP issue!)');
         otp = generateOTP();
     }
 
     // Store in otpStore for verification
     otpStore.set(cleanPhone, { otp, expires: Date.now() + 300000, attempts: 0 });
 
-    console.log('📱 OTP:', otp, 'for', cleanPhone);
+    console.log(`📱 OTP to send: ${otp} for ${cleanPhone}`);
 
     if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
         try {

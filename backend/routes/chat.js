@@ -151,12 +151,20 @@ function extractEmail(message) {
     return match ? match[0].toLowerCase() : null;
 }
 
+// Normalize word (singular/plural, common variations)
+function normalizeWord(word) {
+    word = word.toLowerCase().trim();
+    // Handle plural/singular
+    if (word.endsWith('s')) return word.slice(0, -1);
+    return word;
+}
+
 // Check if message matches any intent
 function checkIntent(message) {
     if (!message || !intents.length) return null;
 
     const q = message.toLowerCase().trim();
-    const qWords = q.split(/\s+/); // Split query into words
+    const qWords = q.split(/\s+/).map(normalizeWord); // Normalize words
 
     for (const intent of intents) {
         if (!intent || !intent.response || !intent.keywords) continue;
@@ -171,12 +179,14 @@ function checkIntent(message) {
             }
 
             // 2. Word-level matching - check if all important words from keyword appear in query
-            const kwWords = kw.split(/\s+/).filter(w => w.length > 2); // Ignore short words like "is", "a"
+            const kwWords = kw.split(/\s+/).filter(w => w.length > 2).map(normalizeWord);
             const allWordsPresent = kwWords.every(kwWord =>
                 qWords.some(qWord => {
-                    // Fuzzy match: allow 1 character difference for typos
+                    // Exact match after normalization
                     if (qWord === kwWord) return true;
+                    // Contains match
                     if (qWord.includes(kwWord) || kwWord.includes(qWord)) return true;
+                    // Fuzzy match: allow 1 character difference for typos
                     if (kwWord.length > 4 && levenshteinDistance(qWord, kwWord) <= 1) return true;
                     return false;
                 })
@@ -358,74 +368,94 @@ router.post('/message', async (req, res) => {
         response = checkIntent(message);
     }
 
-    // 6️⃣ Conversational AI with Knowledge Base context
+    // 6️⃣ Conversational AI with Knowledge Base context (ONLY if KB has high confidence)
     if (!response && anthropic) {
         try {
             // Search knowledge base for relevant information
             let kbContext = '';
+            let kbScore = 0;
+
             if (knowledgeService) {
                 const results = knowledgeService.search(message, 3);
-                if (results.length > 0 && results[0].score > 0.05) {
-                    kbContext = results.slice(0, 3).map(r => r.content).join('\n\n');
+                if (results.length > 0) {
+                    kbScore = results[0].score;
+                    console.log(`🔍 KB Search Score: ${kbScore.toFixed(3)} for "${message}"`);
+
+                    // ⚠️ CRITICAL: Only use KB if confidence is HIGH (>= 0.6)
+                    if (kbScore >= 0.6) {
+                        kbContext = results.slice(0, 3).map(r => r.content).join('\n\n');
+                    } else {
+                        console.log(`⚠️ KB score too low (${kbScore.toFixed(3)} < 0.6), escalating to human`);
+                    }
                 }
             }
 
-            // Build conversation history for context (last 5 messages)
-            const conversationHistory = session.messages.slice(-10).map(msg => ({
-                role: msg.role === 'user' ? 'user' : 'assistant',
-                content: msg.content
-            }));
+            // If KB confidence is too low, escalate immediately
+            if (!kbContext || kbScore < 0.6) {
+                response = `I don't have specific information about that in my knowledge base.\n\nWould you like me to connect you with our team who can help? They can provide detailed answers about company setup, visas, and licensing.`;
+            } else {
+                // KB confidence is high - use AI with strict KB-only constraint
 
-            // Add current message
-            conversationHistory.push({ role: 'user', content: message });
+                // Build conversation history (last 6 messages for context)
+                const conversationHistory = session.messages.slice(-12).map(msg => ({
+                    role: msg.role === 'user' ? 'user' : 'assistant',
+                    content: msg.content
+                }));
 
-            const systemPrompt = kbContext
-                ? `You are Jean, a professional business consultant for Meydan Free Zone in Dubai.
+                // ✅ CRITICAL: Embed KB context IN the user message (not system prompt)
+                // This forces Claude to treat KB as the ONLY source
+                const kbConstrainedMessage = `USER QUESTION:
+"${message}"
 
-## YOUR PERSONALITY:
-- Professional yet warm and friendly
-- Natural conversational style (like talking to a colleague, not a robot)
-- Remember what the user asked before and maintain context
-- Use their name (${session.name}) occasionally
-- NO emojis, NO generic responses
-- Think before answering - understand what they're really asking
-
-## KNOWLEDGE BASE:
+KNOWLEDGE BASE CONTEXT (ONLY USE THIS TO ANSWER):
 ${kbContext}
 
-## RULES:
-1. Answer ONLY using information from the knowledge base above
-2. If a question is a follow-up (like "can I renew?" after asking about license validity), understand the context
-3. For questions outside the KB, politely say "I don't have specific information about that. Would you like me to connect you with our team?"
-4. Be conversational - ask clarifying questions if needed
-5. Provide complete, helpful answers with specifics
-6. If user asks the same thing differently, give the same answer consistently
+INSTRUCTIONS:
+- Answer ONLY from the context above
+- If the answer is not clearly present in the context, say you don't have that information
+- Keep answer to 2-3 sentences maximum
+- Use at most ONE emoji
+- Do NOT guess or invent information`;
 
-## EXAMPLES:
-User: "how long is the validity of license?"
-You: "Clients can choose the license validity during incorporation. The maximum period of validity is 10 years."
+                conversationHistory.push({
+                    role: 'user',
+                    content: kbConstrainedMessage
+                });
 
-User: "can I renew after 10 years?"
-You: "Yes, you can renew your license after the 10-year period expires. The renewal process allows you to extend your license for another term."
+                const systemPrompt = `You are a professional business consultant for Meydan Free Zone Dubai.
 
-User: "my son is 14, can I apply visa for him?"
-You: "The minimum age for a visa is 18 years. Since your son is 14, he wouldn't qualify for an employment visa at this time. However, there may be other options for dependents. Would you like me to connect you with our team to discuss your specific situation?"`
-                : `You are Jean, a professional business consultant for Meydan Free Zone in Dubai.
+CRITICAL RULES (DO NOT BREAK):
+1. Answer ONLY using information in the knowledge base context provided
+2. If the context does NOT clearly contain the answer, say you don't have that information
+3. NEVER guess, assume, or invent information
+4. NEVER repeat unrelated information from the knowledge base
+5. Keep answers brief (2-3 sentences)
+6. Sound human and conversational
+7. Use at most ONE emoji
 
-The user's question is outside your knowledge base. Politely let them know and offer to connect them with the team.
+ESCALATION RULE:
+If you cannot answer from the provided context, offer to connect them with the team.`;
 
-Example: "I don't have specific information about that in my knowledge base. Would you like me to connect you with our team who can provide detailed information? Or feel free to ask about company setup, visas, or business licenses."`;
+                const ai = await anthropic.messages.create({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 200,
+                    system: systemPrompt,
+                    messages: conversationHistory
+                });
 
-            const ai = await anthropic.messages.create({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 300,
-                system: systemPrompt,
-                messages: conversationHistory
-            });
+                response = ai.content[0].text;
 
-            response = ai.content[0].text;
+                // Validate response isn't hallucinating
+                if (response.toLowerCase().includes('i don\'t have') ||
+                    response.toLowerCase().includes('i\'m not sure') ||
+                    response.toLowerCase().includes('i cannot find')) {
+                    // AI admitted it doesn't know - provide escalation
+                    response = `I don't have specific information about that.\n\nWould you like me to arrange a call with our team? They can provide accurate answers about ${message.includes('visa') ? 'visas' : message.includes('company') ? 'company setup' : 'your question'}.`;
+                }
+            }
         } catch (err) {
             console.log('AI error:', err.message);
+            response = null; // Fall through to default fallback
         }
     }
 

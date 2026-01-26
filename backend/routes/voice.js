@@ -620,17 +620,25 @@ router.post('/initiate', async (req, res) => {
         if (vapiData.id) {
             // Store phone AND OTP with multiple keys for OTP function calls
             if (!global.phoneStore) global.phoneStore = new Map();
-            const callData = { phone: cleanPhone, otp };
+            const callData = { phone: cleanPhone, otp, timestamp: Date.now() };
             global.phoneStore.set(vapiData.id, callData); // Vapi call ID
             global.phoneStore.set(callId, callData); // Our internal call ID
             if (sessionId) global.phoneStore.set(sessionId, callData); // Chat session ID
             global.phoneStore.set(cleanPhone, callData); // Also by phone number
 
             console.log(`✅ Vapi call created: ${vapiData.id}`);
-            console.log(`📱 Phone & OTP stored with keys: vapiId=${vapiData.id}, callId=${callId}${sessionId ? `, sessionId=${sessionId}` : ''}, phone=${cleanPhone}`);
-            console.log(`🔐 OTP ${otp} stored globally for verification`);
+            console.log(`📱 Phone & OTP stored with keys:`);
+            console.log(`   - vapiId: ${vapiData.id}`);
+            console.log(`   - callId: ${callId}`);
+            if (sessionId) console.log(`   - sessionId: ${sessionId}`);
+            console.log(`   - phone: ${cleanPhone}`);
+            console.log(`🔐 OTP: ${otp} (stored globally for verification)`);
+            console.log(`⚠️ NOTE: Agent must call send_otp function to trigger SMS`);
+            console.log(`⚠️ Make sure Vapi assistant has send_otp function configured!`);
+
             res.json({ success: true, callId, otp });
         } else {
+            console.error(`❌ Vapi call failed:`, vapiData);
             res.status(500).json({ error: vapiData.message || 'Failed to start call' });
         }
 
