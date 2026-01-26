@@ -86,7 +86,28 @@ function App() {
       )}
 
       {show2FA && (
-        <TwoFactorSetup onClose={() => setShow2FA(false)} />
+        <div className="modal-overlay" onClick={() => setShow2FA(false)}>
+          <div className="modal-content-2fa" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close-button"
+              onClick={() => setShow2FA(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#666',
+                zIndex: 1
+              }}
+            >
+              ×
+            </button>
+            <TwoFactorSetup onComplete={() => setShow2FA(false)} />
+          </div>
+        </div>
       )}
     </div>
   );
