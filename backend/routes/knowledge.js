@@ -20,11 +20,8 @@ function loadData() {
     intentsData = [];
     documentsData = [];
 
-    const intentsPath = path.join(
-        process.cwd(),
-        'data',
-        'meydan_intents.json'
-    );
+    const intentsPath = path.join(process.cwd(), 'config', 'meydan_intents.json');
+
 
 
     try {
