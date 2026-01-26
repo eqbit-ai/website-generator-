@@ -53,9 +53,8 @@ function App() {
         </button>
       </div>
 
-      {/* Bottom Right - Chat and 2FA */}
+      {/* Bottom Right - 2FA Button */}
       <div className="bottom-right-buttons">
-        {/* 2FA Button */}
         <button
           className="twofa-fab"
           onClick={() => setShow2FA(true)}
@@ -63,10 +62,10 @@ function App() {
         >
           <Shield size={22} />
         </button>
-
-        {/* Chatbot */}
-        <Chatbot />
       </div>
+
+      {/* Chatbot - Renders its own button */}
+      <Chatbot />
 
       {/* Modals */}
       <KnowledgeBase
