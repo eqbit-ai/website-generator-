@@ -13,6 +13,7 @@ let documentsData = [];
 // ===============================
 // LOAD DATA (NO SIDE EFFECTS)
 // ===============================
+// Load data
 function loadData() {
     console.log('\n📚 Loading Knowledge Base...');
 
@@ -20,27 +21,41 @@ function loadData() {
     documentsData = [];
 
     const intentsPaths = [
-        path.join(__dirname, '../data/meydan_intents.json'),
-        path.join(process.cwd(), 'data/meydan_intents.json'),
-        '/app/data/meydan_intents.json'
+        // ✅ Railway production path (MOST IMPORTANT)
+        '/app/backend/data/meydan_intents.json',
+
+        // local dev fallback
+        path.join(__dirname, '../data/meydan_intents.json')
     ];
 
-    for (const p of intentsPaths) {
+    let loadedFrom = null;
+
+    for (const intentsPath of intentsPaths) {
         try {
-            if (fs.existsSync(p)) {
-                const raw = fs.readFileSync(p, 'utf8');
-                const json = JSON.parse(raw);
-                intentsData = Array.isArray(json.intents) ? json.intents : [];
-                console.log(`📚 KB Ready: ${intentsData.length} intents loaded`);
+            if (fs.existsSync(intentsPath)) {
+                const raw = fs.readFileSync(intentsPath, 'utf-8');
+                const data = JSON.parse(raw);
+
+                intentsData = Array.isArray(data.intents) ? data.intents : [];
+                loadedFrom = intentsPath;
+
+                console.log(`✅ Loaded ${intentsData.length} intents from ${intentsPath}`);
                 break;
             }
         } catch (e) {
-            console.log('KB load error:', e.message);
+            console.log(`⚠️ Failed reading ${intentsPath}:`, e.message);
         }
     }
+
+    if (!loadedFrom) {
+        console.log('❌ No intents file found');
+    }
+
+    console.log(
+        `📚 KB Ready: ${intentsData.length} intents, ${documentsData.length} docs\n`
+    );
 }
 
-loadData();
 
 // ===============================
 // SEARCH (UNCHANGED)
