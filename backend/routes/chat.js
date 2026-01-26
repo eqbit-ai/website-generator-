@@ -8,16 +8,6 @@ const router = express.Router();
 let knowledgeService;
 try { knowledgeService = require('../services/knowledgeService'); } catch (e) { }
 
-let anthropic = null;
-if (process.env.ANTHROPIC_API_KEY) {
-    try {
-        anthropic = new (require('@anthropic-ai/sdk'))({
-            apiKey: process.env.ANTHROPIC_API_KEY
-        });
-        console.log('✅ Chat AI ready');
-    } catch (e) { }
-}
-
 // Database
 let db;
 try { db = require('../database'); } catch (e) {
@@ -63,6 +53,23 @@ function getConversationalResponse(message, name) {
     }
 
     return null;
+}
+
+function wantsCall(message) {
+    const m = message.toLowerCase();
+    return [
+        'call me',
+        'ring me',
+        'talk to someone',
+        'talk to a person',
+        'speak with team',
+        'speaking with team',
+        'human agent',
+        'real person',
+        'live agent',
+        'callback',
+        'call back'
+    ].some(p => m.includes(p));
 }
 
 // ============================
@@ -117,14 +124,27 @@ router.post('/message', async (req, res) => {
         chatSessions.set(sessionId, session);
     }
 
+    // Save user message
     session.messages.push({
         role: 'user',
         content: message,
         time: formatTime()
     });
 
-    let response = getConversationalResponse(message, session.name);
+    let response = null;
 
+    // 1️⃣ Small talk
+    response = getConversationalResponse(message, session.name);
+
+    // 2️⃣ CALL INTENT (🔥 FIX — must come BEFORE fallback)
+    if (!response && wantsCall(message)) {
+        response = `📞 I can arrange a call for you!
+
+Please share your phone number with country code.
+Example: +971501234567`;
+    }
+
+    // 3️⃣ Knowledge base
     if (!response && knowledgeService) {
         try {
             const kb = knowledgeService.findBestResponse?.(message);
@@ -132,17 +152,25 @@ router.post('/message', async (req, res) => {
         } catch (e) { }
     }
 
+    // 4️⃣ Fallback (LAST)
     if (!response) {
-        response = `I can help with:\n\n🏢 Company setup\n📋 Visas\n📞 Speaking with our team\n\nWhat would you like to know?`;
+        response = `I can help with:
+
+🏢 Company setup
+📋 Visas
+📞 Speaking with our team
+
+What would you like to know?`;
     }
 
+    // Save assistant reply
     session.messages.push({
         role: 'assistant',
         content: response,
         time: formatTime()
     });
 
-    // ✅ THIS WAS MISSING BEFORE (CRITICAL FIX)
+    // ✅ REQUIRED RESPONSE (was missing before)
     res.json({
         success: true,
         message: response,
