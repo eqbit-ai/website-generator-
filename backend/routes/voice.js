@@ -195,6 +195,17 @@ router.post('/vapi/function', (req, res) => {
 
         console.log('📨 Type:', messageType);
 
+        // ⚠️ VERBOSE LOGGING: Log FULL body to see what Vapi is sending
+        if (messageType === 'conversation-update') {
+            console.log('💬 FULL CONVERSATION UPDATE:');
+            console.log(JSON.stringify(body, null, 2).substring(0, 2000)); // First 2000 chars
+        }
+
+        if (messageType === 'speech-update') {
+            console.log('🎤 SPEECH UPDATE:');
+            console.log(JSON.stringify(body, null, 2).substring(0, 1000));
+        }
+
         // Debug: Log what Vapi is sending
         if (body.message?.call) {
             console.log('📞 Call object:', JSON.stringify({
