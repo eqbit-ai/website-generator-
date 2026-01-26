@@ -74,8 +74,12 @@ function App() {
       />
 
       {showVoice && (
-        <VoiceAgent onClose={() => setShowVoice(false)} />
+        <VoiceAgent
+          isOpen={showVoice}
+          onClose={() => setShowVoice(false)}
+        />
       )}
+
 
       {showLogs && (
         <Logs onClose={() => setShowLogs(false)} />
