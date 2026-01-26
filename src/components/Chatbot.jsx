@@ -1,164 +1,200 @@
 // src/components/Chatbot.jsx
+// Modern chatbot with proper timestamps and natural flow
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, User, Bot, X, MessageCircle, Minimize2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    MessageSquare, X, Send, Phone, Minimize2,
+    Loader, Bot, User, Clock
+} from 'lucide-react';
 
-const Chatbot = () => {
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
+const Chatbot = ({ userName = '', userPhone = '', userEmail = '' }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [isMinimized, setIsMinimized] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
-    const [sessionStarted, setSessionStarted] = useState(false);
-    const [conversationId, setConversationId] = useState(null);
-
-    const [customerInfo, setCustomerInfo] = useState({
-        name: '',
-        email: '',
-        phone: ''
-    });
-    const [formErrors, setFormErrors] = useState({});
-
+    const [sessionId, setSessionId] = useState(null);
+    const [isMinimized, setIsMinimized] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
-    useEffect(() => {
+    // Format time for display
+    const formatTime = (timestamp) => {
+        if (!timestamp) {
+            return new Date().toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        try {
+            const date = new Date(timestamp);
+            if (isNaN(date.getTime())) {
+                return new Date().toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+            return date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        } catch {
+            return new Date().toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+    };
+
+    // Auto scroll to bottom
+    const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
     }, [messages]);
 
+    // Focus input when opened
     useEffect(() => {
-        if (isOpen && sessionStarted && inputRef.current) {
-            inputRef.current.focus();
+        if (isOpen && !isMinimized) {
+            setTimeout(() => inputRef.current?.focus(), 100);
         }
-    }, [isOpen, sessionStarted]);
+    }, [isOpen, isMinimized]);
 
-    const validateForm = () => {
-        const errors = {};
-
-        if (!customerInfo.name.trim()) {
-            errors.name = 'Name is required';
-        }
-
-        if (!customerInfo.email.trim()) {
-            errors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerInfo.email)) {
-            errors.email = 'Please enter a valid email';
-        }
-
-        setFormErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-    const handleStartChat = async (e) => {
-        e.preventDefault();
-
-        if (!validateForm()) return;
-
-        setIsLoading(true);
-
+    // Start chat session
+    const startSession = async () => {
         try {
-            const response = await fetch(`${config.apiUrl}/api/chat/start`, {
-
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(customerInfo)
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setConversationId(data.conversationId);
-                setSessionStarted(true);
-                setMessages([{
-                    id: Date.now(),
-                    role: 'assistant',
-                    content: data.greeting,
-                    timestamp: new Date()
-                }]);
-            } else {
-                setFormErrors({ submit: data.error || 'Failed to start chat' });
-            }
-        } catch (error) {
-            setFormErrors({ submit: 'Failed to connect to server. Make sure backend is running.' });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSendMessage = async (e) => {
-        e.preventDefault();
-
-        if (!inputValue.trim() || isLoading) return;
-
-        const userMessage = inputValue.trim();
-        setInputValue('');
-
-        setMessages(prev => [...prev, {
-            id: Date.now(),
-            role: 'user',
-            content: userMessage,
-            timestamp: new Date()
-        }]);
-
-        setIsLoading(true);
-
-        try {
-            const response = await fetch(`${config.apiUrl}/api/chat/message`, {
-
+            const response = await fetch(`${API_URL}/api/chat/start`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    conversationId,
-                    message: userMessage
+                    name: userName || 'Guest',
+                    phone: userPhone,
+                    email: userEmail
                 })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                setMessages(prev => [...prev, {
-                    id: Date.now() + 1,
+                setSessionId(data.sessionId);
+                const greeting = {
+                    id: 'msg_' + Date.now(),
                     role: 'assistant',
-                    content: data.response,
-                    timestamp: new Date()
-                }]);
-            } else {
-                setMessages(prev => [...prev, {
-                    id: Date.now() + 1,
-                    role: 'assistant',
-                    content: 'Sorry, I encountered an error. Please try again.',
-                    timestamp: new Date(),
-                    isError: true
-                }]);
+                    content: data.message,
+                    time: data.time || formatTime()
+                };
+                setMessages([greeting]);
             }
         } catch (error) {
-            setMessages(prev => [...prev, {
-                id: Date.now() + 1,
+            console.error('Failed to start chat:', error);
+            setMessages([{
+                id: 'msg_error',
                 role: 'assistant',
-                content: 'Sorry, I couldn\'t connect to the server. Please try again.',
-                timestamp: new Date(),
-                isError: true
+                content: 'Welcome! How can I help you today?',
+                time: formatTime()
+            }]);
+        }
+    };
+
+    // Open chat
+    const openChat = () => {
+        setIsOpen(true);
+        setIsMinimized(false);
+        if (!sessionId) {
+            startSession();
+        }
+    };
+
+    // Send message
+    const sendMessage = async () => {
+        const message = inputValue.trim();
+        if (!message || isLoading) return;
+
+        const userMessage = {
+            id: 'msg_' + Date.now(),
+            role: 'user',
+            content: message,
+            time: formatTime()
+        };
+
+        setMessages(prev => [...prev, userMessage]);
+        setInputValue('');
+        setIsLoading(true);
+
+        try {
+            const response = await fetch(`${API_URL}/api/chat/message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId,
+                    message
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                const botMessage = {
+                    id: 'msg_' + Date.now() + '_bot',
+                    role: 'assistant',
+                    content: data.response,
+                    time: data.time || formatTime(),
+                    callInitiated: data.callInitiated
+                };
+                setMessages(prev => [...prev, botMessage]);
+            } else {
+                throw new Error(data.error || 'Failed to get response');
+            }
+        } catch (error) {
+            console.error('Chat error:', error);
+            setMessages(prev => [...prev, {
+                id: 'msg_error_' + Date.now(),
+                role: 'assistant',
+                content: 'Sorry, I had trouble processing that. Please try again.',
+                time: formatTime()
             }]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleResetChat = () => {
-        setSessionStarted(false);
-        setConversationId(null);
-        setMessages([]);
-        setCustomerInfo({ name: '', email: '', phone: '' });
-        setFormErrors({});
+    // Handle enter key
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
     };
 
-    // Chat button (when closed)
+    // Quick actions
+    const quickActions = [
+        { label: '📞 Call Me', message: 'I would like someone to call me' },
+        { label: '🏢 Company Setup', message: 'Tell me about company setup' },
+        { label: '📋 Visa Info', message: 'What are the visa requirements?' }
+    ];
+
+    const handleQuickAction = (action) => {
+        setInputValue(action.message);
+        setTimeout(() => sendMessage(), 100);
+    };
+
     if (!isOpen) {
         return (
-            <button className="chatbot-button" onClick={() => setIsOpen(true)}>
-                <MessageCircle size={24} />
-                <span className="chatbot-button-text">Chat with us</span>
+            <button
+                className="chatbot-trigger"
+                onClick={openChat}
+                aria-label="Open chat"
+            >
+                <MessageSquare size={24} />
+                <span className="trigger-text">Chat with us</span>
             </button>
         );
     }
@@ -167,23 +203,31 @@ const Chatbot = () => {
         <div className={`chatbot-container ${isMinimized ? 'minimized' : ''}`}>
             {/* Header */}
             <div className="chatbot-header">
-                <div className="chatbot-header-info">
-                    <div className="chatbot-avatar">
+                <div className="header-info">
+                    <div className="header-avatar">
                         <Bot size={20} />
                     </div>
-                    <div>
-                        <h3>Support Assistant</h3>
-                        <span className="chatbot-status">
+                    <div className="header-text">
+                        <span className="header-title">Meydan Support</span>
+                        <span className="header-status">
                             <span className="status-dot"></span>
                             Online
                         </span>
                     </div>
                 </div>
-                <div className="chatbot-header-actions">
-                    <button onClick={() => setIsMinimized(!isMinimized)} title="Minimize">
+                <div className="header-actions">
+                    <button
+                        className="header-btn"
+                        onClick={() => setIsMinimized(!isMinimized)}
+                        aria-label={isMinimized ? 'Expand' : 'Minimize'}
+                    >
                         <Minimize2 size={18} />
                     </button>
-                    <button onClick={() => setIsOpen(false)} title="Close">
+                    <button
+                        className="header-btn"
+                        onClick={() => setIsOpen(false)}
+                        aria-label="Close"
+                    >
                         <X size={18} />
                     </button>
                 </div>
@@ -191,130 +235,448 @@ const Chatbot = () => {
 
             {!isMinimized && (
                 <>
-                    {/* Customer Info Form */}
-                    {!sessionStarted ? (
-                        <div className="chatbot-form-container">
-                            <div className="chatbot-welcome">
-                                <h4>Welcome! 👋</h4>
-                                <p>Please provide your details to start chatting with our support team.</p>
-                            </div>
-
-                            <form onSubmit={handleStartChat} className="chatbot-form">
-                                <div className="chatbot-input-group">
-                                    <label>Name *</label>
-                                    <input
-                                        type="text"
-                                        value={customerInfo.name}
-                                        onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
-                                        placeholder="Your name"
-                                        className={formErrors.name ? 'error' : ''}
-                                    />
-                                    {formErrors.name && <span className="error-text">{formErrors.name}</span>}
-                                </div>
-
-                                <div className="chatbot-input-group">
-                                    <label>Email *</label>
-                                    <input
-                                        type="email"
-                                        value={customerInfo.email}
-                                        onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
-                                        placeholder="your@email.com"
-                                        className={formErrors.email ? 'error' : ''}
-                                    />
-                                    {formErrors.email && <span className="error-text">{formErrors.email}</span>}
-                                </div>
-
-                                <div className="chatbot-input-group">
-                                    <label>Phone (optional)</label>
-                                    <input
-                                        type="tel"
-                                        value={customerInfo.phone}
-                                        onChange={(e) => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
-                                        placeholder="+1 (123) 456-7890"
-                                    />
-                                </div>
-
-                                {formErrors.submit && (
-                                    <div className="chatbot-error">{formErrors.submit}</div>
-                                )}
-
-                                <button type="submit" className="chatbot-start-button" disabled={isLoading}>
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="spinning" size={18} />
-                                            Starting...
-                                        </>
+                    {/* Messages */}
+                    <div className="chatbot-messages">
+                        {messages.map((msg) => (
+                            <div
+                                key={msg.id}
+                                className={`message ${msg.role}`}
+                            >
+                                <div className="message-avatar">
+                                    {msg.role === 'user' ? (
+                                        <User size={16} />
                                     ) : (
-                                        'Start Chat'
+                                        <Bot size={16} />
                                     )}
+                                </div>
+                                <div className="message-content">
+                                    <div className="message-text">
+                                        {msg.content}
+                                    </div>
+                                    <div className="message-time">
+                                        <Clock size={10} />
+                                        {msg.time}
+                                    </div>
+                                    {msg.callInitiated && (
+                                        <div className="call-badge">
+                                            <Phone size={12} />
+                                            Call scheduled
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+
+                        {isLoading && (
+                            <div className="message assistant">
+                                <div className="message-avatar">
+                                    <Bot size={16} />
+                                </div>
+                                <div className="message-content">
+                                    <div className="typing-indicator">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Quick Actions */}
+                    {messages.length <= 1 && (
+                        <div className="quick-actions">
+                            {quickActions.map((action, idx) => (
+                                <button
+                                    key={idx}
+                                    className="quick-action-btn"
+                                    onClick={() => handleQuickAction(action)}
+                                >
+                                    {action.label}
                                 </button>
-                            </form>
+                            ))}
                         </div>
-                    ) : (
-                        <>
-                            {/* Messages */}
-                            <div className="chatbot-messages">
-                                {messages.map((message) => (
-                                    <div
-                                        key={message.id}
-                                        className={`chatbot-message ${message.role} ${message.isError ? 'error' : ''}`}
-                                    >
-                                        <div className="message-avatar">
-                                            {message.role === 'user' ? <User size={16} /> : <Bot size={16} />}
-                                        </div>
-                                        <div className="message-content">
-                                            <p>{message.content}</p>
-                                            <span className="message-time">
-                                                {new Date(message.timestamp).toLocaleTimeString([], {
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-
-                                {isLoading && (
-                                    <div className="chatbot-message assistant">
-                                        <div className="message-avatar">
-                                            <Bot size={16} />
-                                        </div>
-                                        <div className="message-content typing">
-                                            <span></span>
-                                            <span></span>
-                                            <span></span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div ref={messagesEndRef} />
-                            </div>
-
-                            {/* Input */}
-                            <form onSubmit={handleSendMessage} className="chatbot-input-container">
-                                <input
-                                    ref={inputRef}
-                                    type="text"
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder="Type your message..."
-                                    disabled={isLoading}
-                                />
-                                <button type="submit" disabled={!inputValue.trim() || isLoading}>
-                                    <Send size={18} />
-                                </button>
-                            </form>
-
-                            {/* Footer */}
-                            <div className="chatbot-footer">
-                                <button onClick={handleResetChat} className="reset-chat-button">
-                                    Start New Chat
-                                </button>
-                            </div>
-                        </>
                     )}
+
+                    {/* Input */}
+                    <div className="chatbot-input">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Type your message..."
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            disabled={isLoading}
+                        />
+                        <button
+                            className="send-btn"
+                            onClick={sendMessage}
+                            disabled={!inputValue.trim() || isLoading}
+                        >
+                            {isLoading ? (
+                                <Loader size={18} className="spin" />
+                            ) : (
+                                <Send size={18} />
+                            )}
+                        </button>
+                    </div>
                 </>
             )}
+
+            <style jsx>{`
+                .chatbot-trigger {
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 14px 24px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 50px;
+                    cursor: pointer;
+                    font-size: 15px;
+                    font-weight: 500;
+                    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    z-index: 1000;
+                }
+
+                .chatbot-trigger:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 30px rgba(102, 126, 234, 0.5);
+                }
+
+                .chatbot-container {
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    width: 380px;
+                    max-height: 600px;
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    z-index: 1000;
+                    animation: slideUp 0.3s ease;
+                }
+
+                .chatbot-container.minimized {
+                    max-height: auto;
+                }
+
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .chatbot-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 16px 20px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+
+                .header-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .header-avatar {
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .header-text {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .header-title {
+                    font-weight: 600;
+                    font-size: 16px;
+                }
+
+                .header-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 12px;
+                    opacity: 0.9;
+                }
+
+                .status-dot {
+                    width: 8px;
+                    height: 8px;
+                    background: #4ade80;
+                    border-radius: 50%;
+                }
+
+                .header-actions {
+                    display: flex;
+                    gap: 8px;
+                }
+
+                .header-btn {
+                    width: 32px;
+                    height: 32px;
+                    background: rgba(255, 255, 255, 0.15);
+                    border: none;
+                    border-radius: 8px;
+                    color: white;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: background 0.2s;
+                }
+
+                .header-btn:hover {
+                    background: rgba(255, 255, 255, 0.25);
+                }
+
+                .chatbot-messages {
+                    flex: 1;
+                    padding: 16px;
+                    overflow-y: auto;
+                    min-height: 300px;
+                    max-height: 400px;
+                    background: #f8f9fa;
+                }
+
+                .message {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 16px;
+                    animation: fadeIn 0.3s ease;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .message.user {
+                    flex-direction: row-reverse;
+                }
+
+                .message-avatar {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+
+                .message.assistant .message-avatar {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+
+                .message.user .message-avatar {
+                    background: #e0e0e0;
+                    color: #666;
+                }
+
+                .message-content {
+                    max-width: 75%;
+                }
+
+                .message-text {
+                    padding: 12px 16px;
+                    border-radius: 16px;
+                    font-size: 14px;
+                    line-height: 1.5;
+                    white-space: pre-wrap;
+                }
+
+                .message.assistant .message-text {
+                    background: white;
+                    color: #333;
+                    border-radius: 16px 16px 16px 4px;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+                }
+
+                .message.user .message-text {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 16px 16px 4px 16px;
+                }
+
+                .message-time {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 11px;
+                    color: #999;
+                    margin-top: 4px;
+                    padding: 0 4px;
+                }
+
+                .message.user .message-time {
+                    justify-content: flex-end;
+                }
+
+                .call-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    margin-top: 8px;
+                    padding: 4px 10px;
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                    border-radius: 12px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+
+                .typing-indicator {
+                    display: flex;
+                    gap: 4px;
+                    padding: 12px 16px;
+                    background: white;
+                    border-radius: 16px;
+                }
+
+                .typing-indicator span {
+                    width: 8px;
+                    height: 8px;
+                    background: #bbb;
+                    border-radius: 50%;
+                    animation: bounce 1.4s infinite;
+                }
+
+                .typing-indicator span:nth-child(2) {
+                    animation-delay: 0.2s;
+                }
+
+                .typing-indicator span:nth-child(3) {
+                    animation-delay: 0.4s;
+                }
+
+                @keyframes bounce {
+                    0%, 60%, 100% { transform: translateY(0); }
+                    30% { transform: translateY(-6px); }
+                }
+
+                .quick-actions {
+                    display: flex;
+                    gap: 8px;
+                    padding: 0 16px 12px;
+                    flex-wrap: wrap;
+                }
+
+                .quick-action-btn {
+                    padding: 8px 14px;
+                    background: white;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 20px;
+                    font-size: 13px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .quick-action-btn:hover {
+                    background: #667eea;
+                    color: white;
+                    border-color: #667eea;
+                }
+
+                .chatbot-input {
+                    display: flex;
+                    gap: 8px;
+                    padding: 16px;
+                    border-top: 1px solid #eee;
+                    background: white;
+                }
+
+                .chatbot-input input {
+                    flex: 1;
+                    padding: 12px 16px;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 24px;
+                    font-size: 14px;
+                    outline: none;
+                    transition: border-color 0.2s;
+                }
+
+                .chatbot-input input:focus {
+                    border-color: #667eea;
+                }
+
+                .send-btn {
+                    width: 44px;
+                    height: 44px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border: none;
+                    border-radius: 50%;
+                    color: white;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: transform 0.2s, opacity 0.2s;
+                }
+
+                .send-btn:hover:not(:disabled) {
+                    transform: scale(1.05);
+                }
+
+                .send-btn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+                .spin {
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                @media (max-width: 480px) {
+                    .chatbot-container {
+                        width: calc(100vw - 32px);
+                        right: 16px;
+                        bottom: 16px;
+                        max-height: calc(100vh - 100px);
+                    }
+
+                    .trigger-text {
+                        display: none;
+                    }
+
+                    .chatbot-trigger {
+                        padding: 14px;
+                        border-radius: 50%;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
