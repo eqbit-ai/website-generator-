@@ -20,41 +20,36 @@ function loadData() {
     intentsData = [];
     documentsData = [];
 
-    const intentsPaths = [
-        // ✅ Railway production path (MOST IMPORTANT)
-        '/app/backend/data/meydan_intents.json',
+    const intentsPath = path.join(
+        process.cwd(),
+        'backend',
+        'data',
+        'meydan_intents.json'
+    );
 
-        // local dev fallback
-        path.join(__dirname, '../data/meydan_intents.json')
-    ];
+    try {
+        console.log('🔎 Looking for intents at:', intentsPath);
 
-    let loadedFrom = null;
-
-    for (const intentsPath of intentsPaths) {
-        try {
-            if (fs.existsSync(intentsPath)) {
-                const raw = fs.readFileSync(intentsPath, 'utf-8');
-                const data = JSON.parse(raw);
-
-                intentsData = Array.isArray(data.intents) ? data.intents : [];
-                loadedFrom = intentsPath;
-
-                console.log(`✅ Loaded ${intentsData.length} intents from ${intentsPath}`);
-                break;
-            }
-        } catch (e) {
-            console.log(`⚠️ Failed reading ${intentsPath}:`, e.message);
+        if (!fs.existsSync(intentsPath)) {
+            console.log('❌ Intents file NOT FOUND');
+            return;
         }
-    }
 
-    if (!loadedFrom) {
-        console.log('❌ No intents file found');
+        const raw = fs.readFileSync(intentsPath, 'utf-8');
+        const data = JSON.parse(raw);
+
+        intentsData = Array.isArray(data.intents) ? data.intents : [];
+
+        console.log(`✅ Loaded ${intentsData.length} intents`);
+    } catch (e) {
+        console.log('❌ Failed loading intents:', e.message);
     }
 
     console.log(
         `📚 KB Ready: ${intentsData.length} intents, ${documentsData.length} docs\n`
     );
 }
+
 
 
 // ===============================
