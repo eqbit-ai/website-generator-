@@ -1,23 +1,39 @@
 // backend/routes/chat.js
-// Natural conversational chatbot with user memory and proper timestamps
+// Natural conversational chatbot with KB + AI + Call trigger
 
 const express = require('express');
 const router = express.Router();
 
-// Services
+// ============================
+// SERVICES
+// ============================
+
 let knowledgeService;
 try { knowledgeService = require('../services/knowledgeService'); } catch (e) { }
 
-// Database
+let anthropic = null;
+if (process.env.ANTHROPIC_API_KEY) {
+    try {
+        const Anthropic = require('@anthropic-ai/sdk');
+        anthropic = new Anthropic({
+            apiKey: process.env.ANTHROPIC_API_KEY
+        });
+        console.log('✅ Chat AI ready');
+    } catch (e) { }
+}
+
+// Database (safe fallback)
 let db;
 try { db = require('../database'); } catch (e) {
     db = { userAccounts: { getBy: () => null, insert: () => { }, update: () => { } } };
 }
 
-// Session storage
+// ============================
+// STATE
+// ============================
+
 const chatSessions = new Map();
 
-// Global stores
 if (!global.phoneStore) global.phoneStore = new Map();
 if (!global.chatLogs) global.chatLogs = [];
 
@@ -43,15 +59,12 @@ function getConversationalResponse(message, name) {
     if (/^(hi|hello|hey|hiya)\.?!?$/.test(m)) {
         return `Hey ${name}! 👋 How can I help you today?`;
     }
-
     if (/^(thanks|thank you|thx|ty)\.?!?$/.test(m)) {
         return `You're welcome! 😊 Anything else I can help with?`;
     }
-
     if (/^(bye|goodbye|see you)\.?!?$/.test(m)) {
         return `Goodbye! Take care 👋`;
     }
-
     return null;
 }
 
@@ -72,6 +85,15 @@ function wantsCall(message) {
     ].some(p => m.includes(p));
 }
 
+function extractPhone(message) {
+    const match = message.match(/\+?\d{10,15}/);
+    if (!match) return null;
+
+    let phone = match[0];
+    if (!phone.startsWith('+')) phone = '+' + phone;
+    return phone;
+}
+
 // ============================
 // ROUTES
 // ============================
@@ -87,6 +109,7 @@ router.post('/start', (req, res) => {
     const session = {
         id: sessionId,
         name: customerName,
+        awaitingPhone: false,
         messages: [{
             role: 'assistant',
             content: greeting,
@@ -119,6 +142,7 @@ router.post('/message', async (req, res) => {
         session = {
             id: sessionId,
             name: 'Guest',
+            awaitingPhone: false,
             messages: []
         };
         chatSessions.set(sessionId, session);
@@ -136,41 +160,72 @@ router.post('/message', async (req, res) => {
     // 1️⃣ Small talk
     response = getConversationalResponse(message, session.name);
 
-    // 2️⃣ CALL INTENT (🔥 FIX — must come BEFORE fallback)
-    if (!response && wantsCall(message)) {
-        response = `📞 I can arrange a call for you!
+    // 2️⃣ Phone capture flow
+    if (!response && session.awaitingPhone) {
+        const phone = extractPhone(message);
+        if (phone) {
+            session.awaitingPhone = false;
+            global.phoneStore.set(session.id, phone);
 
-Please share your phone number with country code.
+            response = `✅ Got it! Our team will call you shortly at ${phone} 📞  
+Is there anything else I can help you with meanwhile?`;
+        } else {
+            response = `Please share a valid phone number with country code.  
 Example: +971501234567`;
+        }
     }
 
-    // 3️⃣ Knowledge base
-    if (!response && knowledgeService) {
+    // 3️⃣ Call intent
+    if (!response && wantsCall(message)) {
+        session.awaitingPhone = true;
+        response = `📞 Sure! Please share your phone number with country code so our team can call you.`;
+    }
+
+    // 4️⃣ Knowledge Base + AI
+    if (!response && knowledgeService && anthropic) {
         try {
-            const kb = knowledgeService.findBestResponse?.(message);
-            if (kb?.found) response = kb.response;
-        } catch (e) { }
+            const results = knowledgeService.search(message, 1);
+
+            if (results.length > 0 && results[0].score > 0.1) {
+                const kbContext = results[0].content;
+
+                const ai = await anthropic.messages.create({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 200,
+                    system: `You are a helpful, human-sounding assistant for Meydan Free Zone.
+Answer ONLY using the information below.
+Be clear and concise.
+
+KNOWLEDGE:
+${kbContext}`,
+                    messages: [{ role: 'user', content: message }]
+                });
+
+                response = ai.content[0].text;
+            }
+        } catch (err) {
+            console.log('AI KB error:', err.message);
+        }
     }
 
-    // 4️⃣ Fallback (LAST)
+    // 5️⃣ Fallback (LAST)
     if (!response) {
         response = `I can help with:
 
-🏢 Company setup
-📋 Visas
-📞 Speaking with our team
+🏢 Company setup  
+📋 Visas  
+📞 Speaking with our team  
 
 What would you like to know?`;
     }
 
-    // Save assistant reply
+    // Save assistant response
     session.messages.push({
         role: 'assistant',
         content: response,
         time: formatTime()
     });
 
-    // ✅ REQUIRED RESPONSE (was missing before)
     res.json({
         success: true,
         message: response,
