@@ -109,6 +109,7 @@ router.post('/reload', (req, res) => {
         intents: intentsData.length
     });
 });
+loadData();
 
 // 🔴 THIS IS THE CRITICAL LINE THAT WAS BROKEN
 module.exports = router;
