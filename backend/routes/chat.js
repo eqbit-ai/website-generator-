@@ -164,40 +164,57 @@ function checkIntent(message) {
     if (!message || !intents.length) return null;
 
     const q = message.toLowerCase().trim();
-    const qWords = q.split(/\s+/).map(normalizeWord); // Normalize words
+
+    // Normalize for matching (remove punctuation, extra spaces)
+    const qNormalized = q.replace(/[?!.,]/g, '').replace(/\s+/g, ' ').trim();
+    const qWords = qNormalized.split(/\s+/).map(normalizeWord);
+
+    console.log(`🔍 Intent Check: "${q}"`);
+    console.log(`📝 Normalized: "${qNormalized}"`);
+    console.log(`📝 Words: [${qWords.join(', ')}]`);
 
     for (const intent of intents) {
         if (!intent || !intent.response || !intent.keywords) continue;
 
         for (const keyword of intent.keywords) {
             const kw = keyword.toLowerCase();
+            const kwNormalized = kw.replace(/[?!.,]/g, '').replace(/\s+/g, ' ').trim();
 
-            // 1. Exact phrase match
-            if (q.includes(kw)) {
+            // 1. Exact phrase match (after normalization)
+            if (qNormalized.includes(kwNormalized)) {
                 console.log(`✅ Intent matched (exact): "${intent.name}" via keyword "${keyword}"`);
                 return intent.response;
             }
 
             // 2. Word-level matching - check if all important words from keyword appear in query
-            const kwWords = kw.split(/\s+/).filter(w => w.length > 2).map(normalizeWord);
+            const kwWords = kwNormalized.split(/\s+/).filter(w => w.length > 2).map(normalizeWord);
+
+            // Must have at least 1 keyword word
+            if (kwWords.length === 0) continue;
+
             const allWordsPresent = kwWords.every(kwWord =>
                 qWords.some(qWord => {
                     // Exact match after normalization
                     if (qWord === kwWord) return true;
-                    // Contains match
-                    if (qWord.includes(kwWord) || kwWord.includes(qWord)) return true;
-                    // Fuzzy match: allow 1 character difference for typos
+                    // Contains match (for compound words)
+                    if (qWord.length > 3 && kwWord.length > 3) {
+                        if (qWord.includes(kwWord) || kwWord.includes(qWord)) return true;
+                    }
+                    // Fuzzy match: allow 1 character difference for typos (only for longer words)
                     if (kwWord.length > 4 && levenshteinDistance(qWord, kwWord) <= 1) return true;
                     return false;
                 })
             );
 
-            if (allWordsPresent && kwWords.length > 0) {
+            if (allWordsPresent) {
                 console.log(`✅ Intent matched (word-level): "${intent.name}" via keyword "${keyword}"`);
+                console.log(`   Matched words: [${kwWords.join(', ')}]`);
                 return intent.response;
             }
         }
     }
+
+    console.log(`❌ No intent matched`);
     return null;
 }
 
@@ -384,6 +401,7 @@ router.post('/message', async (req, res) => {
                     // ⚠️ CRITICAL: Only use KB if confidence is HIGH (>= 0.6)
                     if (kbScore >= 0.6) {
                         kbContext = results.slice(0, 3).map(r => r.content).join('\n\n');
+                        console.log(`✅ KB context found (score ${kbScore.toFixed(3)}):`, kbContext.substring(0, 100) + '...');
                     } else {
                         console.log(`⚠️ KB score too low (${kbScore.toFixed(3)} < 0.6), escalating to human`);
                     }
@@ -392,65 +410,76 @@ router.post('/message', async (req, res) => {
 
             // If KB confidence is too low, escalate immediately
             if (!kbContext || kbScore < 0.6) {
-                response = `I don't have specific information about that in my knowledge base.\n\nWould you like me to connect you with our team who can help? They can provide detailed answers about company setup, visas, and licensing.`;
+                console.log(`❌ No relevant KB found, escalating`);
+                response = `I don't have specific information about that.\n\nWould you like me to connect you with our team? They can help with company setup, visas, and licensing questions.`;
             } else {
                 // KB confidence is high - use AI with strict KB-only constraint
-
-                // Build conversation history (last 6 messages for context)
-                const conversationHistory = session.messages.slice(-12).map(msg => ({
-                    role: msg.role === 'user' ? 'user' : 'assistant',
-                    content: msg.content
-                }));
+                console.log(`✅ Using AI with KB context (score: ${kbScore.toFixed(3)})`);
 
                 // ✅ CRITICAL: Embed KB context IN the user message (not system prompt)
-                // This forces Claude to treat KB as the ONLY source
                 const kbConstrainedMessage = `USER QUESTION:
 "${message}"
 
-KNOWLEDGE BASE CONTEXT (ONLY USE THIS TO ANSWER):
+KNOWLEDGE BASE CONTEXT (ONLY USE THIS):
 ${kbContext}
 
-INSTRUCTIONS:
-- Answer ONLY from the context above
-- If the answer is not clearly present in the context, say you don't have that information
-- Keep answer to 2-3 sentences maximum
-- Use at most ONE emoji
-- Do NOT guess or invent information`;
+TASK:
+Answer the question ONLY if the KB context above clearly contains the answer.
+If the KB context does NOT contain relevant information, say: "I don't have information about that."
 
-                conversationHistory.push({
-                    role: 'user',
-                    content: kbConstrainedMessage
-                });
+Keep answer to 2 sentences maximum.`;
 
-                const systemPrompt = `You are a professional business consultant for Meydan Free Zone Dubai.
+                const systemPrompt = `You are a professional consultant for Meydan Free Zone Dubai.
 
-CRITICAL RULES (DO NOT BREAK):
-1. Answer ONLY using information in the knowledge base context provided
-2. If the context does NOT clearly contain the answer, say you don't have that information
-3. NEVER guess, assume, or invent information
-4. NEVER repeat unrelated information from the knowledge base
-5. Keep answers brief (2-3 sentences)
-6. Sound human and conversational
-7. Use at most ONE emoji
-
-ESCALATION RULE:
-If you cannot answer from the provided context, offer to connect them with the team.`;
+CRITICAL RULES:
+1. Answer ONLY from the provided KB context
+2. If KB doesn't contain the answer, say you don't have that information
+3. NEVER invent or guess information
+4. NEVER use information not in the provided context
+5. Keep answers brief (1-2 sentences)
+6. Do NOT over-apologize`;
 
                 const ai = await anthropic.messages.create({
                     model: 'claude-sonnet-4-20250514',
-                    max_tokens: 200,
+                    max_tokens: 150,
+                    temperature: 0.3, // Lower temperature = more focused
                     system: systemPrompt,
-                    messages: conversationHistory
+                    messages: [{ role: 'user', content: kbConstrainedMessage }]
                 });
 
-                response = ai.content[0].text;
+                response = ai.content[0].text.trim();
+                console.log(`🤖 AI Response: "${response}"`);
 
-                // Validate response isn't hallucinating
-                if (response.toLowerCase().includes('i don\'t have') ||
-                    response.toLowerCase().includes('i\'m not sure') ||
-                    response.toLowerCase().includes('i cannot find')) {
-                    // AI admitted it doesn't know - provide escalation
-                    response = `I don't have specific information about that.\n\nWould you like me to arrange a call with our team? They can provide accurate answers about ${message.includes('visa') ? 'visas' : message.includes('company') ? 'company setup' : 'your question'}.`;
+                // ⚠️ CRITICAL VALIDATION: Check if response is relevant to question
+                // Extract key terms from question
+                const questionTerms = message.toLowerCase().split(/\s+/)
+                    .filter(w => w.length > 3)
+                    .map(w => w.replace(/[^a-z]/g, ''));
+
+                // Extract key terms from response
+                const responseTerms = response.toLowerCase().split(/\s+/)
+                    .filter(w => w.length > 3)
+                    .map(w => w.replace(/[^a-z]/g, ''));
+
+                // Check if response shares at least ONE keyword with question OR explicitly admits uncertainty
+                const admitsUncertainty = response.toLowerCase().includes('don\'t have') ||
+                    response.toLowerCase().includes('not sure') ||
+                    response.toLowerCase().includes('cannot find') ||
+                    response.toLowerCase().includes('don\'t know');
+
+                const hasSharedTerms = questionTerms.some(qt => responseTerms.includes(qt));
+
+                if (!admitsUncertainty && !hasSharedTerms && questionTerms.length > 0) {
+                    // Response is completely unrelated to question - AI hallucinated
+                    console.log(`⚠️ AI response unrelated to question! Rejecting.`);
+                    console.log(`   Question terms: [${questionTerms.join(', ')}]`);
+                    console.log(`   Response terms: [${responseTerms.join(', ')}]`);
+                    response = `I don't have specific information about that.\n\nWould you like me to connect you with our team?`;
+                }
+
+                // If AI admitted uncertainty, provide escalation
+                if (admitsUncertainty) {
+                    response = `I don't have specific information about that.\n\nWould you like me to connect you with our team? They can provide detailed answers about company setup, visas, and licensing.`;
                 }
             }
         } catch (err) {
