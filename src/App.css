@@ -2292,3 +2292,271 @@ body {
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
+
+
+/* ============================================
+   CSS FIXES - ADD THESE TO YOUR App.css
+   ============================================ */
+
+/* Admin Buttons Container - Groups KB and Voice buttons */
+.admin-buttons-container {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  z-index: 999;
+}
+
+/* Admin FAB Buttons */
+.admin-fab {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-fab.kb-fab {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.admin-fab.kb-fab:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.admin-fab.voice-fab {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.admin-fab.voice-fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Remove conflicting old button styles */
+.kb-admin-button {
+  display: none !important;
+}
+
+.voice-agent-button {
+  display: none !important;
+}
+
+/* KB Add Form */
+.kb-add-form {
+  background: var(--bg-tertiary);
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Fix KB Modal Overlay */
+.kb-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+/* Fix KB Modal */
+.kb-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Fix KB Header */
+.kb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  flex-shrink: 0;
+}
+
+.kb-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kb-header-title h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.kb-header-title svg {
+  color: var(--accent);
+}
+
+/* Fix KB Content Scrolling */
+.kb-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  min-height: 300px;
+  max-height: calc(90vh - 280px);
+}
+
+/* Fix KB Footer */
+.kb-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  flex-shrink: 0;
+}
+
+/* Chatbot Button Fix - Bottom Right Only */
+.chatbot-button {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  left: auto !important;
+  z-index: 1000;
+}
+
+/* Chatbot Container Fix */
+.chatbot-container {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  left: auto !important;
+  z-index: 1000;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .admin-buttons-container {
+    bottom: 16px;
+    left: 16px;
+    gap: 8px;
+  }
+
+  .admin-fab {
+    width: 44px;
+    height: 44px;
+  }
+
+  .kb-modal {
+    max-height: 100vh;
+    max-width: 100%;
+    border-radius: 0;
+  }
+
+  .kb-content {
+    max-height: calc(100vh - 280px);
+  }
+}
+
+/* ============================================
+   ADD THIS TO THE END OF YOUR App.css
+   ============================================ */
+
+/* Bottom Left Buttons Container */
+.bottom-left-buttons {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  z-index: 999;
+}
+
+/* FAB Button Base */
+.fab-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Knowledge Base Button */
+.fab-button.kb-button {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.fab-button.kb-button:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+/* Voice Agent Button */
+.fab-button.voice-button {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.fab-button.voice-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Hide the old conflicting buttons */
+.kb-admin-button {
+  display: none !important;
+}
+
+.voice-agent-button {
+  display: none !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .bottom-left-buttons {
+    bottom: 16px;
+    left: 16px;
+    gap: 8px;
+  }
+
+  .fab-button {
+    width: 44px;
+    height: 44px;
+  }
+}

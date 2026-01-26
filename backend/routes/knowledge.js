@@ -1,244 +1,272 @@
 // backend/routes/knowledge.js
+// Knowledge Base Routes - Fixed with robust error handling
 
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
-const db = require('../database');
-const knowledgeService = require('../services/knowledgeService');
+const path = require('path');
 
-// Configure multer
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+// Data storage
+let intentsData = [];
+let documentsData = [];
+
+// Find data directory
+function findDataDir() {
+    const possiblePaths = [
+        path.join(__dirname, '../data'),
+        path.join(__dirname, '../../data'),
+        path.join(process.cwd(), 'data'),
+        path.join(process.cwd(), 'backend/data')
+    ];
+
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            return p;
+        }
+    }
+
+    // Create default
+    const defaultPath = path.join(__dirname, '../data');
+    try {
+        fs.mkdirSync(defaultPath, { recursive: true });
+    } catch (e) { }
+    return defaultPath;
 }
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadsDir),
-    filename: (req, file, cb) => cb(null, `${uuidv4()}${path.extname(file.originalname)}`)
-});
+// Load data
+function loadData() {
+    const dataDir = findDataDir();
+    console.log('📁 Data directory:', dataDir);
 
-const upload = multer({
-    storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = ['.txt', '.doc', '.docx', '.md'];
-        const ext = path.extname(file.originalname).toLowerCase();
-        if (allowedTypes.includes(ext)) {
-            cb(null, true);
+    // Load intents
+    const intentsPaths = [
+        path.join(dataDir, 'meydan_intents.json'),
+        path.join(__dirname, '../data/meydan_intents.json'),
+        path.join(process.cwd(), 'meydan_intents.json'),
+        path.join(process.cwd(), 'data/meydan_intents.json')
+    ];
+
+    for (const intentsPath of intentsPaths) {
+        try {
+            if (fs.existsSync(intentsPath)) {
+                const raw = fs.readFileSync(intentsPath, 'utf-8');
+                const data = JSON.parse(raw);
+                intentsData = data.intents || data || [];
+                console.log('✅ Loaded', intentsData.length, 'intents from', intentsPath);
+                break;
+            }
+        } catch (e) {
+            console.log('⚠️ Could not load intents from', intentsPath, ':', e.message);
+        }
+    }
+
+    // Load documents
+    const docsPath = path.join(dataDir, 'knowledge_base.json');
+    try {
+        if (fs.existsSync(docsPath)) {
+            const raw = fs.readFileSync(docsPath, 'utf-8');
+            const data = JSON.parse(raw);
+            documentsData = data.documents || [];
+            console.log('✅ Loaded', documentsData.length, 'documents');
         } else {
-            cb(new Error(`File type ${ext} not supported. Please use TXT, DOCX, or MD files. For PDFs, copy the text and use "Add Text" instead.`));
+            // Create empty file
+            fs.writeFileSync(docsPath, JSON.stringify({ documents: [] }, null, 2));
+            console.log('📝 Created empty knowledge_base.json');
         }
-    }
-});
-
-// Extract text from file
-async function extractText(filePath, fileType) {
-    const ext = fileType.toLowerCase();
-
-    if (ext === '.txt' || ext === '.md') {
-        return fs.readFileSync(filePath, 'utf-8');
+    } catch (e) {
+        console.log('⚠️ Documents load error:', e.message);
+        documentsData = [];
     }
 
-    if (ext === '.docx' || ext === '.doc') {
-        const mammoth = require('mammoth');
-        const result = await mammoth.extractRawText({ path: filePath });
-        return result.value;
-    }
-
-    throw new Error(`Unsupported file type: ${ext}`);
+    console.log('📚 KB Ready:', intentsData.length, 'intents,', documentsData.length, 'docs');
 }
 
-// Upload document
-router.post('/upload', upload.single('file'), async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
+// Initialize
+loadData();
 
-        const { filename, originalname, size, path: filePath } = req.file;
-        const fileType = path.extname(originalname).toLowerCase();
-
-        console.log(`Processing uploaded file: ${originalname}`);
-
-        const content = await extractText(filePath, fileType);
-
-        if (!content || content.trim().length === 0) {
-            fs.unlinkSync(filePath);
-            return res.status(400).json({ error: 'Could not extract text from file' });
-        }
-
-        console.log(`Extracted ${content.length} characters from file`);
-
-        const documentId = uuidv4();
-        const result = knowledgeService.addDocument(documentId, filename, originalname, fileType, size, content);
-
-        console.log(`Document processed: ${result.chunksCreated} chunks created`);
-
-        res.json({
-            success: true,
-            documentId: result.documentId,
-            filename: originalname,
-            chunksCreated: result.chunksCreated,
-            message: `Document uploaded and processed into ${result.chunksCreated} chunks`
-        });
-
-    } catch (error) {
-        console.error('Upload error:', error);
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
-        res.status(500).json({ error: error.message || 'Failed to process document' });
+// Search function
+function search(query) {
+    if (!query || query.trim().length < 2) {
+        return { found: false, response: null, score: 0 };
     }
-});
 
-// Add text directly
-router.post('/add-text', async (req, res) => {
-    try {
-        const { title, content } = req.body;
+    const q = query.toLowerCase().trim();
+    const words = q.split(/\s+/).filter(w => w.length > 1);
 
-        if (!content || content.trim().length === 0) {
-            return res.status(400).json({ error: 'Content is required' });
+    let bestMatch = null;
+    let bestScore = 0;
+
+    // Search intents by keywords
+    for (const intent of intentsData) {
+        // Check keywords array
+        if (intent.keywords && Array.isArray(intent.keywords)) {
+            for (const kw of intent.keywords) {
+                const kwLower = (kw || '').toLowerCase();
+
+                // Direct keyword match
+                if (q.includes(kwLower) || kwLower.includes(q)) {
+                    const score = 0.9;
+                    if (score > bestScore && intent.response) {
+                        bestScore = score;
+                        bestMatch = { response: intent.response, type: 'intent', name: intent.name };
+                    }
+                }
+
+                // Word-by-word match
+                let wordScore = 0;
+                for (const word of words) {
+                    if (kwLower.includes(word)) wordScore++;
+                }
+                const normalizedScore = words.length > 0 ? wordScore / words.length : 0;
+                if (normalizedScore > bestScore && intent.response) {
+                    bestScore = normalizedScore;
+                    bestMatch = { response: intent.response, type: 'intent', name: intent.name };
+                }
+            }
         }
 
-        const documentId = uuidv4();
-        const result = knowledgeService.addDocument(
-            documentId,
-            `text-${documentId}.txt`,
-            title || 'Manual Entry',
-            '.txt',
-            content.length,
-            content
-        );
+        // Check patterns array
+        if (intent.patterns && Array.isArray(intent.patterns)) {
+            for (const pattern of intent.patterns) {
+                const patternLower = (pattern || '').toLowerCase();
+                let wordScore = 0;
+                for (const word of words) {
+                    if (patternLower.includes(word)) wordScore++;
+                }
+                const normalizedScore = words.length > 0 ? wordScore / words.length : 0;
+                if (normalizedScore > bestScore && intent.response) {
+                    bestScore = normalizedScore;
+                    bestMatch = { response: intent.response, type: 'intent', name: intent.name };
+                }
+            }
+        }
 
-        res.json({
-            success: true,
-            documentId: result.documentId,
-            chunksCreated: result.chunksCreated,
-            message: `Text added and processed into ${result.chunksCreated} chunks`
-        });
-
-    } catch (error) {
-        console.error('Add text error:', error);
-        res.status(500).json({ error: error.message || 'Failed to add text' });
+        // Check intent name
+        const name = (intent.name || '').toLowerCase();
+        if (name && (q.includes(name) || name.includes(q))) {
+            if (0.85 > bestScore && intent.response) {
+                bestScore = 0.85;
+                bestMatch = { response: intent.response, type: 'intent', name: intent.name };
+            }
+        }
     }
-});
 
-// Get all documents
+    // Search documents
+    for (const doc of documentsData) {
+        const title = (doc.title || '').toLowerCase();
+        const content = (doc.content || '').toLowerCase();
+        let wordScore = 0;
+
+        for (const word of words) {
+            if (title.includes(word)) wordScore += 2;
+            if (content.includes(word)) wordScore += 1;
+        }
+
+        const maxPossible = words.length * 3;
+        const normalizedScore = maxPossible > 0 ? wordScore / maxPossible : 0;
+
+        if (normalizedScore > bestScore && doc.content) {
+            bestScore = normalizedScore;
+            bestMatch = { response: doc.content, type: 'document', title: doc.title };
+        }
+    }
+
+    if (bestScore >= 0.25 && bestMatch) {
+        return { found: true, response: bestMatch.response, type: bestMatch.type, score: bestScore };
+    }
+
+    return { found: false, response: null, score: bestScore };
+}
+
+// Save documents
+function saveDocuments() {
+    try {
+        const dataDir = findDataDir();
+        const docsPath = path.join(dataDir, 'knowledge_base.json');
+        fs.writeFileSync(docsPath, JSON.stringify({ documents: documentsData, updatedAt: new Date().toISOString() }, null, 2));
+    } catch (e) {
+        console.error('Save error:', e.message);
+    }
+}
+
+// ========== ROUTES ==========
+
+// Get documents
 router.get('/documents', (req, res) => {
+    res.json({ success: true, count: documentsData.length, documents: documentsData });
+});
+
+// Get intents
+router.get('/intents', (req, res) => {
+    res.json({ success: true, count: intentsData.length, intents: intentsData });
+});
+
+// Search
+router.get('/search', (req, res) => {
     try {
-        const documents = knowledgeService.getAllDocuments();
-        res.json({ success: true, documents });
-    } catch (error) {
-        console.error('Error fetching documents:', error);
-        res.status(500).json({ error: 'Failed to fetch documents' });
+        const query = req.query.q || req.query.query || '';
+        const result = search(query);
+        res.json(result);
+    } catch (e) {
+        console.error('Search error:', e);
+        res.json({ found: false, error: e.message, score: 0 });
+    }
+});
+
+// Add document
+router.post('/documents', (req, res) => {
+    try {
+        const { title, content, category, keywords } = req.body;
+        if (!title || !content) {
+            return res.status(400).json({ success: false, error: 'Title and content required' });
+        }
+
+        const newDoc = {
+            id: 'doc_' + Date.now(),
+            title, content,
+            category: category || 'general',
+            keywords: keywords || [],
+            createdAt: new Date().toISOString()
+        };
+
+        documentsData.push(newDoc);
+        saveDocuments();
+        res.json({ success: true, document: newDoc });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
     }
 });
 
 // Delete document
 router.delete('/documents/:id', (req, res) => {
     try {
-        const { id } = req.params;
-        knowledgeService.deleteDocument(id);
-        res.json({ success: true, message: 'Document deleted' });
-    } catch (error) {
-        console.error('Error deleting document:', error);
-        res.status(500).json({ error: 'Failed to delete document' });
-    }
-});
-
-// Search knowledge base
-router.get('/search', (req, res) => {
-    try {
-        const { query, limit = 5 } = req.query;
-
-        if (!query) {
-            return res.status(400).json({ error: 'Query is required' });
+        const idx = documentsData.findIndex(d => d.id === req.params.id);
+        if (idx >= 0) {
+            documentsData.splice(idx, 1);
+            saveDocuments();
+            res.json({ success: true });
+        } else {
+            res.status(404).json({ success: false, error: 'Not found' });
         }
-
-        const results = knowledgeService.searchChunks(query, parseInt(limit));
-        res.json({ success: true, query, results });
-    } catch (error) {
-        console.error('Search error:', error);
-        res.status(500).json({ error: 'Search failed' });
+    } catch (e) {
+        res.status(500).json({ success: false, error: e.message });
     }
 });
 
-// Get stats
+// Stats
 router.get('/stats', (req, res) => {
-    try {
-        const stats = knowledgeService.getStats();
-        res.json({ success: true, stats });
-    } catch (error) {
-        console.error('Error fetching stats:', error);
-        res.status(500).json({ error: 'Failed to fetch stats' });
-    }
+    res.json({ documents: documentsData.length, intents: intentsData.length, loaded: true });
 });
 
-// ============================================
-// INTENT ENDPOINTS
-// ============================================
-
-// Get all intents
-router.get('/intents', (req, res) => {
-    try {
-        const intents = db.intents.getAll();
-        res.json({ success: true, intents });
-    } catch (error) {
-        console.error('Error fetching intents:', error);
-        res.status(500).json({ error: 'Failed to fetch intents' });
-    }
+// Health
+router.get('/health', (req, res) => {
+    res.json({ ok: true, documents: documentsData.length, intents: intentsData.length });
 });
 
-// Add new intent
-router.post('/intents', (req, res) => {
-    try {
-        const { name, patterns, responses } = req.body;
-
-        if (!name || !patterns || !responses) {
-            return res.status(400).json({ error: 'Name, patterns, and responses are required' });
-        }
-
-        if (!Array.isArray(patterns) || !Array.isArray(responses)) {
-            return res.status(400).json({ error: 'Patterns and responses must be arrays' });
-        }
-
-        // Check if intent already exists
-        const existing = db.intents.getBy('name', name.toLowerCase());
-        if (existing) {
-            return res.status(400).json({ error: 'Intent with this name already exists' });
-        }
-
-        const intent = {
-            id: uuidv4(),
-            name: name.toLowerCase(),
-            patterns,
-            responses,
-            created_at: new Date().toISOString()
-        };
-
-        db.intents.insert(intent);
-
-        res.json({ success: true, intent });
-
-    } catch (error) {
-        console.error('Error adding intent:', error);
-        res.status(500).json({ error: 'Failed to add intent' });
-    }
-});
-
-// Delete intent
-router.delete('/intents/:id', (req, res) => {
-    try {
-        const { id } = req.params;
-        db.intents.delete(id);
-        res.json({ success: true, message: 'Intent deleted' });
-    } catch (error) {
-        console.error('Error deleting intent:', error);
-        res.status(500).json({ error: 'Failed to delete intent' });
-    }
+// Reload
+router.post('/reload', (req, res) => {
+    loadData();
+    res.json({ success: true, documents: documentsData.length, intents: intentsData.length });
 });
 
 module.exports = router;

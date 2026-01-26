@@ -1,0 +1,621 @@
+{
+    "intents": [
+        {
+            "name": "Physical Presence",
+            "response": "Physical presence is not required to set up a company.",
+            "keywords": [
+                "physical presence",
+                "physically present",
+                "present",
+                "in person",
+                "be there"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Share Capital",
+            "response": "No paid-up share capital is required.",
+            "keywords": [
+                "share capital",
+                "paid-up",
+                "capital requirements",
+                "capital required"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "NOC Required",
+            "response": "NOC is not required to incorporate a company.",
+            "keywords": [
+                "noc",
+                "no objection",
+                "no objection certificate"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Zero Visa License",
+            "response": "Yes, you can get a license with a zero-visa at Meydan Free Zone.",
+            "keywords": [
+                "0 visa",
+                "zero visa",
+                "0-visa",
+                "zero-visa",
+                "no visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Combine Activities",
+            "response": "Yes, the combination of activities is permitted.",
+            "keywords": [
+                "combine",
+                "combination",
+                "commercial professional trading",
+                "same license"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Incorporation Documents",
+            "response": "Upon incorporation you will receive: Business License, Certificate of Formation, Share Register, Memorandum Of Association, and Lease Agreement.",
+            "keywords": [
+                "documents",
+                "receive documents",
+                "incorporation documents",
+                "certificate"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Maximum Shareholders",
+            "response": "A maximum of 100 shareholders are permitted on the license. If a company has more than 6 shareholders, they will need to pay AED 2000 for each additional shareholder beyond the initial 6. For example, if a company has 10 shareholders, they will need to pay AED 8000 (AED 2000 x 4) in addition to the standard licensing fees.",
+            "keywords": [
+                "shareholders",
+                "how many shareholders",
+                "maximum shareholders"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Maximum Directors",
+            "response": "A maximum of 4 directors are permitted on the license.",
+            "keywords": [
+                "directors",
+                "how many directors",
+                "maximum directors"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Maximum Managers",
+            "response": "A maximum of 1 manager is permitted on the license.",
+            "keywords": [
+                "managers",
+                "how many managers",
+                "maximum managers"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Free Activities",
+            "response": "You can incorporate the company with 3 groups of activities without any additional charge.",
+            "keywords": [
+                "free activities",
+                "activities free",
+                "how many activities"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Additional Activities Cost",
+            "response": "The cost of additional activities is AED 1000 per activity. Approvals are required only for regulated activities.",
+            "keywords": [
+                "additional activities",
+                "activity cost",
+                "add activity",
+                "extra activity"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Multi-year Discount",
+            "response": "For multi-year license applications, 2 or more years for license and visa allocations, there is a standard discount of 15%.",
+            "keywords": [
+                "multi-year",
+                "discount",
+                "multi year",
+                "2 year discount"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Multiple Companies Partner",
+            "response": "Yes, you can be a partner/shareholder in multiple companies.",
+            "keywords": [
+                "multiple companies",
+                "more than one company",
+                "partner multiple"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "After Application Steps",
+            "response": "After submitting the new license application on the Meydan portal, the shareholders, manager, and directors will receive an email to complete: KYC, Accept/Reject, and Compliance form (if applicable). Only once the tasks are completed, our team will receive the application to review and proceed.",
+            "keywords": [
+                "after application",
+                "next step",
+                "after submitting",
+                "what happens after"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "License Validity",
+            "response": "Clients can choose the license validity during incorporation. The maximum period of validity is 10 years.",
+            "keywords": [
+                "license validity",
+                "how long valid",
+                "maximum validity",
+                "10 years"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Free Amendment Multi-year",
+            "response": "Yes, if the company holds a multi-year license, they will get a free amendment. For example: If a company has a 2-year license, the company will get 1 free amendment.",
+            "keywords": [
+                "free amendment",
+                "amendment free",
+                "multi-year amendment"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "License Grace Period",
+            "response": "A 30-day grace period is provided from the license expiry date to renew the license.",
+            "keywords": [
+                "grace period",
+                "license expiry",
+                "30 days",
+                "renew grace"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "License Penalty Fee",
+            "response": "Yes, the penalty fee is AED 500. This is a one-time fee.",
+            "keywords": [
+                "penalty fee",
+                "license penalty",
+                "late renewal penalty",
+                "aed 500"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Immigration Card Grace Period",
+            "response": "No, there is no grace period provided when the immigration card expires.",
+            "keywords": [
+                "immigration grace",
+                "immigration card expires",
+                "card grace period"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Immigration Card Penalty",
+            "response": "Yes, the penalty fee is AED 250 per month from the immigration card expiry date.",
+            "keywords": [
+                "immigration penalty",
+                "immigration card penalty",
+                "card penalty",
+                "aed 250"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Share Allocation Fraction",
+            "response": "No, the share allocation and the total share capital cannot be a fraction. It must be a whole number. For example: It cannot be 45.50%, it must be either 45% or 46%.",
+            "keywords": [
+                "fraction",
+                "share allocation",
+                "percentage",
+                "whole number"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Company Address",
+            "response": "Meydan Grandstand Next to Meydan Hotel 6th floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E.",
+            "keywords": [
+                "company address",
+                "license address",
+                "address mentioned",
+                "business address"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Audit Report",
+            "response": "The Audit Financial Statement Declaration report is required at the time of license renewal.",
+            "keywords": [
+                "audit",
+                "financial statement",
+                "audit report",
+                "declaration"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Convert LLC Branch",
+            "response": "No, it's not possible to convert L.L.C to Branch or Branch to L.L.C.",
+            "keywords": [
+                "convert llc",
+                "llc to branch",
+                "branch to llc",
+                "conversion"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Shop Outside",
+            "response": "No, you need to have a shop within Meydan Free Zone area.",
+            "keywords": [
+                "shop outside",
+                "outside free zone",
+                "shop location"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Change Address",
+            "response": "Yes, the client can change the address in the business license, however, that address must be in the Meydan Free Zone area ONLY.",
+            "keywords": [
+                "change address",
+                "address change",
+                "new address"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Chamber of Commerce",
+            "response": "No, a Chamber of Commerce certificate will not be issued, however, Meydan Free Zone can assist you in registering for the Chamber of Commerce, but a process fee will be applied.",
+            "keywords": [
+                "chamber of commerce",
+                "chamber",
+                "commerce certificate"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Hold Property",
+            "response": "Yes, you can hold a property under your company.",
+            "keywords": [
+                "hold property",
+                "property",
+                "own property",
+                "buy property"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Visa Allocations",
+            "response": "6 visa allocations are available to the company.",
+            "keywords": [
+                "visa allocations",
+                "how many visa",
+                "visa quota",
+                "6 visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "DET Permit",
+            "response": "No, it is not possible to get a DET permit while having General Trading activity. The company needs one of the 44 mainland activities.",
+            "keywords": [
+                "det permit",
+                "det",
+                "general trading"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Immigration Card Definition",
+            "response": "The immigration card is the card you are applying for to register your company details in the immigration system and it's mandatory to apply for it before applying for an employment OR investor/partner visa.",
+            "keywords": [
+                "what is immigration card",
+                "immigration card",
+                "immigration card definition"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Visa Allocation Definition",
+            "response": "Visa allocation is the visa quota in immigration and it's mandatory to apply for it before applying for an employment OR investor/partner visa.",
+            "keywords": [
+                "what is visa allocation",
+                "visa allocation definition",
+                "visa quota"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Immigration Visa Validity",
+            "response": "Immigration card and visa allocation have the same validity as the business license.",
+            "keywords": [
+                "immigration validity",
+                "visa allocation validity",
+                "same validity"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Company Name Change Publication",
+            "response": "The publication time for changing the company name is 14 days.",
+            "keywords": [
+                "company name change",
+                "name change",
+                "publication time",
+                "14 days"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Own MOA",
+            "response": "The company can't provide its own MOA, however, if they want to add/remove/edit any clause in Meydan MOA they can request for it, and it will be subject to legal approval.",
+            "keywords": [
+                "own moa",
+                "provide moa",
+                "moa",
+                "memorandum"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Renewal with Amendment",
+            "response": "There is no extra fees required unless they added 4th activity group.",
+            "keywords": [
+                "renewal amendment",
+                "amendment fee",
+                "renewal with amendment"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Letters Validity",
+            "response": "The validity of corporate and employee letters is 30 days.",
+            "keywords": [
+                "corporate letters",
+                "employee letters",
+                "letter validity",
+                "30 days letter"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Board Resolution Validity",
+            "response": "The board resolution must be valid for 15 days during application submission.",
+            "keywords": [
+                "board resolution",
+                "resolution validity",
+                "15 days resolution"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Cancel License After Grace",
+            "response": "No, the company will not have to pay a penalty fee for the license, however, if the company has an immigration card, they need to pay the immigration card fine.",
+            "keywords": [
+                "cancel license",
+                "license cancel",
+                "cancel after grace"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Visa Allocation Renewal",
+            "response": "The visa allocation validity holds the expiry date of the License. Hence, should be renewed annually along with a Business License and Immigration Card.",
+            "keywords": [
+                "renew visa allocation",
+                "visa allocation renewal",
+                "mid year visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Immigration Amendment Name Change",
+            "response": "The company must apply for an immigration card amendment once the company name is changed.",
+            "keywords": [
+                "immigration amendment",
+                "card amendment",
+                "name change immigration"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Shareholder Age",
+            "response": "There is no minimum and no maximum age for shareholders.",
+            "keywords": [
+                "shareholder age",
+                "age shareholder",
+                "minimum age shareholder",
+                "maximum age shareholder"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Share Capital Limits",
+            "response": "There is no minimum and no maximum share capital.",
+            "keywords": [
+                "share capital limit",
+                "minimum capital",
+                "maximum capital"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "UAE Presence Visa",
+            "response": "An applicant has the option to process the Entry Visa outside the country. However, when the E-visa is issued, the applicant needs to be inside the UAE to complete the medical and Emirates ID procedures.",
+            "keywords": [
+                "inside uae",
+                "uae presence",
+                "residence visa",
+                "process visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Entry Visa Validity",
+            "response": "The entry permit is valid for 60 days from the date of issuance.",
+            "keywords": [
+                "entry visa",
+                "entry permit",
+                "60 days entry",
+                "how long entry visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Change of Status Validity",
+            "response": "The change of status is valid for 60 days from the date of issuance.",
+            "keywords": [
+                "change of status",
+                "status change",
+                "60 days status"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Passport Visa Stamping",
+            "response": "Visa stamping is no longer mandatory, as per the new regulations in the UAE. The electronic version will suffice as Residency proof.",
+            "keywords": [
+                "original passport",
+                "passport visa",
+                "visa stamping",
+                "electronic visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Visa Before Biometrics",
+            "response": "You can submit the Residence Visa Application through the Portal. You may fill out and sign the Emirates ID declaration form for us to proceed with the Residence visa issuance before Biometrics.",
+            "keywords": [
+                "visa before biometrics",
+                "biometrics",
+                "residence visa biometrics"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Biometrics Time",
+            "response": "The client has 60 days to complete the Biometrics.",
+            "keywords": [
+                "biometrics time",
+                "60 days biometrics",
+                "complete biometrics",
+                "biometrics deadline"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Investor Visa Minimum Age",
+            "response": "The minimum age is 18 years. You must have AED 50,000 share capital in the company to apply for an investor/partner visa.",
+            "keywords": [
+                "investor visa age",
+                "partner visa age",
+                "minimum age investor",
+                "18 years investor"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Investor Visa Maximum Age",
+            "response": "There is no age limitation. You must have AED 50,000 share capital in the company to apply for an investor/partner visa.",
+            "keywords": [
+                "investor visa max",
+                "partner visa max",
+                "age limit investor",
+                "maximum investor age"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Employee Visa Minimum Age",
+            "response": "The minimum age is 18 years.",
+            "keywords": [
+                "employee visa age",
+                "minimum age employee",
+                "18 years employee"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Employee Visa Maximum Age",
+            "response": "The maximum age is 60 years.",
+            "keywords": [
+                "employee visa max",
+                "maximum age employee",
+                "60 years employee"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Office Timing",
+            "response": "We are operating 24/7.",
+            "keywords": [
+                "office timing",
+                "working hours",
+                "office hours",
+                "24/7",
+                "open hours",
+                "timing"
+            ],
+            "category": "general"
+        },
+        {
+            "name": "Office Location",
+            "response": "We are next to Meydan Hotel, Meydan Grandstand, 6th Floor, Meydan Rd, Nad Al Sheba 1, Dubai, UAE.",
+            "keywords": [
+                "office location",
+                "where is office",
+                "meydan office",
+                "office address",
+                "where located"
+            ],
+            "category": "general"
+        },
+        {
+            "name": "PO Box",
+            "response": "It's not allowed for the client to use Meydan's P.O. Box number; however, the client can apply for their P.O. Box number through Meydan Plus.",
+            "keywords": [
+                "po box",
+                "p.o. box",
+                "box number",
+                "meydan po box"
+            ],
+            "category": "general"
+        },
+        {
+            "name": "Delivery Address",
+            "response": "Meydan Free Zone will not receive any delivery on the client's behalf unless they register for Mail management services.",
+            "keywords": [
+                "delivery",
+                "packages",
+                "goods delivery",
+                "mail management"
+            ],
+            "category": "general"
+        },
+        {
+            "name": "Share Desk Location",
+            "response": "Meydan Grandstand, 6th floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E.",
+            "keywords": [
+                "share desk",
+                "share desk location",
+                "desk office"
+            ],
+            "category": "general"
+        }
+    ]
+}
