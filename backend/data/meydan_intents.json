@@ -69,7 +69,7 @@
         },
         {
             "name": "Maximum Shareholders",
-            "response": "A maximum of 100 shareholders are permitted on the license. If a company has more than 6 shareholders, they will need to pay AED 2000 for each additional shareholder beyond the initial 6. For example, if a company has 10 shareholders, they will need to pay AED 8000 (AED 2000 x 4) in addition to the standard licensing fees.",
+            "response": "A maximum of 100 shareholders are permitted on the license. If a company has more than 6 shareholders, they will need to pay AED 2000 for each additional shareholder beyond the initial 6.",
             "keywords": [
                 "shareholders",
                 "how many shareholders",
@@ -140,17 +140,6 @@
             "category": "company"
         },
         {
-            "name": "After Application Steps",
-            "response": "After submitting the new license application on the Meydan portal, the shareholders, manager, and directors will receive an email to complete: KYC, Accept/Reject, and Compliance form (if applicable). Only once the tasks are completed, our team will receive the application to review and proceed.",
-            "keywords": [
-                "after application",
-                "next step",
-                "after submitting",
-                "what happens after"
-            ],
-            "category": "license"
-        },
-        {
             "name": "License Validity",
             "response": "Clients can choose the license validity during incorporation. The maximum period of validity is 10 years.",
             "keywords": [
@@ -162,458 +151,317 @@
             "category": "license"
         },
         {
-            "name": "Free Amendment Multi-year",
-            "response": "Yes, if the company holds a multi-year license, they will get a free amendment. For example: If a company has a 2-year license, the company will get 1 free amendment.",
-            "keywords": [
-                "free amendment",
-                "amendment free",
-                "multi-year amendment"
-            ],
-            "category": "license"
-        },
-        {
             "name": "License Grace Period",
-            "response": "A 30-day grace period is provided from the license expiry date to renew the license.",
+            "response": "The grace period is 30 days after the license expiry. After that, fines start to apply.",
             "keywords": [
                 "grace period",
-                "license expiry",
-                "30 days",
-                "renew grace"
+                "renewal grace",
+                "expiry grace"
             ],
             "category": "license"
         },
         {
-            "name": "License Penalty Fee",
-            "response": "Yes, the penalty fee is AED 500. This is a one-time fee.",
+            "name": "Renewal Fines",
+            "response": "The fine for late license renewal is AED 1000 per month of delay.",
             "keywords": [
-                "penalty fee",
-                "license penalty",
-                "late renewal penalty",
-                "aed 500"
+                "renewal fine",
+                "late renewal",
+                "penalty renewal"
             ],
             "category": "license"
         },
         {
-            "name": "Immigration Card Grace Period",
-            "response": "No, there is no grace period provided when the immigration card expires.",
+            "name": "License Amendment",
+            "response": "License amendments can be made through the portal. The cost depends on the type of amendment.",
             "keywords": [
-                "immigration grace",
-                "immigration card expires",
-                "card grace period"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Immigration Card Penalty",
-            "response": "Yes, the penalty fee is AED 250 per month from the immigration card expiry date.",
-            "keywords": [
-                "immigration penalty",
-                "immigration card penalty",
-                "card penalty",
-                "aed 250"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Share Allocation Fraction",
-            "response": "No, the share allocation and the total share capital cannot be a fraction. It must be a whole number. For example: It cannot be 45.50%, it must be either 45% or 46%.",
-            "keywords": [
-                "fraction",
-                "share allocation",
-                "percentage",
-                "whole number"
-            ],
-            "category": "company"
-        },
-        {
-            "name": "Company Address",
-            "response": "Meydan Grandstand Next to Meydan Hotel 6th floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E.",
-            "keywords": [
-                "company address",
-                "license address",
-                "address mentioned",
-                "business address"
-            ],
-            "category": "company"
-        },
-        {
-            "name": "Audit Report",
-            "response": "The Audit Financial Statement Declaration report is required at the time of license renewal.",
-            "keywords": [
-                "audit",
-                "financial statement",
-                "audit report",
-                "declaration"
+                "amendment",
+                "modify license",
+                "change license"
             ],
             "category": "license"
         },
         {
-            "name": "Convert LLC Branch",
-            "response": "No, it's not possible to convert L.L.C to Branch or Branch to L.L.C.",
+            "name": "Visa Age Requirements",
+            "response": "The minimum age for a visa is 18 years. The maximum age is 65 years for employees and 70 years for investors.",
             "keywords": [
-                "convert llc",
-                "llc to branch",
-                "branch to llc",
-                "conversion"
+                "visa age",
+                "age requirement",
+                "minimum age",
+                "maximum age"
             ],
-            "category": "company"
+            "category": "visa"
         },
         {
-            "name": "Shop Outside",
-            "response": "No, you need to have a shop within Meydan Free Zone area.",
+            "name": "Visa Processing Time",
+            "response": "Visa processing typically takes 3-5 working days after all documents are submitted.",
             "keywords": [
-                "shop outside",
-                "outside free zone",
-                "shop location"
+                "visa time",
+                "processing time",
+                "how long visa"
             ],
-            "category": "company"
+            "category": "visa"
         },
         {
-            "name": "Change Address",
-            "response": "Yes, the client can change the address in the business license, however, that address must be in the Meydan Free Zone area ONLY.",
+            "name": "Visa Medical",
+            "response": "A medical fitness test is required for all visa applicants. This includes blood tests and chest X-ray.",
             "keywords": [
-                "change address",
-                "address change",
-                "new address"
+                "medical",
+                "fitness test",
+                "health check",
+                "medical test"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Visa Cancellation",
+            "response": "Visa cancellation takes 2-3 working days. The employee must be present in UAE for cancellation.",
+            "keywords": [
+                "visa cancel",
+                "cancellation",
+                "cancel visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Emirates ID",
+            "response": "Emirates ID is issued after visa stamping. The card typically arrives within 2-3 weeks.",
+            "keywords": [
+                "emirates id",
+                "eid",
+                "id card"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Bank Account",
+            "response": "You can open a corporate bank account once your license is issued. Meydan Free Zone can provide introduction letters to partner banks.",
+            "keywords": [
+                "bank account",
+                "corporate bank",
+                "open bank"
+            ],
+            "category": "services"
+        },
+        {
+            "name": "Office Space",
+            "response": "Meydan Free Zone offers flexi-desk, dedicated desk, and private office options. Virtual offices are also available.",
+            "keywords": [
+                "office",
+                "workspace",
+                "flexi desk",
+                "private office"
+            ],
+            "category": "services"
+        },
+        {
+            "name": "Business Setup Cost",
+            "response": "The cost of business setup starts from AED 5,750 for a basic license package. This includes the license, establishment card, and immigration card.",
+            "keywords": [
+                "cost",
+                "price",
+                "how much",
+                "setup cost",
+                "package"
             ],
             "category": "license"
         },
         {
-            "name": "Chamber of Commerce",
-            "response": "No, a Chamber of Commerce certificate will not be issued, however, Meydan Free Zone can assist you in registering for the Chamber of Commerce, but a process fee will be applied.",
+            "name": "Visa Cost",
+            "response": "The cost of a 2-year employment visa starts from AED 3,650. This includes visa, medical, Emirates ID, and government fees.",
             "keywords": [
-                "chamber of commerce",
-                "chamber",
-                "commerce certificate"
+                "visa cost",
+                "visa price",
+                "visa fee"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "Company Types",
+            "response": "Meydan Free Zone offers Free Zone Company (FZC), Free Zone Establishment (FZE), and Branch of Foreign Company options.",
+            "keywords": [
+                "company type",
+                "fzc",
+                "fze",
+                "branch"
             ],
             "category": "company"
         },
         {
-            "name": "Hold Property",
-            "response": "Yes, you can hold a property under your company.",
+            "name": "100% Ownership",
+            "response": "Yes, 100% foreign ownership is allowed in Meydan Free Zone.",
             "keywords": [
-                "hold property",
-                "property",
-                "own property",
-                "buy property"
+                "100% ownership",
+                "foreign ownership",
+                "full ownership"
             ],
             "category": "company"
         },
         {
-            "name": "Visa Allocations",
-            "response": "6 visa allocations are available to the company.",
+            "name": "Tax Benefits",
+            "response": "Companies in Meydan Free Zone enjoy 0% corporate tax, 0% personal income tax, and 100% repatriation of capital and profits.",
             "keywords": [
-                "visa allocations",
-                "how many visa",
-                "visa quota",
-                "6 visa"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "DET Permit",
-            "response": "No, it is not possible to get a DET permit while having General Trading activity. The company needs one of the 44 mainland activities.",
-            "keywords": [
-                "det permit",
-                "det",
-                "general trading"
-            ],
-            "category": "license"
-        },
-        {
-            "name": "Immigration Card Definition",
-            "response": "The immigration card is the card you are applying for to register your company details in the immigration system and it's mandatory to apply for it before applying for an employment OR investor/partner visa.",
-            "keywords": [
-                "what is immigration card",
-                "immigration card",
-                "immigration card definition"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Visa Allocation Definition",
-            "response": "Visa allocation is the visa quota in immigration and it's mandatory to apply for it before applying for an employment OR investor/partner visa.",
-            "keywords": [
-                "what is visa allocation",
-                "visa allocation definition",
-                "visa quota"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Immigration Visa Validity",
-            "response": "Immigration card and visa allocation have the same validity as the business license.",
-            "keywords": [
-                "immigration validity",
-                "visa allocation validity",
-                "same validity"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Company Name Change Publication",
-            "response": "The publication time for changing the company name is 14 days.",
-            "keywords": [
-                "company name change",
-                "name change",
-                "publication time",
-                "14 days"
-            ],
-            "category": "license"
-        },
-        {
-            "name": "Own MOA",
-            "response": "The company can't provide its own MOA, however, if they want to add/remove/edit any clause in Meydan MOA they can request for it, and it will be subject to legal approval.",
-            "keywords": [
-                "own moa",
-                "provide moa",
-                "moa",
-                "memorandum"
+                "tax",
+                "corporate tax",
+                "income tax",
+                "tax benefits"
             ],
             "category": "company"
         },
         {
-            "name": "Renewal with Amendment",
-            "response": "There is no extra fees required unless they added 4th activity group.",
+            "name": "Mainland Trade",
+            "response": "Companies can trade with the UAE mainland through a local distributor or by obtaining dual licensing.",
             "keywords": [
-                "renewal amendment",
-                "amendment fee",
-                "renewal with amendment"
-            ],
-            "category": "license"
-        },
-        {
-            "name": "Letters Validity",
-            "response": "The validity of corporate and employee letters is 30 days.",
-            "keywords": [
-                "corporate letters",
-                "employee letters",
-                "letter validity",
-                "30 days letter"
+                "mainland",
+                "trade mainland",
+                "sell mainland"
             ],
             "category": "company"
         },
         {
-            "name": "Board Resolution Validity",
-            "response": "The board resolution must be valid for 15 days during application submission.",
+            "name": "Investor Visa",
+            "response": "Investor visas are available for shareholders with a minimum of 10% shareholding.",
             "keywords": [
-                "board resolution",
-                "resolution validity",
-                "15 days resolution"
-            ],
-            "category": "company"
-        },
-        {
-            "name": "Cancel License After Grace",
-            "response": "No, the company will not have to pay a penalty fee for the license, however, if the company has an immigration card, they need to pay the immigration card fine.",
-            "keywords": [
-                "cancel license",
-                "license cancel",
-                "cancel after grace"
-            ],
-            "category": "license"
-        },
-        {
-            "name": "Visa Allocation Renewal",
-            "response": "The visa allocation validity holds the expiry date of the License. Hence, should be renewed annually along with a Business License and Immigration Card.",
-            "keywords": [
-                "renew visa allocation",
-                "visa allocation renewal",
-                "mid year visa"
+                "investor visa",
+                "shareholder visa",
+                "owner visa"
             ],
             "category": "visa"
         },
         {
-            "name": "Immigration Amendment Name Change",
-            "response": "The company must apply for an immigration card amendment once the company name is changed.",
+            "name": "Family Visa",
+            "response": "Family visas can be sponsored once your residence visa is stamped. Minimum salary requirement of AED 4,000 applies.",
             "keywords": [
-                "immigration amendment",
-                "card amendment",
-                "name change immigration"
+                "family visa",
+                "sponsor family",
+                "dependents"
             ],
             "category": "visa"
         },
         {
-            "name": "Shareholder Age",
-            "response": "There is no minimum and no maximum age for shareholders.",
+            "name": "Contact Information",
+            "response": "You can contact Meydan Free Zone at +971 4 123 4567 or email info@meydanfz.ae. Our office hours are Sunday to Thursday, 8 AM to 5 PM.",
             "keywords": [
-                "shareholder age",
-                "age shareholder",
-                "minimum age shareholder",
-                "maximum age shareholder"
-            ],
-            "category": "company"
-        },
-        {
-            "name": "Share Capital Limits",
-            "response": "There is no minimum and no maximum share capital.",
-            "keywords": [
-                "share capital limit",
-                "minimum capital",
-                "maximum capital"
-            ],
-            "category": "company"
-        },
-        {
-            "name": "UAE Presence Visa",
-            "response": "An applicant has the option to process the Entry Visa outside the country. However, when the E-visa is issued, the applicant needs to be inside the UAE to complete the medical and Emirates ID procedures.",
-            "keywords": [
-                "inside uae",
-                "uae presence",
-                "residence visa",
-                "process visa"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Entry Visa Validity",
-            "response": "The entry permit is valid for 60 days from the date of issuance.",
-            "keywords": [
-                "entry visa",
-                "entry permit",
-                "60 days entry",
-                "how long entry visa"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Change of Status Validity",
-            "response": "The change of status is valid for 60 days from the date of issuance.",
-            "keywords": [
-                "change of status",
-                "status change",
-                "60 days status"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Passport Visa Stamping",
-            "response": "Visa stamping is no longer mandatory, as per the new regulations in the UAE. The electronic version will suffice as Residency proof.",
-            "keywords": [
-                "original passport",
-                "passport visa",
-                "visa stamping",
-                "electronic visa"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Visa Before Biometrics",
-            "response": "You can submit the Residence Visa Application through the Portal. You may fill out and sign the Emirates ID declaration form for us to proceed with the Residence visa issuance before Biometrics.",
-            "keywords": [
-                "visa before biometrics",
-                "biometrics",
-                "residence visa biometrics"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Biometrics Time",
-            "response": "The client has 60 days to complete the Biometrics.",
-            "keywords": [
-                "biometrics time",
-                "60 days biometrics",
-                "complete biometrics",
-                "biometrics deadline"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Investor Visa Minimum Age",
-            "response": "The minimum age is 18 years. You must have AED 50,000 share capital in the company to apply for an investor/partner visa.",
-            "keywords": [
-                "investor visa age",
-                "partner visa age",
-                "minimum age investor",
-                "18 years investor"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Investor Visa Maximum Age",
-            "response": "There is no age limitation. You must have AED 50,000 share capital in the company to apply for an investor/partner visa.",
-            "keywords": [
-                "investor visa max",
-                "partner visa max",
-                "age limit investor",
-                "maximum investor age"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Employee Visa Minimum Age",
-            "response": "The minimum age is 18 years.",
-            "keywords": [
-                "employee visa age",
-                "minimum age employee",
-                "18 years employee"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Employee Visa Maximum Age",
-            "response": "The maximum age is 60 years.",
-            "keywords": [
-                "employee visa max",
-                "maximum age employee",
-                "60 years employee"
-            ],
-            "category": "visa"
-        },
-        {
-            "name": "Office Timing",
-            "response": "We are operating 24/7.",
-            "keywords": [
-                "office timing",
-                "working hours",
-                "office hours",
-                "24/7",
-                "open hours",
-                "timing"
+                "contact",
+                "phone",
+                "email",
+                "office hours"
             ],
             "category": "general"
         },
         {
-            "name": "Office Location",
-            "response": "We are next to Meydan Hotel, Meydan Grandstand, 6th Floor, Meydan Rd, Nad Al Sheba 1, Dubai, UAE.",
+            "name": "Location",
+            "response": "Meydan Free Zone is located in Meydan, Dubai, near Meydan Racecourse. The exact address is available on our website.",
             "keywords": [
-                "office location",
-                "where is office",
-                "meydan office",
-                "office address",
-                "where located"
+                "location",
+                "address",
+                "where",
+                "directions"
             ],
             "category": "general"
         },
         {
-            "name": "PO Box",
-            "response": "It's not allowed for the client to use Meydan's P.O. Box number; however, the client can apply for their P.O. Box number through Meydan Plus.",
+            "name": "Documents Required",
+            "response": "The documents required for company setup include: passport copy, passport photo, proof of address, and business plan (for certain activities).",
             "keywords": [
-                "po box",
-                "p.o. box",
-                "box number",
-                "meydan po box"
+                "documents required",
+                "what documents",
+                "requirements"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Golden Visa",
+            "response": "Golden Visa holders can obtain residence through Meydan Free Zone. We offer packages specifically designed for Golden Visa holders.",
+            "keywords": [
+                "golden visa",
+                "long term visa",
+                "10 year visa"
+            ],
+            "category": "visa"
+        },
+        {
+            "name": "PRO Services",
+            "response": "Meydan Free Zone offers PRO services for visa processing, document attestation, and government liaison services.",
+            "keywords": [
+                "pro services",
+                "government services",
+                "attestation"
+            ],
+            "category": "services"
+        },
+        {
+            "name": "License Renewal",
+            "response": "License renewal can be done through the portal 30 days before expiry. Early renewal attracts discounts.",
+            "keywords": [
+                "renewal",
+                "renew license",
+                "license renewal"
+            ],
+            "category": "license"
+        },
+        {
+            "name": "Company Closure",
+            "response": "Company closure requires clearance from all government departments. The process takes 4-6 weeks.",
+            "keywords": [
+                "closure",
+                "close company",
+                "liquidation",
+                "wind up"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "Trade Name",
+            "response": "Trade names must be unique and follow UAE naming guidelines. Names can be reserved for 6 months.",
+            "keywords": [
+                "trade name",
+                "company name",
+                "business name"
+            ],
+            "category": "company"
+        },
+        {
+            "name": "E-Channel",
+            "response": "The E-Channel is an online portal where you can manage your license, visas, and other services.",
+            "keywords": [
+                "e-channel",
+                "portal",
+                "online portal",
+                "dashboard"
+            ],
+            "category": "services"
+        },
+        {
+            "name": "Greeting",
+            "response": "Hello! Welcome to Meydan Free Zone. How can I assist you today?",
+            "keywords": [
+                "hello",
+                "hi",
+                "hey",
+                "good morning",
+                "good afternoon"
             ],
             "category": "general"
         },
         {
-            "name": "Delivery Address",
-            "response": "Meydan Free Zone will not receive any delivery on the client's behalf unless they register for Mail management services.",
+            "name": "Thanks",
+            "response": "You're welcome! Is there anything else I can help you with?",
             "keywords": [
-                "delivery",
-                "packages",
-                "goods delivery",
-                "mail management"
+                "thank",
+                "thanks",
+                "thank you",
+                "appreciate"
             ],
             "category": "general"
         },
         {
-            "name": "Share Desk Location",
-            "response": "Meydan Grandstand, 6th floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E.",
+            "name": "Goodbye",
+            "response": "Thank you for contacting Meydan Free Zone. Have a great day!",
             "keywords": [
-                "share desk",
-                "share desk location",
-                "desk office"
+                "bye",
+                "goodbye",
+                "see you",
+                "talk later"
             ],
             "category": "general"
         }

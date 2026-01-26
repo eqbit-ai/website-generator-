@@ -1,5 +1,5 @@
 // src/components/KnowledgeBase.jsx
-// Knowledge Base Admin Modal - Works with existing App.css styles
+// Knowledge Base Admin Modal
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -57,7 +57,6 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
         }
     }, [isOpen, fetchData]);
 
-    // Clear messages after timeout
     useEffect(() => {
         if (error || success) {
             const timer = setTimeout(() => { setError(null); setSuccess(null); }, 4000);

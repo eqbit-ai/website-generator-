@@ -1,28 +1,31 @@
 // src/App.js
-// Main App with properly connected modals
+// Main App with all modals properly connected
 
 import React, { useState } from 'react';
-import { Database, Phone } from 'lucide-react';
+import { Database, Phone, FileText, Shield } from 'lucide-react';
 import WebsiteGenerator from './components/WebsiteGenerator';
 import Chatbot from './components/Chatbot';
 import KnowledgeBase from './components/KnowledgeBase';
 import VoiceAgent from './components/VoiceAgent';
+import Logs from './components/Logs';
+import TwoFactorSetup from './components/TwoFactorSetup';
 import './App.css';
 
 function App() {
+  // Modal states
   const [showKB, setShowKB] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
 
   return (
     <div className="app">
       {/* Main Content */}
       <WebsiteGenerator />
 
-      {/* Chatbot - Bottom Right */}
-      <Chatbot />
-
-      {/* Admin Buttons - Bottom Left */}
+      {/* Bottom Left - Admin Buttons */}
       <div className="bottom-left-buttons">
+        {/* Knowledge Base Button */}
         <button
           className="fab-button kb-button"
           onClick={() => setShowKB(true)}
@@ -31,6 +34,7 @@ function App() {
           <Database size={22} />
         </button>
 
+        {/* Voice Agent Button */}
         <button
           className="fab-button voice-button"
           onClick={() => setShowVoice(true)}
@@ -38,17 +42,48 @@ function App() {
         >
           <Phone size={22} />
         </button>
+
+        {/* Logs Button */}
+        <button
+          className="fab-button logs-button"
+          onClick={() => setShowLogs(true)}
+          title="View Logs"
+        >
+          <FileText size={22} />
+        </button>
       </div>
 
-      {/* Knowledge Base Modal */}
+      {/* Bottom Right - Chat and 2FA */}
+      <div className="bottom-right-buttons">
+        {/* 2FA Button */}
+        <button
+          className="twofa-fab"
+          onClick={() => setShow2FA(true)}
+          title="2FA Setup"
+        >
+          <Shield size={22} />
+        </button>
+
+        {/* Chatbot */}
+        <Chatbot />
+      </div>
+
+      {/* Modals */}
       <KnowledgeBase
         isOpen={showKB}
         onClose={() => setShowKB(false)}
       />
 
-      {/* Voice Agent Modal */}
       {showVoice && (
         <VoiceAgent onClose={() => setShowVoice(false)} />
+      )}
+
+      {showLogs && (
+        <Logs onClose={() => setShowLogs(false)} />
+      )}
+
+      {show2FA && (
+        <TwoFactorSetup onClose={() => setShow2FA(false)} />
       )}
     </div>
   );

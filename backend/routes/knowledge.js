@@ -1,5 +1,5 @@
 // backend/routes/knowledge.js
-// Knowledge Base Routes - Fixed with robust error handling
+// Knowledge Base Routes
 
 const express = require('express');
 const router = express.Router();
@@ -10,40 +10,20 @@ const path = require('path');
 let intentsData = [];
 let documentsData = [];
 
-// Find data directory
-function findDataDir() {
-    const possiblePaths = [
-        path.join(__dirname, '../data'),
-        path.join(__dirname, '../../data'),
-        path.join(process.cwd(), 'data'),
-        path.join(process.cwd(), 'backend/data')
-    ];
-
-    for (const p of possiblePaths) {
-        if (fs.existsSync(p)) {
-            return p;
-        }
-    }
-
-    // Create default
-    const defaultPath = path.join(__dirname, '../data');
-    try {
-        fs.mkdirSync(defaultPath, { recursive: true });
-    } catch (e) { }
-    return defaultPath;
-}
-
 // Load data
 function loadData() {
-    const dataDir = findDataDir();
-    console.log('📁 Data directory:', dataDir);
+    console.log('\n📚 Loading Knowledge Base...');
 
-    // Load intents
+    intentsData = [];
+    documentsData = [];
+
+    // Find intents file
     const intentsPaths = [
-        path.join(dataDir, 'meydan_intents.json'),
         path.join(__dirname, '../data/meydan_intents.json'),
+        path.join(__dirname, '../../data/meydan_intents.json'),
+        path.join(process.cwd(), 'data/meydan_intents.json'),
         path.join(process.cwd(), 'meydan_intents.json'),
-        path.join(process.cwd(), 'data/meydan_intents.json')
+        '/app/data/meydan_intents.json'
     ];
 
     for (const intentsPath of intentsPaths) {
@@ -51,37 +31,34 @@ function loadData() {
             if (fs.existsSync(intentsPath)) {
                 const raw = fs.readFileSync(intentsPath, 'utf-8');
                 const data = JSON.parse(raw);
-                intentsData = data.intents || data || [];
+                intentsData = Array.isArray(data.intents) ? data.intents : (Array.isArray(data) ? data : []);
                 console.log('✅ Loaded', intentsData.length, 'intents from', intentsPath);
                 break;
             }
         } catch (e) {
-            console.log('⚠️ Could not load intents from', intentsPath, ':', e.message);
+            console.log('Error:', e.message);
         }
     }
 
     // Load documents
-    const docsPath = path.join(dataDir, 'knowledge_base.json');
     try {
+        const docsPath = path.join(__dirname, '../data/knowledge_base.json');
         if (fs.existsSync(docsPath)) {
             const raw = fs.readFileSync(docsPath, 'utf-8');
             const data = JSON.parse(raw);
-            documentsData = data.documents || [];
+            documentsData = Array.isArray(data.documents) ? data.documents : [];
             console.log('✅ Loaded', documentsData.length, 'documents');
-        } else {
-            // Create empty file
-            fs.writeFileSync(docsPath, JSON.stringify({ documents: [] }, null, 2));
-            console.log('📝 Created empty knowledge_base.json');
         }
     } catch (e) {
-        console.log('⚠️ Documents load error:', e.message);
         documentsData = [];
     }
 
-    console.log('📚 KB Ready:', intentsData.length, 'intents,', documentsData.length, 'docs');
+    if (!Array.isArray(intentsData)) intentsData = [];
+    if (!Array.isArray(documentsData)) documentsData = [];
+
+    console.log('📚 KB Ready:', intentsData.length, 'intents,', documentsData.length, 'docs\n');
 }
 
-// Initialize
 loadData();
 
 // Search function
@@ -96,52 +73,36 @@ function search(query) {
     let bestMatch = null;
     let bestScore = 0;
 
-    // Search intents by keywords
-    for (const intent of intentsData) {
-        // Check keywords array
-        if (intent.keywords && Array.isArray(intent.keywords)) {
-            for (const kw of intent.keywords) {
-                const kwLower = (kw || '').toLowerCase();
+    const intents = Array.isArray(intentsData) ? intentsData : [];
+    const documents = Array.isArray(documentsData) ? documentsData : [];
 
-                // Direct keyword match
-                if (q.includes(kwLower) || kwLower.includes(q)) {
-                    const score = 0.9;
-                    if (score > bestScore && intent.response) {
-                        bestScore = score;
-                        bestMatch = { response: intent.response, type: 'intent', name: intent.name };
-                    }
-                }
+    // Search intents
+    for (const intent of intents) {
+        if (!intent) continue;
 
-                // Word-by-word match
-                let wordScore = 0;
-                for (const word of words) {
-                    if (kwLower.includes(word)) wordScore++;
-                }
-                const normalizedScore = words.length > 0 ? wordScore / words.length : 0;
-                if (normalizedScore > bestScore && intent.response) {
-                    bestScore = normalizedScore;
+        const keywords = Array.isArray(intent.keywords) ? intent.keywords : [];
+        for (const kw of keywords) {
+            if (!kw) continue;
+            const kwLower = kw.toLowerCase();
+
+            if (q.includes(kwLower) || kwLower.includes(q)) {
+                if (0.9 > bestScore && intent.response) {
+                    bestScore = 0.9;
                     bestMatch = { response: intent.response, type: 'intent', name: intent.name };
                 }
             }
-        }
 
-        // Check patterns array
-        if (intent.patterns && Array.isArray(intent.patterns)) {
-            for (const pattern of intent.patterns) {
-                const patternLower = (pattern || '').toLowerCase();
-                let wordScore = 0;
-                for (const word of words) {
-                    if (patternLower.includes(word)) wordScore++;
-                }
-                const normalizedScore = words.length > 0 ? wordScore / words.length : 0;
-                if (normalizedScore > bestScore && intent.response) {
-                    bestScore = normalizedScore;
-                    bestMatch = { response: intent.response, type: 'intent', name: intent.name };
-                }
+            let wordScore = 0;
+            for (const word of words) {
+                if (kwLower.includes(word)) wordScore++;
+            }
+            const score = words.length > 0 ? wordScore / words.length : 0;
+            if (score > bestScore && intent.response) {
+                bestScore = score;
+                bestMatch = { response: intent.response, type: 'intent', name: intent.name };
             }
         }
 
-        // Check intent name
         const name = (intent.name || '').toLowerCase();
         if (name && (q.includes(name) || name.includes(q))) {
             if (0.85 > bestScore && intent.response) {
@@ -152,7 +113,8 @@ function search(query) {
     }
 
     // Search documents
-    for (const doc of documentsData) {
+    for (const doc of documents) {
+        if (!doc) continue;
         const title = (doc.title || '').toLowerCase();
         const content = (doc.content || '').toLowerCase();
         let wordScore = 0;
@@ -163,10 +125,10 @@ function search(query) {
         }
 
         const maxPossible = words.length * 3;
-        const normalizedScore = maxPossible > 0 ? wordScore / maxPossible : 0;
+        const score = maxPossible > 0 ? wordScore / maxPossible : 0;
 
-        if (normalizedScore > bestScore && doc.content) {
-            bestScore = normalizedScore;
+        if (score > bestScore && doc.content) {
+            bestScore = score;
             bestMatch = { response: doc.content, type: 'document', title: doc.title };
         }
     }
@@ -178,95 +140,119 @@ function search(query) {
     return { found: false, response: null, score: bestScore };
 }
 
-// Save documents
-function saveDocuments() {
-    try {
-        const dataDir = findDataDir();
-        const docsPath = path.join(dataDir, 'knowledge_base.json');
-        fs.writeFileSync(docsPath, JSON.stringify({ documents: documentsData, updatedAt: new Date().toISOString() }, null, 2));
-    } catch (e) {
-        console.error('Save error:', e.message);
-    }
-}
-
-// ========== ROUTES ==========
-
-// Get documents
+// Routes
 router.get('/documents', (req, res) => {
-    res.json({ success: true, count: documentsData.length, documents: documentsData });
+    const docs = Array.isArray(documentsData) ? documentsData : [];
+    res.json({ success: true, count: docs.length, documents: docs });
 });
 
-// Get intents
 router.get('/intents', (req, res) => {
-    res.json({ success: true, count: intentsData.length, intents: intentsData });
+    const ints = Array.isArray(intentsData) ? intentsData : [];
+    res.json({ success: true, count: ints.length, intents: ints });
 });
 
-// Search
 router.get('/search', (req, res) => {
     try {
         const query = req.query.q || req.query.query || '';
         const result = search(query);
         res.json(result);
     } catch (e) {
-        console.error('Search error:', e);
         res.json({ found: false, error: e.message, score: 0 });
     }
 });
 
-// Add document
 router.post('/documents', (req, res) => {
     try {
-        const { title, content, category, keywords } = req.body;
+        const { title, content, category } = req.body;
         if (!title || !content) {
             return res.status(400).json({ success: false, error: 'Title and content required' });
         }
+
+        if (!Array.isArray(documentsData)) documentsData = [];
 
         const newDoc = {
             id: 'doc_' + Date.now(),
             title, content,
             category: category || 'general',
-            keywords: keywords || [],
             createdAt: new Date().toISOString()
         };
 
         documentsData.push(newDoc);
-        saveDocuments();
+
+        try {
+            const dataDir = path.join(__dirname, '../data');
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+            fs.writeFileSync(path.join(dataDir, 'knowledge_base.json'),
+                JSON.stringify({ documents: documentsData }, null, 2));
+        } catch (e) { }
+
         res.json({ success: true, document: newDoc });
     } catch (e) {
         res.status(500).json({ success: false, error: e.message });
     }
 });
 
-// Delete document
 router.delete('/documents/:id', (req, res) => {
-    try {
-        const idx = documentsData.findIndex(d => d.id === req.params.id);
-        if (idx >= 0) {
-            documentsData.splice(idx, 1);
-            saveDocuments();
-            res.json({ success: true });
-        } else {
-            res.status(404).json({ success: false, error: 'Not found' });
-        }
-    } catch (e) {
-        res.status(500).json({ success: false, error: e.message });
+    if (!Array.isArray(documentsData)) documentsData = [];
+    const idx = documentsData.findIndex(d => d && d.id === req.params.id);
+    if (idx >= 0) {
+        documentsData.splice(idx, 1);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ success: false, error: 'Not found' });
     }
 });
 
-// Stats
 router.get('/stats', (req, res) => {
-    res.json({ documents: documentsData.length, intents: intentsData.length, loaded: true });
+    res.json({
+        documents: Array.isArray(documentsData) ? documentsData.length : 0,
+        intents: Array.isArray(intentsData) ? intentsData.length : 0,
+        loaded: true
+    });
 });
 
-// Health
 router.get('/health', (req, res) => {
-    res.json({ ok: true, documents: documentsData.length, intents: intentsData.length });
+    res.json({
+        ok: true,
+        documents: Array.isArray(documentsData) ? documentsData.length : 0,
+        intents: Array.isArray(intentsData) ? intentsData.length : 0
+    });
 });
 
-// Reload
 router.post('/reload', (req, res) => {
     loadData();
-    res.json({ success: true, documents: documentsData.length, intents: intentsData.length });
+    res.json({
+        success: true,
+        documents: Array.isArray(documentsData) ? documentsData.length : 0,
+        intents: Array.isArray(intentsData) ? intentsData.length : 0
+    });
+});
+
+router.get('/debug', (req, res) => {
+    const info = {
+        dirname: __dirname,
+        cwd: process.cwd(),
+        intentsCount: Array.isArray(intentsData) ? intentsData.length : 0,
+        documentsCount: Array.isArray(documentsData) ? documentsData.length : 0,
+        files: {}
+    };
+
+    const dirsToCheck = [
+        path.join(__dirname, '..'),
+        path.join(__dirname, '../data'),
+        process.cwd(),
+        path.join(process.cwd(), 'data')
+    ];
+
+    for (const dir of dirsToCheck) {
+        try {
+            if (fs.existsSync(dir)) {
+                info.files[dir] = fs.readdirSync(dir).slice(0, 15);
+            }
+        } catch (e) { }
+    }
+
+    res.json(info);
 });
 
 module.exports = router;

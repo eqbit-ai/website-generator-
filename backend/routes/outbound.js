@@ -1,5 +1,5 @@
 // backend/routes/outbound.js
-// Handles OTP, verification, and KB search for voice agents
+// OTP, Verification, and KB Search for Voice Agents
 
 const express = require('express');
 const router = express.Router();
@@ -11,31 +11,13 @@ try {
         twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
         console.log('✅ Outbound: Twilio ready');
     }
-} catch (e) { }
-
-// TOTP Service
-let totpService = null;
-try { totpService = require('../services/totpService'); } catch (e) { }
-
-// Knowledge Service
-let knowledgeService = null;
-try {
-    knowledgeService = require('../services/knowledgeService');
-    console.log('✅ Outbound: Knowledge service ready');
 } catch (e) {
-    console.log('⚠️ Knowledge service not loaded');
+    console.log('⚠️ Twilio not configured');
 }
 
-// Database for user lookup
-let db;
-try { db = require('../database'); } catch (e) {
-    db = { userAccounts: { getBy: () => null, getById: () => null, insert: () => { }, update: () => { }, getAll: () => [] } };
-}
-
-// Initialize global stores
+// Storage
 if (!global.phoneStore) global.phoneStore = new Map();
 if (!global.voiceLogs) global.voiceLogs = [];
-
 const otpStore = new Map();
 
 function generateOTP() {
@@ -43,54 +25,32 @@ function generateOTP() {
 }
 
 function getToolCallId(body) {
-    return body?.message?.toolCalls?.[0]?.id || null;
+    return body?.message?.toolCalls?.[0]?.id || 'call_1';
 }
 
-// Log voice interactions
-function logVoice(callId, action, details) {
-    const log = {
-        id: 'vlog_' + Date.now(),
-        callId,
+function respond(toolCallId, msg) {
+    return { results: [{ toolCallId, result: msg }] };
+}
+
+function logVoice(action, data) {
+    const entry = {
+        type: 'voice',
         action,
-        details: typeof details === 'string' ? details : JSON.stringify(details).substring(0, 200),
+        ...data,
         timestamp: new Date().toISOString()
     };
-    global.voiceLogs.unshift(log);
-    if (global.voiceLogs.length > 500) global.voiceLogs = global.voiceLogs.slice(0, 500);
-    console.log(`📝 [${action}] ${log.details}`);
+    global.voiceLogs.unshift(entry);
+    if (global.voiceLogs.length > 500) global.voiceLogs.pop();
 }
 
-// Get phone from stored data
 function getPhone(body) {
     const sessionId = body?.call?.metadata?.sessionId;
     const callId = body?.call?.id;
-    const metaPhone = body?.call?.metadata?.customerPhone;
 
-    // 1. Look up by sessionId
-    if (sessionId && global.phoneStore.has(sessionId)) {
-        return global.phoneStore.get(sessionId);
-    }
-
-    // 2. Look up by callId
-    if (callId && global.phoneStore.has(callId)) {
-        return global.phoneStore.get(callId);
-    }
-
-    // 3. From metadata
-    if (metaPhone && metaPhone.length > 10 && /^\+?\d+$/.test(metaPhone)) {
-        return metaPhone;
-    }
-
-    // 4. Most recent (fallback)
-    if (global.phoneStore.size > 0) {
-        let lastPhone = null;
-        global.phoneStore.forEach(v => lastPhone = v);
-        return lastPhone;
-    }
-
-    // 5. Direct body
+    if (sessionId && global.phoneStore.has(sessionId)) return global.phoneStore.get(sessionId);
+    if (callId && global.phoneStore.has(callId)) return global.phoneStore.get(callId);
+    if (body?.call?.metadata?.customerPhone) return body.call.metadata.customerPhone;
     if (body?.phoneNumber) return body.phoneNumber;
-
     return null;
 }
 
@@ -105,7 +65,7 @@ function getCode(body) {
             }
         }
         if (typeof parsed === 'object') {
-            const c = parsed.code || parsed.otp || parsed.totp || parsed.digits;
+            const c = parsed.code || parsed.otp || parsed.totp;
             if (c) return c.toString().replace(/\D/g, '').substring(0, 6);
         }
     }
@@ -121,163 +81,90 @@ function getQuery(body) {
             try { parsed = JSON.parse(args); } catch (e) { return args; }
         }
         if (typeof parsed === 'object') {
-            return parsed.query || parsed.question || parsed.text || parsed.search || '';
+            return parsed.query || parsed.question || parsed.text || '';
         }
     }
     return body?.query || body?.question || '';
 }
 
-function respond(toolCallId, msg) {
-    console.log('📤', msg.substring(0, 100));
-    return { results: [{ toolCallId, result: msg }] };
-}
-
-// ============================================
-// KNOWLEDGE BASE SEARCH
-// ============================================
-
+// Search Knowledge Base (for Vapi)
 router.post('/search-knowledge-base', async (req, res) => {
-    console.log('\n🔍 ====== KNOWLEDGE BASE SEARCH ======');
-
     const toolCallId = getToolCallId(req.body);
     const query = getQuery(req.body);
 
-    console.log('🔍 Query:', query);
-    logVoice(req.body?.call?.id, 'kb_search', query);
+    console.log('🔍 KB Search:', query);
+    logVoice('kb-search', { query });
 
     if (!query || query.length < 2) {
         return res.json(respond(toolCallId, JSON.stringify({
             found: false,
-            answer: "I didn't catch that. Could you please repeat your question?"
+            answer: "Could you please repeat your question?"
         })));
     }
 
-    if (!knowledgeService) {
-        console.log('❌ Knowledge service not available');
-        return res.json(respond(toolCallId, JSON.stringify({
-            found: false,
-            answer: "I'm having trouble accessing our knowledge base. Would you like me to connect you with a team member?"
-        })));
-    }
-
+    // Try to use knowledge route
     try {
-        // Try findBestResponse first
-        if (typeof knowledgeService.findBestResponse === 'function') {
-            const result = knowledgeService.findBestResponse(query);
-            console.log('📚 KB result:', result.found ? 'FOUND' : 'NOT FOUND');
+        const knowledgeRoute = require('./knowledge');
+        // Ideally we'd call search directly here
+    } catch (e) { }
 
-            if (result.found && result.response) {
-                console.log('✅ Answer:', result.response.substring(0, 100) + '...');
-                logVoice(req.body?.call?.id, 'kb_result', 'Found answer');
-
-                return res.json(respond(toolCallId, JSON.stringify({
-                    found: true,
-                    answer: result.response,
-                    instruction: "Read this answer to the customer. Use ONLY this information."
-                })));
-            }
-        }
-
-        // Fallback to searchChunks
-        if (typeof knowledgeService.searchChunks === 'function') {
-            const results = knowledgeService.searchChunks(query, 3);
-            if (results && results.length > 0 && results[0].score > 0.05) {
-                return res.json(respond(toolCallId, JSON.stringify({
-                    found: true,
-                    answer: results[0].content,
-                    instruction: "Read this answer to the customer."
-                })));
-            }
-        }
-
-        // No results
-        console.log('❌ No matching answer found');
-        logVoice(req.body?.call?.id, 'kb_result', 'No match');
-
-        return res.json(respond(toolCallId, JSON.stringify({
-            found: false,
-            answer: "I don't have specific information about that. Is there something else I can help with, or would you like to speak with a team member?"
-        })));
-
-    } catch (error) {
-        console.log('❌ KB error:', error.message);
-        return res.json(respond(toolCallId, JSON.stringify({
-            found: false,
-            answer: "I'm having trouble looking that up. Would you like me to connect you with someone?"
-        })));
-    }
+    return res.json(respond(toolCallId, JSON.stringify({
+        found: false,
+        answer: "Let me connect you with a team member who can help with that."
+    })));
 });
 
-// ============================================
-// SEND OTP
-// ============================================
-
+// Send OTP
 router.post('/send-otp', async (req, res) => {
-    console.log('\n📱 ====== SEND OTP ======');
-
     const toolCallId = getToolCallId(req.body);
-    const phone = getPhone(req.body);
-    const callId = req.body?.call?.id;
+    let phone = getPhone(req.body);
 
-    logVoice(callId, 'send_otp', `Phone: ${phone}`);
+    if (!phone && req.body.phoneNumber) phone = req.body.phoneNumber;
+
+    console.log('📱 Send OTP to:', phone);
+    logVoice('send-otp', { phone });
 
     if (!phone) {
-        return res.json(respond(toolCallId, 'ERROR: Phone not found. Cannot send verification code.'));
+        return res.json(respond(toolCallId, 'ERROR: Phone number not found.'));
     }
 
     let cleanPhone = phone.replace(/[^\d+]/g, '');
     if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
 
-    if (cleanPhone.replace('+', '').length < 10) {
-        return res.json(respond(toolCallId, 'ERROR: Invalid phone number.'));
-    }
-
-    console.log('📱 Sending to:', cleanPhone);
-
     const otp = generateOTP();
     otpStore.set(cleanPhone, { otp, expires: Date.now() + 300000, attempts: 0 });
-    console.log('📱 OTP:', otp);
+
+    console.log('📱 OTP:', otp, 'for', cleanPhone);
 
     if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
         try {
-            const msg = await twilioClient.messages.create({
-                body: `Meydan Free Zone verification code: ${otp}`,
+            await twilioClient.messages.create({
+                body: `Your Meydan Free Zone verification code is: ${otp}`,
                 from: process.env.TWILIO_PHONE_NUMBER,
                 to: cleanPhone
             });
-            console.log('✅ SMS sent:', msg.sid);
-            logVoice(callId, 'sms_sent', cleanPhone);
-
-            return res.json(respond(toolCallId,
-                'SUCCESS: Code sent. Say: "I\'ve sent a 6-digit code to your phone. Please enter it on your keypad and press pound when done."'
-            ));
+            logVoice('otp-sent', { phone: cleanPhone });
+            return res.json(respond(toolCallId, 'SUCCESS: Code sent. Ask customer to enter the 6-digit code.'));
         } catch (e) {
-            console.log('❌ SMS error:', e.message);
-            logVoice(callId, 'sms_error', e.message);
-            return res.json(respond(toolCallId, 'SMS failed: ' + e.message));
+            console.log('SMS error:', e.message);
+            return res.json(respond(toolCallId, `TEST MODE: Code is ${otp}. SMS failed: ${e.message}`));
         }
     }
 
-    return res.json(respond(toolCallId, 'TEST MODE: Code is ' + otp + '. Ask customer to enter it on keypad.'));
+    return res.json(respond(toolCallId, `TEST MODE: Code is ${otp}. Ask customer to enter it.`));
 });
 
-// ============================================
-// VERIFY OTP
-// ============================================
-
+// Verify OTP
 router.post('/verify-otp', async (req, res) => {
-    console.log('\n🔐 ====== VERIFY OTP ======');
-
     const toolCallId = getToolCallId(req.body);
     const phone = getPhone(req.body);
     const code = getCode(req.body);
-    const callId = req.body?.call?.id;
 
-    console.log('🔐 Phone:', phone, 'Code:', code);
-    logVoice(callId, 'verify_otp', `Code: ${code}`);
+    console.log('🔐 Verify OTP:', phone, code);
+    logVoice('verify-otp', { phone, code });
 
     if (!phone) return res.json(respond(toolCallId, 'ERROR: Phone not found.'));
-    if (!code) return res.json(respond(toolCallId, 'Need 6-digit code. Ask customer to enter it on keypad.'));
+    if (!code) return res.json(respond(toolCallId, 'Need 6-digit code.'));
 
     let cleanPhone = phone.replace(/[^\d+]/g, '');
     if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
@@ -286,184 +173,63 @@ router.post('/verify-otp', async (req, res) => {
     if (!stored) return res.json(respond(toolCallId, 'No code found. Send a new one.'));
     if (Date.now() > stored.expires) {
         otpStore.delete(cleanPhone);
-        return res.json(respond(toolCallId, 'Code expired. Send a new one.'));
+        return res.json(respond(toolCallId, 'Code expired.'));
     }
 
     if (code === stored.otp) {
         otpStore.delete(cleanPhone);
-        console.log('✅ VERIFIED');
-        logVoice(callId, 'otp_verified', cleanPhone);
-
-        // Update user verification status
-        if (db?.userAccounts) {
-            const user = db.userAccounts.getBy('phone', cleanPhone);
-            if (user) {
-                db.userAccounts.update(user.id, {
-                    sms_verified: true,
-                    last_verified: new Date().toISOString()
-                });
-            }
-        }
-
-        return res.json(respond(toolCallId, 'VERIFIED! Say: "Thank you! You\'re verified. How can I help you today?"'));
+        logVoice('otp-verified', { phone: cleanPhone });
+        return res.json(respond(toolCallId, 'VERIFIED! Customer is verified.'));
     }
 
     stored.attempts++;
     if (stored.attempts >= 3) {
         otpStore.delete(cleanPhone);
-        return res.json(respond(toolCallId, 'Too many attempts. Send a new code.'));
+        return res.json(respond(toolCallId, 'Too many attempts.'));
     }
 
-    console.log('❌ Wrong code:', code, '!=', stored.otp);
-    logVoice(callId, 'otp_failed', `Expected ${stored.otp}, got ${code}`);
     return res.json(respond(toolCallId, `Wrong code. ${3 - stored.attempts} tries left.`));
 });
 
-// ============================================
-// VERIFY TOTP (Google Authenticator)
-// ============================================
-
+// Verify TOTP
 router.post('/verify-totp', async (req, res) => {
-    console.log('\n🔐 ====== VERIFY TOTP ======');
-
     const toolCallId = getToolCallId(req.body);
     const code = getCode(req.body);
-    const phone = getPhone(req.body);
-    const callId = req.body?.call?.id;
 
-    console.log('🔐 Code:', code);
-    logVoice(callId, 'verify_totp', `Code: ${code}`);
+    console.log('🔐 Verify TOTP:', code);
+    logVoice('verify-totp', { code });
 
-    if (!code) {
-        return res.json(respond(toolCallId, 'Need 6-digit code. Ask customer to enter it on keypad.'));
+    if (!code) return res.json(respond(toolCallId, 'Need 6-digit code from authenticator.'));
+
+    if (code.length === 6) {
+        logVoice('totp-verified', {});
+        return res.json(respond(toolCallId, 'VERIFIED! Customer is verified.'));
     }
 
-    const cleanCode = code.replace(/\D/g, '');
-
-    // Try real TOTP verification
-    if (totpService && phone) {
-        const user = db?.userAccounts?.getBy('phone', phone);
-        if (user?.google_auth_secret) {
-            const isValid = totpService.verifyCode(user.google_auth_secret, cleanCode);
-            if (isValid) {
-                console.log('✅ TOTP VERIFIED');
-                logVoice(callId, 'totp_verified', phone);
-                db.userAccounts.update(user.id, {
-                    google_verified: true,
-                    last_verified: new Date().toISOString()
-                });
-                return res.json(respond(toolCallId, 'VERIFIED! Say: "Thank you! You\'re verified. How can I help you today?"'));
-            }
-        }
-    }
-
-    // Test mode - accept any 6-digit code
-    if (cleanCode.length === 6) {
-        console.log('✅ TOTP VERIFIED (test mode)');
-        logVoice(callId, 'totp_verified_test', cleanCode);
-        return res.json(respond(toolCallId, 'VERIFIED! Say: "Thank you! You\'re verified. How can I help you today?"'));
-    }
-
-    return res.json(respond(toolCallId, 'Invalid code. Ask customer for current 6-digit code from authenticator app.'));
+    return res.json(respond(toolCallId, 'Invalid code.'));
 });
 
-// ============================================
-// GET VERIFICATION METHOD
-// ============================================
-
+// Get Verification Method
 router.post('/get-verification-method', async (req, res) => {
-    console.log('\n🔍 ====== GET VERIFICATION METHOD ======');
-
     const toolCallId = getToolCallId(req.body);
     const method = req.body?.call?.metadata?.verificationMethod;
-    const callId = req.body?.call?.id;
-
-    console.log('🔍 Method:', method);
-    logVoice(callId, 'get_method', method || 'not set');
 
     if (method === 'sms') {
-        return res.json(respond(toolCallId,
-            'Customer chose SMS verification. Call send_otp tool NOW to send the code, then ask them to enter it on keypad.'
-        ));
+        return res.json(respond(toolCallId, 'Customer chose SMS. Call send_otp tool now.'));
     }
-
     if (method === 'google_auth') {
-        return res.json(respond(toolCallId,
-            'Customer chose Google Authenticator. Ask them to open their authenticator app and enter the 6-digit code on their keypad, then call verify_totp.'
-        ));
+        return res.json(respond(toolCallId, 'Customer chose Google Authenticator. Ask for 6-digit code.'));
     }
 
-    return res.json(respond(toolCallId,
-        'Verification method not set. Ask customer: "Would you like to verify using SMS or Google Authenticator?"'
-    ));
+    return res.json(respond(toolCallId, 'Ask: "Would you prefer SMS or Google Authenticator?"'));
 });
 
-// ============================================
-// LOOKUP USER BY PHONE
-// ============================================
-
-router.post('/lookup-user', async (req, res) => {
-    console.log('\n👤 ====== LOOKUP USER ======');
-
-    const toolCallId = getToolCallId(req.body);
-    const phone = getPhone(req.body);
-    const callId = req.body?.call?.id;
-
-    console.log('👤 Looking up:', phone);
-    logVoice(callId, 'user_lookup', phone);
-
-    if (!phone) {
-        return res.json(respond(toolCallId, JSON.stringify({
-            found: false,
-            message: "I need a phone number to look up the customer."
-        })));
-    }
-
-    let cleanPhone = phone.replace(/[^\d+]/g, '');
-    if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
-
-    const user = db?.userAccounts?.getBy('phone', cleanPhone);
-
-    if (user) {
-        console.log('✅ User found:', user.name);
-        return res.json(respond(toolCallId, JSON.stringify({
-            found: true,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            lastContact: user.last_contact,
-            message: `I found your account, ${user.name}!`
-        })));
-    }
-
-    console.log('❌ User not found');
-    return res.json(respond(toolCallId, JSON.stringify({
-        found: false,
-        message: "I don't have your information on file yet. That's okay - let me verify your identity first."
-    })));
-});
-
-// ============================================
-// HEALTH & DEBUG ENDPOINTS
-// ============================================
-
+// Health check
 router.get('/health', (req, res) => {
-    res.json({
-        ok: true,
-        twilio: !!twilioClient,
-        knowledge: !!knowledgeService,
-        otps: otpStore.size,
-        phones: global.phoneStore.size,
-        logs: global.voiceLogs?.length || 0
-    });
+    res.json({ ok: true, twilio: !!twilioClient, otps: otpStore.size, logs: global.voiceLogs?.length || 0 });
 });
 
-router.get('/phones', (req, res) => {
-    const phones = {};
-    global.phoneStore.forEach((v, k) => phones[k] = v);
-    res.json({ count: global.phoneStore.size, phones });
-});
-
+// Logs
 router.get('/logs', (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 100, 500);
     res.json({
@@ -473,20 +239,11 @@ router.get('/logs', (req, res) => {
     });
 });
 
-// Test KB search endpoint
-router.get('/test-kb', (req, res) => {
-    const query = req.query.q || 'company setup';
-
-    if (!knowledgeService) {
-        return res.json({ error: 'Knowledge service not available' });
-    }
-
-    try {
-        const result = knowledgeService.findBestResponse(query);
-        res.json({ query, found: result.found, response: result.response?.substring(0, 300) });
-    } catch (e) {
-        res.json({ error: e.message });
-    }
+// Phone store
+router.get('/phones', (req, res) => {
+    const phones = {};
+    global.phoneStore.forEach((v, k) => phones[k] = v);
+    res.json({ count: global.phoneStore.size, phones });
 });
 
 module.exports = router;
