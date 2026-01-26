@@ -22,10 +22,10 @@ function loadData() {
 
     const intentsPath = path.join(
         process.cwd(),
-        'backend',
         'data',
         'meydan_intents.json'
     );
+
 
     try {
         console.log('🔎 Looking for intents at:', intentsPath);
