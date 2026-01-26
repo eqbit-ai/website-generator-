@@ -293,42 +293,74 @@ router.post('/message', async (req, res) => {
         response = checkIntent(message);
     }
 
-    // 6️⃣ Knowledge Base + AI (TF-IDF chunks)
-    if (!response && knowledgeService && anthropic) {
+    // 6️⃣ Conversational AI with Knowledge Base context
+    if (!response && anthropic) {
         try {
-            const results = knowledgeService.search(message, 3);
+            // Search knowledge base for relevant information
+            let kbContext = '';
+            if (knowledgeService) {
+                const results = knowledgeService.search(message, 3);
+                if (results.length > 0 && results[0].score > 0.05) {
+                    kbContext = results.slice(0, 3).map(r => r.content).join('\n\n');
+                }
+            }
 
-            // Lower threshold to 0.05 to catch more results
-            if (results.length > 0 && results[0].score > 0.05) {
-                // Combine top results for better context
-                const kbContext = results.slice(0, 2).map(r => r.content).join('\n\n');
+            // Build conversation history for context (last 5 messages)
+            const conversationHistory = session.messages.slice(-10).map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'assistant',
+                content: msg.content
+            }));
 
-                const ai = await anthropic.messages.create({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 300,
-                    system: `You are a professional, knowledgeable business consultant for Meydan Free Zone in Dubai.
+            // Add current message
+            conversationHistory.push({ role: 'user', content: message });
 
-Your communication style:
-- Professional yet warm and approachable
-- Clear, concise, and informative
-- Natural conversational tone (avoid robotic responses)
-- Use minimal emojis (max 1 per response, and only when truly appropriate)
-- Focus on providing accurate information and genuine help
+            const systemPrompt = kbContext
+                ? `You are Jean, a professional business consultant for Meydan Free Zone in Dubai.
 
-Answer questions using ONLY the information provided in the knowledge base below.
-If the question is outside the knowledge base, politely indicate that and suggest they speak with a team member for more specific information.
+## YOUR PERSONALITY:
+- Professional yet warm and friendly
+- Natural conversational style (like talking to a colleague, not a robot)
+- Remember what the user asked before and maintain context
+- Use their name (${session.name}) occasionally
+- NO emojis, NO generic responses
+- Think before answering - understand what they're really asking
 
-KNOWLEDGE BASE:
+## KNOWLEDGE BASE:
 ${kbContext}
 
-Important: Provide complete, helpful answers. Don't be overly brief or generic. Show expertise.`,
-                    messages: [{ role: 'user', content: message }]
-                });
+## RULES:
+1. Answer ONLY using information from the knowledge base above
+2. If a question is a follow-up (like "can I renew?" after asking about license validity), understand the context
+3. For questions outside the KB, politely say "I don't have specific information about that. Would you like me to connect you with our team?"
+4. Be conversational - ask clarifying questions if needed
+5. Provide complete, helpful answers with specifics
+6. If user asks the same thing differently, give the same answer consistently
 
-                response = ai.content[0].text;
-            }
+## EXAMPLES:
+User: "how long is the validity of license?"
+You: "Clients can choose the license validity during incorporation. The maximum period of validity is 10 years."
+
+User: "can I renew after 10 years?"
+You: "Yes, you can renew your license after the 10-year period expires. The renewal process allows you to extend your license for another term."
+
+User: "my son is 14, can I apply visa for him?"
+You: "The minimum age for a visa is 18 years. Since your son is 14, he wouldn't qualify for an employment visa at this time. However, there may be other options for dependents. Would you like me to connect you with our team to discuss your specific situation?"`
+                : `You are Jean, a professional business consultant for Meydan Free Zone in Dubai.
+
+The user's question is outside your knowledge base. Politely let them know and offer to connect them with the team.
+
+Example: "I don't have specific information about that in my knowledge base. Would you like me to connect you with our team who can provide detailed information? Or feel free to ask about company setup, visas, or business licenses."`;
+
+            const ai = await anthropic.messages.create({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 300,
+                system: systemPrompt,
+                messages: conversationHistory
+            });
+
+            response = ai.content[0].text;
         } catch (err) {
-            console.log('AI KB error:', err.message);
+            console.log('AI error:', err.message);
         }
     }
 

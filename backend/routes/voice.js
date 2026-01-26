@@ -283,8 +283,31 @@ function executeFunction(funcName, params, callId) {
         if (!callData) {
             return 'ERROR: System error - no call data found.';
         }
-        // OTP was already sent during call initiation
-        const phone = callData.phone || 'your phone';
+
+        const phone = callData.phone;
+        const otp = callData.otpCode;
+
+        if (!phone) {
+            return 'ERROR: Phone number not found in call data.';
+        }
+
+        // Send SMS via Twilio NOW (when agent calls this function)
+        if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
+            try {
+                twilioClient.messages.create({
+                    body: `Meydan Free Zone verification code: ${otp}`,
+                    from: process.env.TWILIO_PHONE_NUMBER,
+                    to: phone
+                }).then(() => {
+                    console.log('📱 SMS sent to', phone);
+                }).catch(e => {
+                    console.log('SMS failed:', e.message);
+                });
+            } catch (e) {
+                console.log('SMS error:', e.message);
+            }
+        }
+
         return `SUCCESS: Code sent to ${phone}. Ask customer to enter the 6-digit code on their keypad.`;
     }
 
@@ -563,19 +586,9 @@ router.post('/initiate', async (req, res) => {
 
         logVoice(callId, 'outgoing_call', { phone: cleanPhone, source: callSource });
 
-        // Send SMS
-        if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
-            try {
-                await twilioClient.messages.create({
-                    body: `Meydan Free Zone verification code: ${otp}`,
-                    from: process.env.TWILIO_PHONE_NUMBER,
-                    to: cleanPhone
-                });
-                console.log('📱 SMS sent to', cleanPhone);
-            } catch (e) {
-                console.log('SMS failed:', e.message);
-            }
-        }
+        // DON'T send SMS here - let the agent send it when user chooses SMS
+        // Just generate and store the OTP for later verification
+        console.log('📱 OTP generated (will be sent by agent): ', otp);
 
         // Use chatbot-specific assistant if call is from chatbot, otherwise use default
         const assistantId = callSource === 'chatbot' && VAPI_CHATBOT_ASSISTANT_ID
