@@ -354,6 +354,49 @@ async function generateIntents(scrapedData, anthropic) {
         for (const page of pagesToProcess) {
             console.log(`📋 Processing: ${page.title}`);
 
+            // ✅ SPECIAL HANDLING FOR FAQ PAGES
+            // If FAQ pairs were extracted, convert them directly to intents (no AI needed)
+            if (page.isFAQ && page.faqPairs && page.faqPairs.length > 0) {
+                console.log(`✅ FAQ page detected with ${page.faqPairs.length} Q&A pairs - converting directly to intents`);
+
+                for (const faqPair of page.faqPairs) {
+                    // Extract keywords from question and answer
+                    const combinedText = `${faqPair.question} ${faqPair.answer}`.toLowerCase();
+                    const words = combinedText
+                        .replace(/[^a-z0-9\s]/g, ' ')
+                        .split(/\s+/)
+                        .filter(w => w.length > 4); // Only meaningful words
+
+                    // Get unique important words as keywords (limit to 5)
+                    const keywords = [...new Set(words)]
+                        .filter(w => !['about', 'there', 'where', 'which', 'their', 'would', 'should', 'could'].includes(w))
+                        .slice(0, 5);
+
+                    // Create 3 answer variations from the single FAQ answer
+                    const baseAnswer = faqPair.answer.trim();
+                    const responses = [
+                        baseAnswer,
+                        // Variation 2: Add "According to Meydan Free Zone," prefix
+                        baseAnswer.length < 200 ? `According to Meydan Free Zone, ${baseAnswer.charAt(0).toLowerCase()}${baseAnswer.slice(1)}` : baseAnswer,
+                        // Variation 3: Add brief lead-in
+                        baseAnswer.length < 200 ? `Here's what you need to know: ${baseAnswer}` : baseAnswer
+                    ];
+
+                    allIntents.push({
+                        name: faqPair.question.substring(0, 60) + (faqPair.question.length > 60 ? '...' : ''),
+                        question: faqPair.question,
+                        responses: responses,
+                        keywords: keywords,
+                        source: page.url,
+                        sourceTitle: page.title
+                    });
+                }
+
+                console.log(`  ✅ Created ${page.faqPairs.length} intents from FAQ pairs (Total: ${allIntents.length})`);
+                continue; // Skip AI processing for FAQ pages
+            }
+
+            // ✅ REGULAR CONTENT (NOT FAQ) - Use AI to generate intents
             // Split content into chunks if it's too long (limit to first 2 chunks per page)
             const chunks = splitIntoChunks(page.content, 3000).slice(0, 2);
 

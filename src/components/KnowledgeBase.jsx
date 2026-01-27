@@ -30,6 +30,9 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
     const [scraping, setScraping] = useState(false);
     const [scrapeResult, setScrapeResult] = useState(null);
 
+    // Intent selection for bulk operations
+    const [selectedIntents, setSelectedIntents] = useState(new Set());
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -141,9 +144,92 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
 
             if (data.success) {
                 setSuccess('Intent deleted successfully');
+                setSelectedIntents(new Set()); // Clear selection
                 fetchData(); // Refresh to show updated list
             } else {
                 setError(data.error || 'Failed to delete intent');
+            }
+        } catch (e) {
+            setError('Delete failed: ' + e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleIntentSelection = (index) => {
+        const newSelection = new Set(selectedIntents);
+        if (newSelection.has(index)) {
+            newSelection.delete(index);
+        } else {
+            newSelection.add(index);
+        }
+        setSelectedIntents(newSelection);
+    };
+
+    const selectAllIntents = () => {
+        const allIndices = new Set(intents.map((_, idx) => idx));
+        setSelectedIntents(allIndices);
+    };
+
+    const deselectAllIntents = () => {
+        setSelectedIntents(new Set());
+    };
+
+    const handleDeleteSelected = async () => {
+        if (selectedIntents.size === 0) {
+            setError('No intents selected');
+            return;
+        }
+
+        if (!window.confirm(`Delete ${selectedIntents.size} selected intent(s)? This action cannot be undone.`)) return;
+
+        setLoading(true);
+        try {
+            const indices = Array.from(selectedIntents).sort((a, b) => b - a); // Delete from highest index first
+            const res = await fetch(`${API_URL}/api/knowledge/intents/bulk-delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ indices })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setSuccess(`Deleted ${indices.length} intent(s) successfully`);
+                setSelectedIntents(new Set()); // Clear selection
+                fetchData(); // Refresh to show updated list
+            } else {
+                setError(data.error || 'Failed to delete intents');
+            }
+        } catch (e) {
+            setError('Delete failed: ' + e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteAll = async () => {
+        if (intents.length === 0) {
+            setError('No intents to delete');
+            return;
+        }
+
+        if (!window.confirm(`Delete ALL ${intents.length} intents? This action cannot be undone.`)) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/api/knowledge/intents/delete-all`, {
+                method: 'DELETE'
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setSuccess(`Deleted all ${data.deletedCount} intent(s) successfully`);
+                setSelectedIntents(new Set()); // Clear selection
+                fetchData(); // Refresh to show updated list
+            } else {
+                setError(data.error || 'Failed to delete all intents');
             }
         } catch (e) {
             setError('Delete failed: ' + e.message);
@@ -348,27 +434,88 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                                     <span>Place meydan_intents.json in backend/data/</span>
                                 </div>
                             ) : (
-                                intents.map((intent, idx) => (
-                                    <div key={idx} className="kb-intent-item">
-                                        <div className="kb-intent-header">
-                                            <div onClick={() => toggleExpand(`intent_${idx}`)} style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-                                                <h4>{intent.name || intent.intent || intent.question || `Intent ${idx + 1}`}</h4>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                                        {(intent.keywords || intent.patterns || []).length} keywords
-                                                    </span>
-                                                    {expandedItems.has(`intent_${idx}`) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                <>
+                                    {/* Bulk Actions Toolbar */}
+                                    <div style={{
+                                        display: 'flex',
+                                        gap: '0.5rem',
+                                        marginBottom: '1rem',
+                                        padding: '0.75rem',
+                                        background: 'var(--bg-tertiary)',
+                                        borderRadius: '8px',
+                                        alignItems: 'center',
+                                        flexWrap: 'wrap'
+                                    }}>
+                                        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginRight: 'auto' }}>
+                                            {selectedIntents.size > 0 ? `${selectedIntents.size} selected` : `${intents.length} total`}
+                                        </span>
+                                        <button
+                                            className="kb-btn secondary"
+                                            onClick={selectedIntents.size === intents.length ? deselectAllIntents : selectAllIntents}
+                                            style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem' }}
+                                        >
+                                            <CheckCircle size={16} />
+                                            {selectedIntents.size === intents.length ? 'Deselect All' : 'Select All'}
+                                        </button>
+                                        <button
+                                            className="kb-btn danger"
+                                            onClick={handleDeleteSelected}
+                                            disabled={selectedIntents.size === 0}
+                                            style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem' }}
+                                        >
+                                            <Trash2 size={16} />
+                                            Delete Selected ({selectedIntents.size})
+                                        </button>
+                                        <button
+                                            className="kb-btn danger"
+                                            onClick={handleDeleteAll}
+                                            style={{ fontSize: '0.875rem', padding: '0.5rem 0.75rem' }}
+                                        >
+                                            <Trash2 size={16} />
+                                            Delete All ({intents.length})
+                                        </button>
+                                    </div>
+
+                                    {/* Intent List */}
+                                    {intents.map((intent, idx) => (
+                                        <div key={idx} className="kb-intent-item">
+                                            <div className="kb-intent-header">
+                                                {/* Checkbox */}
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedIntents.has(idx)}
+                                                    onChange={() => toggleIntentSelection(idx)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{
+                                                        width: '18px',
+                                                        height: '18px',
+                                                        cursor: 'pointer',
+                                                        marginRight: '0.75rem',
+                                                        flexShrink: 0
+                                                    }}
+                                                />
+
+                                                {/* Intent Info (clickable to expand) */}
+                                                <div onClick={() => toggleExpand(`intent_${idx}`)} style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                                                    <h4>{intent.name || intent.intent || intent.question || `Intent ${idx + 1}`}</h4>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                                            {(intent.keywords || intent.patterns || []).length} keywords
+                                                        </span>
+                                                        {expandedItems.has(`intent_${idx}`) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                                    </div>
                                                 </div>
+
+                                                {/* Individual Delete Button */}
+                                                <button
+                                                    className="kb-btn-icon danger"
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteIntent(idx); }}
+                                                    title="Delete this intent"
+                                                    style={{ marginLeft: '0.5rem' }}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
-                                            <button
-                                                className="kb-btn-icon danger"
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteIntent(idx); }}
-                                                title="Delete intent"
-                                                style={{ marginLeft: '0.5rem' }}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
                                         {expandedItems.has(`intent_${idx}`) && (
                                             <div className="kb-intent-details">
                                                 {intent.question && (
@@ -417,7 +564,8 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                                             </div>
                                         )}
                                     </div>
-                                ))
+                                    ))}
+                                </>
                             )}
                         </div>
                     )}

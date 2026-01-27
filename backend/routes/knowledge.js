@@ -328,6 +328,117 @@ router.delete('/intents/:index', (req, res) => {
     }
 });
 
+/**
+ * Bulk delete intents by indices
+ * POST /api/knowledge/intents/bulk-delete
+ * Body: { indices: [0, 2, 5, ...] }
+ */
+router.post('/intents/bulk-delete', (req, res) => {
+    try {
+        const { indices } = req.body;
+
+        if (!Array.isArray(indices) || indices.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Indices array is required'
+            });
+        }
+
+        // Sort indices in descending order to delete from highest index first
+        // This prevents index shifting issues
+        const sortedIndices = [...indices].sort((a, b) => b - a);
+
+        const deletedIntents = [];
+
+        for (const index of sortedIndices) {
+            if (index >= 0 && index < intentsData.length) {
+                const deleted = intentsData.splice(index, 1)[0];
+                deletedIntents.push(deleted);
+            }
+        }
+
+        // Update the file
+        const intentsPath = path.join(__dirname, '..', 'config', 'meydan_intents.json');
+        if (fs.existsSync(intentsPath)) {
+            fs.writeFileSync(intentsPath, JSON.stringify({ intents: intentsData }, null, 2), 'utf-8');
+            console.log(`💾 Updated ${intentsPath} with ${intentsData.length} intents`);
+        }
+
+        // Reload chat intents
+        try {
+            const chatModule = require('./chat');
+            if (chatModule.loadIntents) {
+                chatModule.loadIntents();
+                console.log('🔄 Chat intents reloaded after bulk deletion');
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not reload chat intents:', e.message);
+        }
+
+        console.log(`🗑️ Bulk deleted ${deletedIntents.length} intents`);
+
+        res.json({
+            success: true,
+            message: `Deleted ${deletedIntents.length} intent(s) successfully`,
+            deletedCount: deletedIntents.length,
+            remainingCount: intentsData.length
+        });
+
+    } catch (error) {
+        console.error('❌ Bulk delete error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to delete intents'
+        });
+    }
+});
+
+/**
+ * Delete all intents
+ * DELETE /api/knowledge/intents/delete-all
+ */
+router.delete('/intents/delete-all', (_req, res) => {
+    try {
+        const deletedCount = intentsData.length;
+
+        // Clear in-memory array
+        intentsData = [];
+
+        // Update the file
+        const intentsPath = path.join(__dirname, '..', 'config', 'meydan_intents.json');
+        if (fs.existsSync(intentsPath)) {
+            fs.writeFileSync(intentsPath, JSON.stringify({ intents: [] }, null, 2), 'utf-8');
+            console.log(`💾 Cleared all intents in ${intentsPath}`);
+        }
+
+        // Reload chat intents
+        try {
+            const chatModule = require('./chat');
+            if (chatModule.loadIntents) {
+                chatModule.loadIntents();
+                console.log('🔄 Chat intents reloaded after delete all');
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not reload chat intents:', e.message);
+        }
+
+        console.log(`🗑️ Deleted all ${deletedCount} intents`);
+
+        res.json({
+            success: true,
+            message: `Deleted all ${deletedCount} intent(s) successfully`,
+            deletedCount: deletedCount
+        });
+
+    } catch (error) {
+        console.error('❌ Delete all error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to delete all intents'
+        });
+    }
+});
+
 loadData();
 
 // 🔴 THIS IS THE CRITICAL LINE THAT WAS BROKEN
