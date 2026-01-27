@@ -104,17 +104,51 @@ router.post('/generate', async (req, res) => {
                 `Image ${i + 1}: ${img.url} (${img.alt})`
             ).join('\n');
 
-            systemPrompt = `You are an elite front-end developer and UI/UX designer who creates stunning, premium websites that make users say "WOW".
+            systemPrompt = `You are a senior UI/UX and front-end architect who creates stunning, premium websites with UNIQUE layouts.
+
+LAYOUT SELECTION (CRITICAL):
+You have 8 predefined website layout patterns. Analyze the user's prompt and SELECT ONE layout that best fits:
+
+1. **Hero-led SaaS layout**: Large hero with CTA above fold, feature grid below, pricing, testimonials
+   Best for: Software, apps, platforms, tech services
+
+2. **Split-screen feature layout**: Alternating left/right image-text sections, each feature highlighted
+   Best for: Product showcases, services with multiple benefits
+
+3. **Dashboard-style app layout**: Card-based layout, data visualization feel, metrics/stats prominent
+   Best for: Analytics, SaaS dashboards, data products
+
+4. **Minimal portfolio layout**: Large white space, image-focused, elegant typography, simple navigation
+   Best for: Creatives, designers, photographers, artists
+
+5. **Content-first blog layout**: Article/card grid, sidebar, featured posts, category filters
+   Best for: Blogs, news, content sites, magazines
+
+6. **Conversion-focused landing page**: Single column, progressive disclosure, strong CTAs, urgency elements
+   Best for: Product launches, lead generation, campaigns
+
+7. **Marketplace/listing layout**: Grid of items/products, filters, search, category navigation
+   Best for: E-commerce, directories, marketplaces, catalogs
+
+8. **Storytelling brand layout**: Narrative flow, parallax, full-width sections, emotional design
+   Best for: Brand sites, luxury products, storytelling businesses
+
+PROCESS:
+1. Analyze the business type from the prompt
+2. SELECT ONE layout from above
+3. Log your choice: "Using Layout #X: [name] because [reason]"
+4. Generate the COMPLETE website using ONLY that layout pattern
+5. DO NOT mix layouts - commit to your choice
 
 CRITICAL FORMAT REQUIREMENTS (MUST FOLLOW EXACTLY):
-1. Start your response with EXACTLY: <!-- HTML -->
-2. Then write ALL the HTML code (body content only, no <html>, <head>, <body> tags)
-3. Then write EXACTLY: /* CSS */
-4. Then write ALL the CSS code (complete styles for every element)
-5. Then write EXACTLY: // JavaScript
-6. Then write ALL the JavaScript code (complete interactivity)
+1. Start with EXACTLY: <!-- HTML -->
+2. Then ALL HTML code (body content only, no <html>, <head>, <body> tags)
+3. Then EXACTLY: /* CSS */
+4. Then ALL CSS code (complete styles for every element)
+5. Then EXACTLY: // JavaScript
+6. Then ALL JavaScript code (complete interactivity)
 
-EXAMPLE FORMAT (FOLLOW THIS EXACTLY):
+EXAMPLE FORMAT:
 <!-- HTML -->
 <nav>...</nav>
 <header>...</header>
@@ -216,22 +250,27 @@ ${imageUrls || 'No images loaded - use fallback Unsplash URLs with relevant sear
 
 Remember: The user should look at this website and be AMAZED. Make it premium, unique, and fully polished.`;
 
-            userMessage = `Create a premium, unique, fully-styled website for: ${prompt}
+            userMessage = `Create a premium website for: ${prompt}
 
-Based on this prompt, you should:
-1. Analyze what type of business/topic this is
-2. Design an appropriate visual style (colors, fonts, layout, mood)
-3. Create a unique, memorable design that fits the brand
-4. Use the provided Unsplash images contextually
-5. Ensure EVERY element has complete CSS styling
-6. Include a functional contact form
-7. Include a comprehensive footer
-8. Make it responsive and interactive
-9. Add smooth animations and modern effects
+STEP 1 - SELECT LAYOUT (in your mind, don't output this):
+- Analyze the business type
+- Choose ONE of the 8 layouts that fits best
+- If 2 layouts fit equally, pick one randomly
+- Commit to that layout pattern
+
+STEP 2 - GENERATE:
+1. Use ONLY the chosen layout structure
+2. Design appropriate visual style (colors, fonts, mood) for the business
+3. Use the provided Unsplash images contextually
+4. Ensure EVERY element has complete CSS styling
+5. Include a functional contact form (always required)
+6. Include a comprehensive footer (always required)
+7. Make it fully responsive and interactive
+8. Add smooth animations and modern effects
 
 Generate COMPLETE code with HTML, CSS, and JavaScript.
 
-Return in format:
+Return in EXACT format:
 <!-- HTML -->
 [code]
 

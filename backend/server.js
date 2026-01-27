@@ -108,6 +108,16 @@ try {
     console.log('⚠️ Generator routes not available:', e.message);
 }
 
+// Deploy routes (Website deployment and domain search)
+try {
+    const deployRoutes = require('./routes/deploy');
+    app.use('/api/deploy', deployRoutes);
+    app.use('/api/domains', deployRoutes); // Domains search is also in deploy.js
+    console.log('✅ Deploy & Domains routes loaded');
+} catch (e) {
+    console.log('⚠️ Deploy routes not available:', e.message);
+}
+
 // ============================================
 // STATIC FILES
 // ============================================
