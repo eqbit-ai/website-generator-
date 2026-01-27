@@ -26,32 +26,42 @@ try { knowledgeService = require('../services/knowledgeService'); } catch (e) { 
 const fs = require('fs');
 const path = require('path');
 let intents = [];
-try {
-    // Try multiple paths for Railway compatibility
-    const possiblePaths = [
-        path.join(__dirname, '..', 'config', 'meydan_intents.json'),
-        path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json'),
-        path.join(process.cwd(), 'config', 'meydan_intents.json')
-    ];
 
-    let intentsPath = null;
-    for (const p of possiblePaths) {
-        if (fs.existsSync(p)) {
-            intentsPath = p;
-            break;
+// Function to load/reload intents
+function loadIntents() {
+    try {
+        // Try multiple paths for Railway compatibility
+        const possiblePaths = [
+            path.join(__dirname, '..', 'config', 'meydan_intents.json'),
+            path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json'),
+            path.join(process.cwd(), 'config', 'meydan_intents.json')
+        ];
+
+        let intentsPath = null;
+        for (const p of possiblePaths) {
+            if (fs.existsSync(p)) {
+                intentsPath = p;
+                break;
+            }
         }
-    }
 
-    if (intentsPath) {
-        const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
-        intents = data.intents || [];
-        console.log(`✅ Chat: Loaded ${intents.length} intents from ${intentsPath}`);
-    } else {
-        console.log('❌ Chat: Intents file not found in any location');
+        if (intentsPath) {
+            const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
+            intents = data.intents || [];
+            console.log(`✅ Chat: Loaded ${intents.length} intents from ${intentsPath}`);
+            return true;
+        } else {
+            console.log('❌ Chat: Intents file not found in any location');
+            return false;
+        }
+    } catch (e) {
+        console.log('⚠️ Chat: Could not load intents:', e.message);
+        return false;
     }
-} catch (e) {
-    console.log('⚠️ Chat: Could not load intents:', e.message);
 }
+
+// Load intents on startup
+loadIntents();
 
 let anthropic = null;
 if (process.env.ANTHROPIC_API_KEY) {
@@ -544,4 +554,30 @@ router.get('/health', (req, res) => {
     });
 });
 
+/**
+ * Reload intents from file
+ * POST /api/chat/reload-intents
+ */
+router.post('/reload-intents', (req, res) => {
+    const oldCount = intents.length;
+    const success = loadIntents();
+
+    if (success) {
+        console.log(`🔄 Chat intents reloaded: ${oldCount} → ${intents.length}`);
+        res.json({
+            success: true,
+            message: 'Intents reloaded successfully',
+            oldCount: oldCount,
+            newCount: intents.length,
+            added: intents.length - oldCount
+        });
+    } else {
+        res.status(500).json({
+            success: false,
+            error: 'Failed to reload intents'
+        });
+    }
+});
+
 module.exports = router;
+module.exports.loadIntents = loadIntents; // Export for other modules

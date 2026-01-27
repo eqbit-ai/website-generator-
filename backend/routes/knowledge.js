@@ -176,6 +176,7 @@ router.post('/scrape-website', async (req, res) => {
 
         // Step 5: Add intents to in-memory knowledge base
         const newIntents = intentsResult.intents.map(intent => ({
+            name: intent.name || intent.question || 'Untitled Intent',
             keywords: intent.keywords || [],
             response: intent.answer,
             question: intent.question,
@@ -205,7 +206,9 @@ router.post('/scrape-website', async (req, res) => {
                 intentsGenerated: intentsResult.totalIntents,
                 textFile: filename
             },
-            intents: intentsResult.intents
+            intents: intentsResult.intents,
+            textContent: textContent, // For browser download
+            filename: filename
         });
 
     } catch (error) {
@@ -233,6 +236,48 @@ router.get('/scrape-status', (req, res) => {
         totalScrapedFiles: scrapedFiles.length,
         totalIntents: intentsData.length
     });
+});
+
+/**
+ * Delete an intent
+ * DELETE /api/knowledge/intents/:index
+ */
+router.delete('/intents/:index', (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+
+        if (isNaN(index) || index < 0 || index >= intentsData.length) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid intent index'
+            });
+        }
+
+        // Remove from in-memory array
+        const deletedIntent = intentsData.splice(index, 1)[0];
+
+        // Update the file
+        const intentsPath = path.join(process.cwd(), 'config', 'meydan_intents.json');
+        if (fs.existsSync(intentsPath)) {
+            fs.writeFileSync(intentsPath, JSON.stringify({ intents: intentsData }, null, 2), 'utf-8');
+        }
+
+        console.log(`🗑️ Deleted intent: ${deletedIntent.name || deletedIntent.question || 'Unnamed'}`);
+
+        res.json({
+            success: true,
+            message: 'Intent deleted successfully',
+            deletedIntent: deletedIntent,
+            remainingCount: intentsData.length
+        });
+
+    } catch (error) {
+        console.error('❌ Delete intent error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to delete intent'
+        });
+    }
 });
 
 loadData();

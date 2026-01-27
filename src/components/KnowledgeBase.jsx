@@ -128,6 +128,30 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
         setExpandedItems(newSet);
     };
 
+    const handleDeleteIntent = async (index) => {
+        if (!window.confirm('Delete this intent? This action cannot be undone.')) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/api/knowledge/intents/${index}`, {
+                method: 'DELETE'
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setSuccess('Intent deleted successfully');
+                fetchData(); // Refresh to show updated list
+            } else {
+                setError(data.error || 'Failed to delete intent');
+            }
+        } catch (e) {
+            setError('Delete failed: ' + e.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleScrapeWebsite = async () => {
         if (!websiteUrl.trim()) {
             setError('Website URL is required');
@@ -160,6 +184,20 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                 setScrapeResult(data);
                 setWebsiteUrl('');
                 fetchData(); // Refresh knowledge base
+
+                // Auto-download text file
+                if (data.textContent && data.filename) {
+                    const blob = new Blob([data.textContent], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = data.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    console.log(`📥 Downloaded: ${data.filename}`);
+                }
             } else {
                 setError(data.error || 'Failed to scrape website');
             }
@@ -312,14 +350,24 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                             ) : (
                                 intents.map((intent, idx) => (
                                     <div key={idx} className="kb-intent-item">
-                                        <div className="kb-intent-header" onClick={() => toggleExpand(`intent_${idx}`)}>
-                                            <h4>{intent.name || intent.intent || `Intent ${idx + 1}`}</h4>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                                                    {(intent.keywords || intent.patterns || []).length} keywords
-                                                </span>
-                                                {expandedItems.has(`intent_${idx}`) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                        <div className="kb-intent-header">
+                                            <div onClick={() => toggleExpand(`intent_${idx}`)} style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                                                <h4>{intent.name || intent.intent || intent.question || `Intent ${idx + 1}`}</h4>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                                                        {(intent.keywords || intent.patterns || []).length} keywords
+                                                    </span>
+                                                    {expandedItems.has(`intent_${idx}`) ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                                                </div>
                                             </div>
+                                            <button
+                                                className="kb-btn-icon danger"
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteIntent(idx); }}
+                                                title="Delete intent"
+                                                style={{ marginLeft: '0.5rem' }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                         {expandedItems.has(`intent_${idx}`) && (
                                             <div className="kb-intent-details">

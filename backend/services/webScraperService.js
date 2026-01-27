@@ -215,6 +215,7 @@ Generate intents in this EXACT JSON format:
 {
   "intents": [
     {
+      "name": "Brief descriptive name (3-5 words)",
       "question": "What is [specific topic]?",
       "answer": "Comprehensive answer based on the content...",
       "keywords": ["keyword1", "keyword2", "keyword3"]
@@ -224,11 +225,12 @@ Generate intents in this EXACT JSON format:
 
 Requirements:
 1. Generate 3-4 diverse intents that users might ask
-2. Each answer should be comprehensive (2-3 sentences)
-3. Answers MUST be based ONLY on the provided content (no hallucination)
-4. Include relevant keywords for search
-5. Make questions natural and conversational
-6. Cover different aspects of the content
+2. Each "name" should be a brief, descriptive title (e.g., "VARA Regulations Overview", "Company Formation Cost")
+3. Each answer should be comprehensive (2-3 sentences)
+4. Answers MUST be based ONLY on the provided content (no hallucination)
+5. Include relevant keywords for search
+6. Make questions natural and conversational
+7. Cover different aspects of the content
 
 Return ONLY the JSON, no explanation.`;
 
