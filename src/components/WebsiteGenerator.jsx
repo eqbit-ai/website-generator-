@@ -23,10 +23,19 @@ const WebsiteGenerator = () => {
     const [designStyle, setDesignStyle] = useState(null);
     const [loadingMessage, setLoadingMessage] = useState('');
 
+    // Prompt history (session-only, clears on refresh)
+    const [promptHistory, setPromptHistory] = useState([]);
+
     const handleGenerate = async (prompt) => {
         setIsLoading(true);
         setError(null);
         setLoadingMessage('Creating your unique design with AI...');
+
+        // Add prompt to history
+        setPromptHistory(prev => [...prev, {
+            text: prompt,
+            timestamp: new Date().toLocaleTimeString()
+        }]);
 
         try {
             const result = await generateWebsite(prompt, sessionId);
@@ -104,6 +113,7 @@ ${js}
         setSessionId(null);
         setIsNewDesign(true);
         setDesignStyle(null);
+        setPromptHistory([]); // Clear prompt history
     };
 
     return (
@@ -154,6 +164,7 @@ ${js}
                         onGenerate={handleGenerate}
                         isLoading={isLoading}
                         loadingMessage={loadingMessage}
+                        promptHistory={promptHistory}
                     />
 
                     {error && (

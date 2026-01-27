@@ -99,10 +99,12 @@ router.post('/generate', async (req, res) => {
             // Reset history for new design
             session.conversationHistory = [];
 
-            // Build image list for AI
-            const imageUrls = contextualImages.map((img, i) =>
-                `Image ${i + 1}: ${img.url} (${img.alt})`
-            ).join('\n');
+            // Build image list for AI with explicit instructions
+            const imageUrls = contextualImages.length > 0
+                ? `🚨 MUST USE THESE EXACT URLS IN <img src="..."> TAGS - NO PLACEHOLDERS:\n${contextualImages.map((img, i) =>
+                    `${i + 1}. ${img.url}\n   Alt text: "${img.alt}"`
+                ).join('\n\n')}`
+                : 'No images loaded - use source.unsplash.com URLs with relevant search terms';
 
             systemPrompt = `You are a senior UI/UX and front-end architect who creates stunning, premium websites with UNIQUE layouts.
 
@@ -222,12 +224,17 @@ REQUIRED SECTIONS (ALWAYS INCLUDE):
    - Copyright notice
    - Additional footer content as appropriate
 
-IMAGES (Use provided contextual images):
-- Use the specific Unsplash URLs provided below
+IMAGES - CRITICAL REQUIREMENT:
+🚨 IMPORTANT: You MUST use the EXACT image URLs provided in the "CONTEXT-AWARE IMAGES PROVIDED" section below
+- DO NOT use placeholder text like "Image Loading..." or "[Image will load here]"
+- DO NOT use generic Unsplash URLs
+- USE ONLY the specific URLs provided below in <img src="..."> tags
 - Images are already contextually relevant to the topic
-- Place them strategically throughout the design
-- Apply professional image treatments (overlays, filters, shapes, etc.)
-- Ensure images are responsive and optimized
+- Place them strategically throughout the design (hero section, features, gallery, etc.)
+- Apply professional image treatments (overlays, filters, shapes, rounded corners, shadows, etc.)
+- Ensure images are responsive with proper CSS (max-width: 100%, height: auto)
+- Add loading="lazy" for performance
+- Example: <img src="https://images.unsplash.com/photo-..." alt="..." class="hero-image" loading="lazy">
 
 JAVASCRIPT INTERACTIVITY:
 - Smooth scroll navigation
@@ -261,7 +268,7 @@ STEP 1 - SELECT LAYOUT (in your mind, don't output this):
 STEP 2 - GENERATE:
 1. Use ONLY the chosen layout structure
 2. Design appropriate visual style (colors, fonts, mood) for the business
-3. Use the provided Unsplash images contextually
+3. 🚨 CRITICAL: Use the EXACT Unsplash image URLs provided above in <img src="..."> tags - NO placeholder text!
 4. Ensure EVERY element has complete CSS styling
 5. Include a functional contact form (always required)
 6. Include a comprehensive footer (always required)

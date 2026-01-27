@@ -1,9 +1,9 @@
 // src/components/PromptInput.jsx
 
 import React, { useState } from 'react';
-import { Wand2, Loader2 } from 'lucide-react';
+import { Wand2, Loader2, Clock } from 'lucide-react';
 
-const PromptInput = ({ onGenerate, isLoading, loadingMessage }) => {
+const PromptInput = ({ onGenerate, isLoading, loadingMessage, promptHistory = [] }) => {
     const [prompt, setPrompt] = useState('');
 
     const handleSubmit = (e) => {
@@ -52,6 +52,25 @@ const PromptInput = ({ onGenerate, isLoading, loadingMessage }) => {
                     )}
                 </button>
             </form>
+
+            {/* Prompt History */}
+            {promptHistory.length > 0 && (
+                <div className="prompt-history">
+                    <div className="history-header">
+                        <Clock size={16} />
+                        <span>Your Prompts</span>
+                    </div>
+                    <div className="history-list">
+                        {promptHistory.map((item, index) => (
+                            <div key={index} className="history-item">
+                                <span className="history-number">{index + 1}.</span>
+                                <span className="history-text">{item.text}</span>
+                                <span className="history-time">{item.timestamp}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="example-prompts">
                 <p className="example-label">Try an example:</p>
