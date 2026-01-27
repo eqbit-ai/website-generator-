@@ -183,14 +183,27 @@ router.post('/scrape-website', async (req, res) => {
         console.log(`✅ Saved scraped content to: ${filename}`);
 
         // Step 5: Add intents to in-memory knowledge base
-        const newIntents = intentsResult.intents.map(intent => ({
-            name: intent.name || intent.question || 'Untitled Intent',
-            keywords: intent.keywords || [],
-            response: intent.answer,
-            question: intent.question,
-            source: intent.source,
-            sourceTitle: intent.sourceTitle
-        }));
+        const newIntents = intentsResult.intents.map(intent => {
+            // Support both new format (responses array) and old format (single answer)
+            let responses;
+            if (intent.responses && Array.isArray(intent.responses)) {
+                responses = intent.responses; // New format: multiple variations
+            } else if (intent.answer) {
+                responses = [intent.answer]; // Old format: convert to array
+            } else {
+                responses = ['No response available'];
+            }
+
+            return {
+                name: intent.name || intent.question || 'Untitled Intent',
+                keywords: intent.keywords || [],
+                responses: responses, // Store as array
+                response: responses[0], // Backward compatibility: first response as default
+                question: intent.question,
+                source: intent.source,
+                sourceTitle: intent.sourceTitle
+            };
+        });
 
         intentsData.push(...newIntents);
 
@@ -247,7 +260,7 @@ router.post('/scrape-website', async (req, res) => {
  * Get scraping status
  * GET /api/knowledge/scrape-status
  */
-router.get('/scrape-status', (req, res) => {
+router.get('/scrape-status', (_req, res) => {
     const configPath = path.join(__dirname, '..', 'config');
     const scrapedFiles = fs.existsSync(configPath)
         ? fs.readdirSync(configPath).filter(f => f.startsWith('kb_scraped_'))

@@ -371,6 +371,12 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                                         </div>
                                         {expandedItems.has(`intent_${idx}`) && (
                                             <div className="kb-intent-details">
+                                                {intent.question && (
+                                                    <div style={{ marginBottom: '1rem' }}>
+                                                        <strong>Question:</strong>
+                                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>{intent.question}</p>
+                                                    </div>
+                                                )}
                                                 <div>
                                                     <strong>Keywords:</strong>
                                                     <ul>
@@ -379,9 +385,35 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                                                     </ul>
                                                 </div>
                                                 <div>
-                                                    <strong>Response:</strong>
-                                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{intent.response?.substring(0, 200)}...</p>
+                                                    {intent.responses && Array.isArray(intent.responses) && intent.responses.length > 0 ? (
+                                                        <>
+                                                            <strong>Responses ({intent.responses.length} variations):</strong>
+                                                            <ol style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
+                                                                {intent.responses.map((resp, respIdx) => (
+                                                                    <li key={respIdx} style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
+                                                                        {resp}
+                                                                    </li>
+                                                                ))}
+                                                            </ol>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <strong>Response:</strong>
+                                                            <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{intent.response?.substring(0, 200)}...</p>
+                                                        </>
+                                                    )}
                                                 </div>
+                                                {intent.source && (
+                                                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                                                        <strong>Source:</strong>
+                                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                                                            {intent.sourceTitle && <>{intent.sourceTitle}<br /></>}
+                                                            <a href={intent.source} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>
+                                                                {intent.source}
+                                                            </a>
+                                                        </p>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

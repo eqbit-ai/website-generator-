@@ -7,18 +7,26 @@ const { URL } = require('url');
 
 /**
  * Scrape a website and extract all text content
+ * @param {string} websiteUrl - URL to scrape
+ * @param {boolean} singlePageOnly - If true, only scrape the specified page (no following links)
  */
-async function scrapeWebsite(websiteUrl) {
+async function scrapeWebsite(websiteUrl, singlePageOnly = true) {
     try {
         console.log(`🕷️ Starting scrape of: ${websiteUrl}`);
+        console.log(`📄 Mode: ${singlePageOnly ? 'Single page only' : 'Multi-page (max 10)'}`);
 
         const visitedUrls = new Set();
         const scrapedPages = [];
         const baseUrl = new URL(websiteUrl);
         const baseDomain = baseUrl.origin;
 
-        // Start with the homepage
-        await crawlPage(websiteUrl, baseDomain, visitedUrls, scrapedPages, 0, 10); // Max 10 pages
+        if (singlePageOnly) {
+            // Only scrape the specified page, don't follow links
+            await scrapeSinglePage(websiteUrl, scrapedPages);
+        } else {
+            // Crawl multiple pages (original behavior)
+            await crawlPage(websiteUrl, baseDomain, visitedUrls, scrapedPages, 0, 10); // Max 10 pages
+        }
 
         console.log(`✅ Scraped ${scrapedPages.length} pages from ${websiteUrl}`);
 
@@ -37,6 +45,155 @@ async function scrapeWebsite(websiteUrl) {
             pages: []
         };
     }
+}
+
+/**
+ * Scrape a single page only (no following links)
+ */
+async function scrapeSinglePage(url, scrapedPages) {
+    try {
+        console.log(`📄 Scraping single page: ${url}`);
+
+        const response = await axios.get(url, {
+            timeout: 15000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; KnowledgeBaseScraper/1.0)'
+            }
+        });
+
+        const html = response.data;
+        const $ = cheerio.load(html);
+
+        // Remove script and style tags
+        $('script, style, nav, footer, header[role="banner"]').remove();
+
+        // Extract page title
+        const title = $('title').text().trim() || $('h1').first().text().trim() || 'Untitled Page';
+
+        console.log(`📋 Title: ${title}`);
+
+        // Check if this is a FAQ page
+        const isFAQ = title.toLowerCase().includes('faq') ||
+            url.toLowerCase().includes('faq') ||
+            $('h1, h2').text().toLowerCase().includes('frequently asked questions');
+
+        let content = '';
+        let faqPairs = [];
+
+        if (isFAQ) {
+            console.log('🔍 Detected FAQ page - extracting Q&A pairs');
+            faqPairs = extractFAQPairs($);
+
+            if (faqPairs.length > 0) {
+                console.log(`✅ Extracted ${faqPairs.length} FAQ pairs`);
+                // Format FAQ pairs as content
+                content = faqPairs.map(pair => `Q: ${pair.question}\nA: ${pair.answer}`).join('\n\n');
+            }
+        }
+
+        // If no FAQ pairs found, extract regular content
+        if (!content) {
+            const mainContent = $('main, article, .content, .main-content, #content, #main').first();
+
+            if (mainContent.length > 0) {
+                content = mainContent.text();
+            } else {
+                content = $('body').text();
+            }
+
+            // Clean up the content
+            content = content
+                .replace(/\s+/g, ' ')
+                .replace(/\n+/g, '\n')
+                .trim();
+        }
+
+        // Extract headings for structure
+        const headings = [];
+        $('h1, h2, h3').each((i, elem) => {
+            const text = $(elem).text().trim();
+            if (text) {
+                headings.push({
+                    level: elem.name,
+                    text: text
+                });
+            }
+        });
+
+        // Save the page data
+        if (content.length > 100) {
+            scrapedPages.push({
+                url: url,
+                title: title,
+                content: content,
+                headings: headings,
+                isFAQ: isFAQ,
+                faqPairs: faqPairs,
+                scrapedAt: new Date().toISOString()
+            });
+
+            console.log(`✅ Saved page: ${title} (${content.length} chars, ${isFAQ ? faqPairs.length + ' FAQ pairs' : 'regular content'})`);
+        }
+
+    } catch (error) {
+        console.error(`❌ Error scraping ${url}:`, error.message);
+    }
+}
+
+/**
+ * Extract FAQ Q&A pairs from page
+ */
+function extractFAQPairs($) {
+    const faqPairs = [];
+
+    // Method 1: Look for accordion/details elements
+    $('details, .accordion-item, .faq-item, [class*="faq"]').each((i, elem) => {
+        const $elem = $(elem);
+        const question = $elem.find('summary, .question, [class*="question"], h3, h4').first().text().trim();
+        const answer = $elem.find('.answer, [class*="answer"], p').text().trim() ||
+            $elem.text().replace(question, '').trim();
+
+        if (question && answer && answer.length > 20) {
+            faqPairs.push({ question, answer });
+        }
+    });
+
+    // Method 2: Look for dt/dd pairs
+    if (faqPairs.length === 0) {
+        $('dt').each((i, elem) => {
+            const question = $(elem).text().trim();
+            const answer = $(elem).next('dd').text().trim();
+
+            if (question && answer && answer.length > 20) {
+                faqPairs.push({ question, answer });
+            }
+        });
+    }
+
+    // Method 3: Look for h3/h4 followed by paragraphs
+    if (faqPairs.length === 0) {
+        $('h3, h4').each((i, elem) => {
+            const $heading = $(elem);
+            const question = $heading.text().trim();
+
+            if (question.includes('?') || question.toLowerCase().match(/^(what|how|why|when|where|can|do|does|is|are)/)) {
+                let answer = '';
+                $heading.nextUntil('h3, h4').each((j, next) => {
+                    if ($(next).is('p')) {
+                        answer += $(next).text().trim() + ' ';
+                    }
+                });
+
+                answer = answer.trim();
+
+                if (question && answer && answer.length > 20) {
+                    faqPairs.push({ question, answer });
+                }
+            }
+        });
+    }
+
+    return faqPairs;
 }
 
 /**
@@ -203,7 +360,7 @@ async function generateIntents(scrapedData, anthropic) {
             for (let i = 0; i < chunks.length; i++) {
                 const chunk = chunks[i];
 
-                const prompt = `Analyze this website content and generate 3-4 intents (questions users might ask) with comprehensive answers.
+                const prompt = `Analyze this website content and generate 3-4 intents (questions users might ask) with multiple short answer variations.
 
 Website: ${page.title}
 URL: ${page.url}
@@ -217,8 +374,12 @@ Generate intents in this EXACT JSON format:
     {
       "name": "Brief descriptive name (3-5 words)",
       "question": "What is [specific topic]?",
-      "answer": "Comprehensive answer based on the content...",
-      "keywords": ["keyword1", "keyword2", "keyword3"]
+      "responses": [
+        "Short answer variation 1 (2-3 sentences, conversational)",
+        "Short answer variation 2 (2-3 sentences, different phrasing)",
+        "Short answer variation 3 (2-3 sentences, another angle)"
+      ],
+      "keywords": ["specific", "relevant", "keyword"]
     }
   ]
 }
@@ -226,11 +387,14 @@ Generate intents in this EXACT JSON format:
 Requirements:
 1. Generate 3-4 diverse intents that users might ask
 2. Each "name" should be a brief, descriptive title (e.g., "VARA Regulations Overview", "Company Formation Cost")
-3. Each answer should be comprehensive (2-3 sentences)
-4. Answers MUST be based ONLY on the provided content (no hallucination)
-5. Include relevant keywords for search
-6. Make questions natural and conversational
-7. Cover different aspects of the content
+3. Each intent should have 3 SHORT response variations (2-3 sentences each, NOT long paragraphs)
+4. Make each response variation sound human and conversational, not robotic
+5. Vary the phrasing and angle of each response while keeping the core information
+6. Responses MUST be based ONLY on the provided content (no hallucination)
+7. Keywords must be HIGHLY SPECIFIC and RELEVANT (e.g., "VARA", "virtual assets", "license cost")
+8. Avoid generic keywords like "company", "business", "services"
+9. Make questions natural and conversational
+10. Cover different aspects of the content
 
 Return ONLY the JSON, no explanation.`;
 
@@ -340,7 +504,17 @@ function formatAsTextFile(scrapedData, intents) {
     for (let i = 0; i < intents.length; i++) {
         const intent = intents[i];
         textContent += `${i + 1}. ${intent.question}\n`;
-        textContent += `   Answer: ${intent.answer}\n`;
+
+        // Support both new format (responses array) and old format (single answer)
+        if (intent.responses && Array.isArray(intent.responses)) {
+            textContent += `   Responses (${intent.responses.length} variations):\n`;
+            intent.responses.forEach((resp, idx) => {
+                textContent += `     ${idx + 1}. ${resp}\n`;
+            });
+        } else if (intent.answer) {
+            textContent += `   Answer: ${intent.answer}\n`;
+        }
+
         textContent += `   Keywords: ${intent.keywords.join(', ')}\n`;
         textContent += `   Source: ${intent.sourceTitle} (${intent.source})\n`;
         textContent += `\n`;

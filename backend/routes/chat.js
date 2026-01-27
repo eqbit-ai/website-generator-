@@ -184,7 +184,11 @@ function checkIntent(message) {
     console.log(`📝 Words: [${qWords.join(', ')}]`);
 
     for (const intent of intents) {
-        if (!intent || !intent.response || !intent.keywords) continue;
+        // Check if intent has valid response (support both new and old format)
+        const hasResponse = (intent.responses && Array.isArray(intent.responses) && intent.responses.length > 0) ||
+                           intent.response;
+
+        if (!intent || !hasResponse || !intent.keywords) continue;
 
         for (const keyword of intent.keywords) {
             const kw = keyword.toLowerCase();
@@ -193,7 +197,7 @@ function checkIntent(message) {
             // 1. Exact phrase match (after normalization)
             if (qNormalized.includes(kwNormalized)) {
                 console.log(`✅ Intent matched (exact): "${intent.name}" via keyword "${keyword}"`);
-                return intent.response;
+                return selectResponse(intent);
             }
 
             // 2. Word-level matching - check if all important words from keyword appear in query
@@ -219,13 +223,31 @@ function checkIntent(message) {
             if (allWordsPresent) {
                 console.log(`✅ Intent matched (word-level): "${intent.name}" via keyword "${keyword}"`);
                 console.log(`   Matched words: [${kwWords.join(', ')}]`);
-                return intent.response;
+                return selectResponse(intent);
             }
         }
     }
 
     console.log(`❌ No intent matched`);
     return null;
+}
+
+// Helper: Randomly select a response from intent (supports multiple variations)
+function selectResponse(intent) {
+    // New format: multiple response variations
+    if (intent.responses && Array.isArray(intent.responses) && intent.responses.length > 0) {
+        const randomIndex = Math.floor(Math.random() * intent.responses.length);
+        const selectedResponse = intent.responses[randomIndex];
+        console.log(`🎲 Selected response variation ${randomIndex + 1}/${intent.responses.length}`);
+        return selectedResponse;
+    }
+
+    // Old format: single response (backward compatibility)
+    if (intent.response) {
+        return intent.response;
+    }
+
+    return 'No response available';
 }
 
 // Simple Levenshtein distance for typo tolerance
