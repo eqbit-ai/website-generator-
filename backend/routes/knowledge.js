@@ -27,15 +27,16 @@ function loadData() {
     intentsData = [];
     documentsData = [];
 
-    const intentsPath = path.join(process.cwd(), 'config', 'meydan_intents.json');
-
-
+    // Use __dirname for reliable path (works in Railway and local)
+    const intentsPath = path.join(__dirname, '..', 'config', 'meydan_intents.json');
 
     try {
         console.log('🔎 Looking for intents at:', intentsPath);
 
         if (!fs.existsSync(intentsPath)) {
             console.log('❌ Intents file NOT FOUND');
+            console.log('📁 __dirname:', __dirname);
+            console.log('📁 process.cwd():', process.cwd());
             return;
         }
 
@@ -44,7 +45,7 @@ function loadData() {
 
         intentsData = Array.isArray(data.intents) ? data.intents : [];
 
-        console.log(`✅ Loaded ${intentsData.length} intents`);
+        console.log(`✅ Loaded ${intentsData.length} intents from ${intentsPath}`);
     } catch (e) {
         console.log('❌ Failed loading intents:', e.message);
     }
@@ -169,7 +170,14 @@ router.post('/scrape-website', async (req, res) => {
         // Step 4: Save text file to config directory
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `kb_scraped_${timestamp}.txt`;
-        const filePath = path.join(process.cwd(), 'config', filename);
+        const configDir = path.join(__dirname, '..', 'config');
+
+        // Ensure config directory exists
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+
+        const filePath = path.join(configDir, filename);
 
         fs.writeFileSync(filePath, textContent, 'utf-8');
         console.log(`✅ Saved scraped content to: ${filename}`);
@@ -187,15 +195,30 @@ router.post('/scrape-website', async (req, res) => {
         intentsData.push(...newIntents);
 
         // Step 6: Save to meydan_intents.json
-        const intentsPath = path.join(process.cwd(), 'config', 'meydan_intents.json');
+        const intentsPath = path.join(__dirname, '..', 'config', 'meydan_intents.json');
+        console.log(`📁 Intents file path: ${intentsPath}`);
+
         const currentIntents = fs.existsSync(intentsPath)
             ? JSON.parse(fs.readFileSync(intentsPath, 'utf-8'))
             : { intents: [] };
 
+        console.log(`📊 Current intents: ${currentIntents.intents.length}, Adding: ${newIntents.length}`);
+
         currentIntents.intents.push(...newIntents);
 
         fs.writeFileSync(intentsPath, JSON.stringify(currentIntents, null, 2), 'utf-8');
-        console.log(`✅ Added ${newIntents.length} intents to knowledge base`);
+        console.log(`✅ Saved ${currentIntents.intents.length} total intents to ${intentsPath}`);
+
+        // CRITICAL: Reload chat intents so chatbot knows about new data
+        try {
+            const chatModule = require('./chat');
+            if (chatModule.loadIntents) {
+                chatModule.loadIntents();
+                console.log('🔄 Chat intents reloaded after scraping');
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not reload chat intents:', e.message);
+        }
 
         res.json({
             success: true,
@@ -225,7 +248,7 @@ router.post('/scrape-website', async (req, res) => {
  * GET /api/knowledge/scrape-status
  */
 router.get('/scrape-status', (req, res) => {
-    const configPath = path.join(process.cwd(), 'config');
+    const configPath = path.join(__dirname, '..', 'config');
     const scrapedFiles = fs.existsSync(configPath)
         ? fs.readdirSync(configPath).filter(f => f.startsWith('kb_scraped_'))
         : [];
@@ -257,9 +280,21 @@ router.delete('/intents/:index', (req, res) => {
         const deletedIntent = intentsData.splice(index, 1)[0];
 
         // Update the file
-        const intentsPath = path.join(process.cwd(), 'config', 'meydan_intents.json');
+        const intentsPath = path.join(__dirname, '..', 'config', 'meydan_intents.json');
         if (fs.existsSync(intentsPath)) {
             fs.writeFileSync(intentsPath, JSON.stringify({ intents: intentsData }, null, 2), 'utf-8');
+            console.log(`💾 Updated ${intentsPath} with ${intentsData.length} intents`);
+        }
+
+        // Reload chat intents
+        try {
+            const chatModule = require('./chat');
+            if (chatModule.loadIntents) {
+                chatModule.loadIntents();
+                console.log('🔄 Chat intents reloaded after deletion');
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not reload chat intents:', e.message);
         }
 
         console.log(`🗑️ Deleted intent: ${deletedIntent.name || deletedIntent.question || 'Unnamed'}`);
