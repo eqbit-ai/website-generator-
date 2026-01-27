@@ -438,14 +438,44 @@ Return the COMPLETE modified code in format:
         js = js.replace(/```(?:javascript|js)\s*/gi, '').replace(/```\s*$/g, '').trim();
 
         // Validate extraction
+        console.log('\n📊 EXTRACTION RESULTS:');
+        console.log(`HTML: ${html.length} chars ${html ? '✅' : '❌'}`);
+        console.log(`CSS: ${css.length} chars ${css ? '✅' : '❌'}`);
+        console.log(`JS: ${js.length} chars ${js ? '✅' : '❌'}`);
+
         if (!html) {
             console.error('❌ CRITICAL: No HTML extracted!');
             console.error('Response length:', generatedCode.length);
             console.error('First 1000 chars:', generatedCode.substring(0, 1000));
         }
+
         if (!css) {
             console.error('❌ CRITICAL: No CSS extracted!');
             console.error('Response length:', generatedCode.length);
+            console.error('Full response sample:');
+            console.error(generatedCode.substring(0, 2000));
+        } else if (css.length < 500) {
+            console.warn('⚠️ WARNING: CSS seems too short (< 500 chars)');
+            console.warn('CSS content:', css.substring(0, 200));
+        }
+
+        // CRITICAL: If CSS is missing or too short, return error
+        if (!css || css.length < 100) {
+            console.error('\n❌ ABORTING: CSS extraction failed completely');
+            console.error('Cannot return website without CSS - would be unstyled');
+
+            return res.status(500).json({
+                success: false,
+                error: 'CSS generation failed',
+                message: 'The AI did not generate proper CSS. Please try again or use a different prompt.',
+                debug: {
+                    htmlExtracted: html.length > 0,
+                    cssExtracted: css.length,
+                    jsExtracted: js.length > 0,
+                    responseLength: generatedCode.length,
+                    responseSample: generatedCode.substring(0, 500)
+                }
+            });
         }
 
         // Store in session
@@ -455,13 +485,7 @@ Return the COMPLETE modified code in format:
             { role: 'assistant', content: generatedCode }
         );
 
-        console.log(`✅ Generated ${html.length} chars HTML, ${css.length} chars CSS, ${js.length} chars JS`);
-
-        // Warn if CSS extraction seems incomplete (but still return what we have)
-        if (!css || css.length < 100) {
-            console.error('⚠️ WARNING: CSS extraction failed or incomplete');
-            console.error('Response sample:', generatedCode.substring(0, 1000));
-        }
+        console.log(`✅ Generated ${html.length} chars HTML, ${css.length} chars CSS, ${js.length} chars JS\n`);
 
         res.json({
             success: true,

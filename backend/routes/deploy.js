@@ -1,16 +1,19 @@
 // backend/routes/deploy.js
-// Website Deployment Routes
+// Website Deployment Routes with Vercel Integration
 
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
+const axios = require('axios');
 
-// Simple in-memory deployment storage (in production, use a real hosting service)
+// Vercel configuration
+const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
+const VERCEL_API = 'https://api.vercel.com';
+
+// Simple in-memory deployment storage (fallback if Vercel not available)
 const deployments = new Map();
 
 /**
- * Deploy a website
+ * Deploy a website to Vercel
  * POST /api/deploy
  */
 router.post('/', async (req, res) => {
@@ -29,9 +32,6 @@ router.post('/', async (req, res) => {
             .toLowerCase()
             .replace(/[^a-z0-9-]/g, '-')
             .substring(0, 50);
-
-        // Generate deployment ID
-        const deploymentId = `${sanitizedName}-${Date.now()}`;
 
         // Create full HTML file
         const fullHTML = `<!DOCTYPE html>
@@ -52,7 +52,52 @@ ${js || ''}
 </body>
 </html>`;
 
-        // Store deployment
+        // Try Vercel deployment if token is available
+        if (VERCEL_TOKEN) {
+            try {
+                console.log(`🚀 Deploying to Vercel: ${sanitizedName}`);
+
+                // Create deployment using Vercel API
+                const deployment = await axios.post(
+                    `${VERCEL_API}/v13/deployments`,
+                    {
+                        name: sanitizedName,
+                        files: [
+                            {
+                                file: 'index.html',
+                                data: fullHTML
+                            }
+                        ],
+                        projectSettings: {
+                            framework: null
+                        }
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${VERCEL_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                const vercelUrl = `https://${deployment.data.url}`;
+                console.log(`✅ Deployed to Vercel: ${vercelUrl}`);
+
+                return res.json({
+                    success: true,
+                    deploymentId: deployment.data.id,
+                    url: vercelUrl,
+                    message: 'Website deployed successfully to Vercel!'
+                });
+
+            } catch (vercelError) {
+                console.error('❌ Vercel deployment failed:', vercelError.response?.data || vercelError.message);
+                // Fall through to local storage
+            }
+        }
+
+        // Fallback: Store locally if Vercel not available
+        const deploymentId = `${sanitizedName}-${Date.now()}`;
         deployments.set(deploymentId, {
             id: deploymentId,
             projectName: sanitizedName,
@@ -61,18 +106,13 @@ ${js || ''}
             visits: 0
         });
 
-        // In a real implementation, you would:
-        // 1. Upload to Vercel/Netlify/GitHub Pages
-        // 2. Return the actual deployed URL
-        // For now, we'll return a mock URL
-
-        console.log(`✅ Deployed: ${sanitizedName} (${deploymentId})`);
+        console.log(`✅ Stored locally: ${sanitizedName} (${deploymentId})`);
 
         res.json({
             success: true,
             deploymentId,
-            url: `https://${sanitizedName}.demo.app`, // Mock URL
-            message: 'Website deployed successfully! (Demo mode - use Export HTML for production)'
+            url: `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/deploy/${deploymentId}`,
+            message: 'Website stored locally (Vercel not configured)'
         });
 
     } catch (error) {
@@ -129,27 +169,43 @@ router.get('/', (req, res) => {
  * GET /api/domains/search
  */
 router.get('/search', async (req, res) => {
-    const query = req.query.query || '';
+    try {
+        let query = req.query.query || '';
 
-    if (!query) {
-        return res.status(400).json({
+        if (!query) {
+            return res.status(400).json({
+                success: false,
+                error: 'Search query required'
+            });
+        }
+
+        // Clean the query - remove any existing TLD
+        query = query.toLowerCase()
+            .replace(/\.(com|net|org|io|co|dev|app|xyz)$/i, '')
+            .replace(/[^a-z0-9-]/g, '')
+            .substring(0, 63);
+
+        console.log(`🔍 Domain search for: ${query}`);
+
+        // Mock domain search results - in frontend, clicking Buy redirects to Namecheap
+        const tlds = ['.com', '.net', '.org', '.io', '.co'];
+        const domains = tlds.map(tld => ({
+            name: `${query}${tld}`,
+            available: Math.random() > 0.5, // Random availability
+            price: tld === '.com' ? 12.99 : tld === '.io' ? 39.99 : 19.99
+        }));
+
+        res.json({
+            success: true,
+            domains
+        });
+    } catch (error) {
+        console.error('❌ Domain search error:', error);
+        res.status(500).json({
             success: false,
-            error: 'Search query required'
+            error: 'Domain search failed'
         });
     }
-
-    // Mock domain search results - in frontend, clicking Buy redirects to Namecheap
-    const tlds = ['.com', '.net', '.org', '.io', '.co'];
-    const domains = tlds.map(tld => ({
-        name: `${query}${tld}`,
-        available: Math.random() > 0.5, // Random availability
-        price: tld === '.com' ? 12.99 : tld === '.io' ? 39.99 : 19.99
-    }));
-
-    res.json({
-        success: true,
-        domains
-    });
 });
 
 module.exports = router;
