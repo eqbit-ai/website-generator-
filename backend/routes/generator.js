@@ -94,6 +94,7 @@ router.post('/generate', async (req, res) => {
 
         // Create the prompt based on whether it's new or iteration
         let systemPrompt, userMessage;
+        let isTargetedEdit = false;
 
         if (isNewDesign) {
             // Reset history for new design
@@ -288,8 +289,55 @@ Return in EXACT format:
 [code]`;
 
         } else {
-            // Iteration mode
-            systemPrompt = `You are an expert front-end developer iterating on an existing design.
+            // Iteration mode - Detect if it's a targeted edit or full redesign
+            const targetedEditKeywords = [
+                'add image', 'change image', 'replace image', 'update image',
+                'change color', 'update color', 'make bigger', 'make smaller',
+                'change text', 'update text', 'add button', 'change font',
+                'hero section', 'header section', 'footer section',
+                'fix', 'adjust', 'tweak', 'modify'
+            ];
+
+            isTargetedEdit = targetedEditKeywords.some(keyword =>
+                prompt.toLowerCase().includes(keyword)
+            );
+
+            if (isTargetedEdit) {
+                systemPrompt = `You are an expert front-end developer making TARGETED EDITS to an existing design.
+
+🚨 CRITICAL: This is a SMALL CHANGE request. DO NOT redesign the website!
+
+REQUIREMENTS:
+1. Make ONLY the specific change requested by the user
+2. Keep EVERYTHING else EXACTLY the same (layout, colors, fonts, spacing, animations, etc.)
+3. Do NOT regenerate or rewrite sections that weren't mentioned
+4. Return COMPLETE code (with your targeted changes applied)
+5. Maintain the exact same design aesthetic
+6. Return in EXACT format:
+   <!-- HTML -->
+   [complete HTML with targeted change]
+
+   /* CSS */
+   [complete CSS with targeted change]
+
+   // JavaScript
+   [complete JavaScript]
+
+EXAMPLES OF TARGETED EDITS:
+- "add image to hero" → Only change hero <img src="..."> URL, keep everything else
+- "change color to blue" → Only update color CSS variables, keep layout/content
+- "make heading bigger" → Only adjust font-size in CSS, keep everything else
+- "fix button alignment" → Only tweak button CSS, keep rest intact
+
+🚨 DO NOT:
+- Redesign unrelated sections
+- Change the overall layout
+- Add new sections unless explicitly asked
+- Remove existing features
+- Change color schemes unless asked
+- Modify animations unless asked`;
+            } else {
+                systemPrompt = `You are an expert front-end developer iterating on an existing design.
 
 CRITICAL REQUIREMENTS:
 1. Modify the existing code based on the user's request
@@ -317,11 +365,14 @@ WHEN MODIFYING:
 - Maintain animations and interactions
 - If adding new elements, style them completely
 - Always maintain contact form and footer sections`;
+            }
 
             userMessage = `Current website code:
 ${session.currentDesign}
 
 User request: ${prompt}
+
+${isTargetedEdit ? '🚨 REMINDER: Make ONLY the specific change requested. Keep everything else IDENTICAL!' : ''}
 
 Return the COMPLETE modified code in format:
 <!-- HTML -->
@@ -337,11 +388,11 @@ Return the COMPLETE modified code in format:
         conversationMessages.push({ role: 'user', content: userMessage });
 
         // Generate with Claude
-        console.log('🤖 Calling Claude API...');
+        console.log(`🤖 Calling Claude API... ${!isNewDesign && isTargetedEdit ? '(Targeted Edit Mode)' : ''}`);
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 16000, // Increased for complete websites with CSS/JS
-            temperature: 0.7, // Balanced creativity and instruction following
+            temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7, // Lower temp for targeted edits = more precise
             system: systemPrompt,
             messages: conversationMessages
         });

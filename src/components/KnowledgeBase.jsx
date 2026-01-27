@@ -4,7 +4,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Database, X, FileText, Book, Search, Plus, Trash2,
-    RefreshCw, CheckCircle, AlertCircle, ChevronDown, ChevronUp
+    RefreshCw, CheckCircle, AlertCircle, ChevronDown, ChevronUp,
+    Globe, Loader2
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -23,6 +24,11 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
     // Add document form
     const [showAddForm, setShowAddForm] = useState(false);
     const [newDoc, setNewDoc] = useState({ title: '', content: '', category: 'general' });
+
+    // Website scraping
+    const [websiteUrl, setWebsiteUrl] = useState('');
+    const [scraping, setScraping] = useState(false);
+    const [scrapeResult, setScrapeResult] = useState(null);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -122,6 +128,48 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
         setExpandedItems(newSet);
     };
 
+    const handleScrapeWebsite = async () => {
+        if (!websiteUrl.trim()) {
+            setError('Website URL is required');
+            return;
+        }
+
+        // Validate URL
+        try {
+            new URL(websiteUrl);
+        } catch (e) {
+            setError('Invalid URL format. Please include http:// or https://');
+            return;
+        }
+
+        setScraping(true);
+        setError(null);
+        setScrapeResult(null);
+
+        try {
+            const res = await fetch(`${API_URL}/api/knowledge/scrape-website`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: websiteUrl })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setSuccess(`Scraped ${data.stats.pagesScraped} pages, generated ${data.stats.intentsGenerated} intents!`);
+                setScrapeResult(data);
+                setWebsiteUrl('');
+                fetchData(); // Refresh knowledge base
+            } else {
+                setError(data.error || 'Failed to scrape website');
+            }
+        } catch (e) {
+            setError('Scraping failed: ' + e.message);
+        } finally {
+            setScraping(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -171,6 +219,9 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                     </button>
                     <button className={`kb-tab ${activeTab === 'intents' ? 'active' : ''}`} onClick={() => setActiveTab('intents')}>
                         <Book size={16} /> Intents ({intents.length})
+                    </button>
+                    <button className={`kb-tab ${activeTab === 'scrape' ? 'active' : ''}`} onClick={() => setActiveTab('scrape')}>
+                        <Globe size={16} /> Scrape Website
                     </button>
                     <button className={`kb-tab ${activeTab === 'test' ? 'active' : ''}`} onClick={() => setActiveTab('test')}>
                         <Search size={16} /> Test
@@ -288,6 +339,125 @@ const KnowledgeBase = ({ isOpen, onClose }) => {
                                     </div>
                                 ))
                             )}
+                        </div>
+                    )}
+
+                    {/* Scrape Website Tab */}
+                    {activeTab === 'scrape' && (
+                        <div className="kb-scrape">
+                            <div className="kb-scrape-header">
+                                <Globe size={32} style={{ color: 'var(--accent)' }} />
+                                <h3>Scrape Website & Generate Intents</h3>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                                    Enter a website URL to automatically crawl all pages, extract content, and generate AI-powered intents for your knowledge base.
+                                </p>
+                            </div>
+
+                            <div className="kb-form-group" style={{ marginTop: '1.5rem' }}>
+                                <label>Website URL</label>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <input
+                                        type="url"
+                                        value={websiteUrl}
+                                        onChange={e => setWebsiteUrl(e.target.value)}
+                                        onKeyPress={e => e.key === 'Enter' && !scraping && handleScrapeWebsite()}
+                                        placeholder="https://example.com"
+                                        disabled={scraping}
+                                        style={{ flex: 1 }}
+                                    />
+                                    <button
+                                        className="kb-btn primary"
+                                        onClick={handleScrapeWebsite}
+                                        disabled={scraping || !websiteUrl.trim()}
+                                        style={{ minWidth: '120px' }}
+                                    >
+                                        {scraping ? (
+                                            <>
+                                                <Loader2 size={18} className="spinning" />
+                                                Scraping...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Globe size={18} />
+                                                Scrape
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', display: 'block' }}>
+                                    Example: https://www.example.com (max 10 pages per website)
+                                </span>
+                            </div>
+
+                            {scraping && (
+                                <div style={{
+                                    marginTop: '1.5rem',
+                                    padding: '1rem',
+                                    background: 'var(--bg-tertiary)',
+                                    borderRadius: '10px',
+                                    textAlign: 'center'
+                                }}>
+                                    <Loader2 size={32} className="spinning" style={{ color: 'var(--accent)', marginBottom: '0.5rem' }} />
+                                    <p style={{ color: 'var(--text-secondary)' }}>Crawling website and generating intents...</p>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>This may take 1-2 minutes</span>
+                                </div>
+                            )}
+
+                            {scrapeResult && (
+                                <div style={{
+                                    marginTop: '1.5rem',
+                                    padding: '1.5rem',
+                                    background: 'var(--bg-tertiary)',
+                                    borderRadius: '10px',
+                                    border: '1px solid var(--success)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                                        <CheckCircle size={24} style={{ color: 'var(--success)' }} />
+                                        <h4 style={{ margin: 0 }}>Scraping Complete!</h4>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div className="kb-stat" style={{ background: 'var(--bg-card)', padding: '1rem', borderRadius: '8px' }}>
+                                            <span className="kb-stat-value">{scrapeResult.stats?.pagesScraped || 0}</span>
+                                            <span className="kb-stat-label">Pages Scraped</span>
+                                        </div>
+                                        <div className="kb-stat" style={{ background: 'var(--bg-card)', padding: '1rem', borderRadius: '8px' }}>
+                                            <span className="kb-stat-value">{scrapeResult.stats?.intentsGenerated || 0}</span>
+                                            <span className="kb-stat-label">Intents Generated</span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                        <p style={{ marginBottom: '0.5rem' }}>
+                                            <strong>URL:</strong> {scrapeResult.url}
+                                        </p>
+                                        <p style={{ marginBottom: '0.5rem' }}>
+                                            <strong>Text File:</strong> {scrapeResult.stats?.textFile}
+                                        </p>
+                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '1rem' }}>
+                                            All intents have been added to the knowledge base and are now available for chatbot and voice agents.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div style={{
+                                marginTop: '1.5rem',
+                                padding: '1rem',
+                                background: 'var(--bg-tertiary)',
+                                borderRadius: '10px',
+                                border: '1px solid var(--border)'
+                            }}>
+                                <h4 style={{ marginBottom: '0.5rem', fontSize: '0.875rem' }}>How it works:</h4>
+                                <ol style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', paddingLeft: '1.5rem', margin: 0 }}>
+                                    <li>Crawls the website and all linked pages (max 10 pages)</li>
+                                    <li>Extracts all text content from each page</li>
+                                    <li>Uses AI to analyze content and generate 5-6 intents per section</li>
+                                    <li>Creates organized text file with all content</li>
+                                    <li>Adds intents to knowledge base automatically</li>
+                                    <li>Chatbot and voice agents can now answer questions about this content</li>
+                                </ol>
+                            </div>
                         </div>
                     )}
 

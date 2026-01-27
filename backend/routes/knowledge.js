@@ -5,6 +5,13 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const webScraperService = require('../services/webScraperService');
+
+// Get Anthropic API client
+const Anthropic = require('@anthropic-ai/sdk');
+const anthropic = process.env.ANTHROPIC_API_KEY
+    ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    : null;
 
 // In-memory storage (AS BEFORE)
 let intentsData = [];
@@ -110,6 +117,122 @@ router.post('/reload', (req, res) => {
 // Stub endpoint for documents (not implemented yet)
 router.get('/documents', (req, res) => {
     res.json({ documents: documentsData });
+});
+
+/**
+ * Scrape website and generate intents
+ * POST /api/knowledge/scrape-website
+ */
+router.post('/scrape-website', async (req, res) => {
+    try {
+        const { url } = req.body;
+
+        if (!url) {
+            return res.status(400).json({
+                success: false,
+                error: 'Website URL is required'
+            });
+        }
+
+        if (!anthropic) {
+            return res.status(500).json({
+                success: false,
+                error: 'AI service not available. Please configure ANTHROPIC_API_KEY'
+            });
+        }
+
+        console.log(`🕷️ Starting website scrape: ${url}`);
+
+        // Step 1: Scrape the website
+        const scrapedData = await webScraperService.scrapeWebsite(url);
+
+        if (!scrapedData.success) {
+            return res.status(500).json({
+                success: false,
+                error: scrapedData.error || 'Failed to scrape website'
+            });
+        }
+
+        // Step 2: Generate intents from scraped content
+        const intentsResult = await webScraperService.generateIntents(scrapedData, anthropic);
+
+        if (!intentsResult.success) {
+            return res.status(500).json({
+                success: false,
+                error: intentsResult.error || 'Failed to generate intents'
+            });
+        }
+
+        // Step 3: Format as text file
+        const textContent = webScraperService.formatAsTextFile(scrapedData, intentsResult.intents);
+
+        // Step 4: Save text file to config directory
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `kb_scraped_${timestamp}.txt`;
+        const filePath = path.join(process.cwd(), 'config', filename);
+
+        fs.writeFileSync(filePath, textContent, 'utf-8');
+        console.log(`✅ Saved scraped content to: ${filename}`);
+
+        // Step 5: Add intents to in-memory knowledge base
+        const newIntents = intentsResult.intents.map(intent => ({
+            keywords: intent.keywords || [],
+            response: intent.answer,
+            question: intent.question,
+            source: intent.source,
+            sourceTitle: intent.sourceTitle
+        }));
+
+        intentsData.push(...newIntents);
+
+        // Step 6: Save to meydan_intents.json
+        const intentsPath = path.join(process.cwd(), 'config', 'meydan_intents.json');
+        const currentIntents = fs.existsSync(intentsPath)
+            ? JSON.parse(fs.readFileSync(intentsPath, 'utf-8'))
+            : { intents: [] };
+
+        currentIntents.intents.push(...newIntents);
+
+        fs.writeFileSync(intentsPath, JSON.stringify(currentIntents, null, 2), 'utf-8');
+        console.log(`✅ Added ${newIntents.length} intents to knowledge base`);
+
+        res.json({
+            success: true,
+            message: 'Website scraped and intents generated successfully',
+            url: url,
+            stats: {
+                pagesScraped: scrapedData.totalPages,
+                intentsGenerated: intentsResult.totalIntents,
+                textFile: filename
+            },
+            intents: intentsResult.intents
+        });
+
+    } catch (error) {
+        console.error('❌ Scrape website error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to scrape website'
+        });
+    }
+});
+
+/**
+ * Get scraping status
+ * GET /api/knowledge/scrape-status
+ */
+router.get('/scrape-status', (req, res) => {
+    const configPath = path.join(process.cwd(), 'config');
+    const scrapedFiles = fs.existsSync(configPath)
+        ? fs.readdirSync(configPath).filter(f => f.startsWith('kb_scraped_'))
+        : [];
+
+    res.json({
+        success: true,
+        scrapedFiles: scrapedFiles,
+        totalScrapedFiles: scrapedFiles.length,
+        totalIntents: intentsData.length
+    });
 });
 
 loadData();
