@@ -85,7 +85,17 @@ const DeployModal = ({ isOpen, onClose, html, css, js }) => {
 
     const handlePurchaseDomain = (domain) => {
         // Redirect to domain registrar
-        window.open(`https://www.namecheap.com/domains/registration/results/?domain=${domain.name}`, '_blank');
+        const namecheapUrl = `https://www.namecheap.com/domains/registration/results/?domain=${domain.name}`;
+        console.log('Opening Namecheap:', namecheapUrl);
+
+        // Use window.location for more reliable opening (bypasses popup blockers)
+        const newWindow = window.open(namecheapUrl, '_blank', 'noopener,noreferrer');
+
+        // Fallback if popup blocked
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+            console.warn('Popup blocked, using fallback');
+            window.location.href = namecheapUrl;
+        }
     };
 
     const handleClose = () => {

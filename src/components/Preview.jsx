@@ -14,18 +14,28 @@ const Preview = ({ html, css, js }) => {
             const doc = iframe.contentDocument || iframe.contentWindow?.document;
             if (!doc) return;
 
-            const fullHTML = `
-<!DOCTYPE html>
+            const fullHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Preview</title>
-  <style>${css || ''}</style>
+  <style>
+    /* Prevent FOUC (Flash of Unstyled Content) */
+    body { visibility: hidden; }
+    body.loaded { visibility: visible; }
+    ${css || ''}
+  </style>
 </head>
 <body>
   ${html || '<p style="padding: 20px; color: #666; font-family: sans-serif;">Enter a prompt to generate your website...</p>'}
-  <script>${js || ''}<\/script>
+  <script>
+    // Show body only after CSS is parsed
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('loaded');
+    });
+    ${js || ''}
+  <\/script>
 </body>
 </html>`;
 
