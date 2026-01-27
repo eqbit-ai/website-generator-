@@ -709,9 +709,53 @@ router.get('/users', (req, res) => {
     res.json({ count: users.length, users });
 });
 
-// Stub endpoint for 2FA setup (not implemented yet)
-router.get('/setup-2fa', (req, res) => {
-    res.json({ message: '2FA setup not implemented yet' });
+// 2FA setup endpoint
+router.post('/setup-2fa', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ success: false, error: 'Valid email required' });
+        }
+
+        if (!totpService) {
+            return res.status(500).json({ success: false, error: 'TOTP service not available' });
+        }
+
+        // Generate secret and QR code
+        const secret = totpService.generateSecret();
+        const qrData = await totpService.generateQRCode(email, secret);
+        const currentCode = totpService.generateCurrentCode(secret);
+
+        // Save to database
+        const existingUser = db.userAccounts.getBy('email', email.toLowerCase());
+        if (existingUser) {
+            db.userAccounts.update(existingUser.id, {
+                totp_secret: secret,
+                totp_enabled: false // Not enabled until verified
+            });
+        } else {
+            db.userAccounts.insert({
+                email: email.toLowerCase(),
+                name: email.split('@')[0],
+                source: '2fa-setup',
+                totp_secret: secret,
+                totp_enabled: false,
+                created_at: new Date().toISOString()
+            });
+        }
+
+        res.json({
+            success: true,
+            qrCode: qrData.qrCodeDataUrl,
+            manualEntry: qrData.manualEntry,
+            currentCode: currentCode // For testing
+        });
+
+    } catch (error) {
+        console.error('2FA setup error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 module.exports = router;
