@@ -1,5 +1,6 @@
 // backend/routes/deploy.js
 // Website Deployment Routes with Vercel Integration
+// Version: 1.1 - Added domain search endpoint
 
 const express = require('express');
 const router = express.Router();

@@ -522,6 +522,241 @@ body {
   cursor: not-allowed;
 }
 
+/* Domain Search Styles */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2rem 0 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.divider span {
+  padding: 0 1rem;
+}
+
+.domain-search {
+  margin-bottom: 2rem;
+}
+
+.search-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.5rem;
+  transition: border-color 0.2s;
+}
+
+.search-input-group:focus-within {
+  border-color: var(--accent);
+}
+
+.search-input-group svg {
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.domain-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0.5rem;
+  outline: none;
+}
+
+.domain-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-button {
+  padding: 0.625rem 1.25rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.search-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.search-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.domain-results {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.domain-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.domain-result.available {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.domain-result.available:hover {
+  border-color: var(--success);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.domain-result.taken {
+  opacity: 0.6;
+}
+
+.domain-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.domain-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.domain-price {
+  font-size: 0.875rem;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.domain-taken {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.buy-button {
+  padding: 0.625rem 1.5rem;
+  background: var(--success);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buy-button:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+.deployed-url-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.deployed-url-box a {
+  flex: 1;
+  color: var(--accent);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.deployed-url-box a:hover {
+  text-decoration: underline;
+}
+
+.copy-button {
+  padding: 0.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.copy-button:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.manual-connect {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.manual-connect h4 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.manual-connect p {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.manual-connect code {
+  display: block;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--accent);
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.dns-hint {
+  font-size: 0.8125rem !important;
+  color: var(--text-muted) !important;
+}
+
 /* ============================================
    FLOATING ACTION BUTTONS (FAB)
    ============================================ */
