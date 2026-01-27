@@ -2,13 +2,13 @@ import config from '../config';
 
 const API_BASE_URL = `${config.apiUrl}/api`;
 
-// NEW: Premium generator with conversation context
-export const generateWebsite = async (prompt, sessionId = null, style = null) => {
+// AI-Driven generator with conversation context
+export const generateWebsite = async (prompt, sessionId = null) => {
     try {
         const response = await fetch(`${API_BASE_URL}/generator/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, sessionId, style }),
+            body: JSON.stringify({ prompt, sessionId }),
         });
 
         const data = await response.json();

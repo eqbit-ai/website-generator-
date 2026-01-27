@@ -106,6 +106,12 @@ router.post('/reload', (req, res) => {
         intents: intentsData.length
     });
 });
+
+// Stub endpoint for documents (not implemented yet)
+router.get('/documents', (req, res) => {
+    res.json({ documents: documentsData });
+});
+
 loadData();
 
 // 🔴 THIS IS THE CRITICAL LINE THAT WAS BROKEN

@@ -18,14 +18,7 @@ Wait for their choice:
 - If they say "SMS" or "text" or "phone" → SMS FLOW (go to Step 3a)
 - If they say "Google" or "authenticator" or "app" → GOOGLE AUTH FLOW (go to Step 3b)
 
-### STEP 3a: SMS VERIFICATION FLOW
-1. **IMPORTANT: Call the send_otp function** (no parameters needed)
-2. Wait for the function response
-3. Say: "Perfect! I've sent a 6-digit verification code to your phone. Please enter the code using your keypad, then press pound."
-4. Wait for them to say or enter the code (they'll say digits like "3 8 5 5 9 3" or enter via keypad)
-5. **Call verify_otp function** with the code parameter
-6. If verified → Say: "Great! You're verified. How can I help you today?"
-7. If verification fails → Say: "That code doesn't match. Please try again."
+
 
 ### STEP 3b: GOOGLE AUTHENTICATOR FLOW
 1. Say: "Please open your Google Authenticator app and enter the 6-digit code using your keypad."

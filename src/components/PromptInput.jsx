@@ -15,10 +15,12 @@ const PromptInput = ({ onGenerate, isLoading, loadingMessage }) => {
     };
 
     const examplePrompts = [
-        "A premium landing page for a tech startup",
-        "A luxury hotel website with booking section",
-        "A creative portfolio for a graphic designer",
-        "An elegant e-commerce site for jewelry",
+        "A modern pet shop website with adorable animal photos",
+        "A professional dental clinic website with clean design",
+        "A luxury spa and wellness center with calming aesthetics",
+        "A tech startup landing page with futuristic design",
+        "A restaurant website with food photography gallery",
+        "A fitness gym website with energy and motivation"
     ];
 
     return (

@@ -23,13 +23,13 @@ const WebsiteGenerator = () => {
     const [designStyle, setDesignStyle] = useState(null);
     const [loadingMessage, setLoadingMessage] = useState('');
 
-    const handleGenerate = async (prompt, style = null) => {
+    const handleGenerate = async (prompt) => {
         setIsLoading(true);
         setError(null);
-        setLoadingMessage('Generating your premium website...');
+        setLoadingMessage('Creating your unique design with AI...');
 
         try {
-            const result = await generateWebsite(prompt, sessionId, style);
+            const result = await generateWebsite(prompt, sessionId);
 
             if (result.success) {
                 setHtml(result.website.html);

@@ -709,4 +709,9 @@ router.get('/users', (req, res) => {
     res.json({ count: users.length, users });
 });
 
+// Stub endpoint for 2FA setup (not implemented yet)
+router.get('/setup-2fa', (req, res) => {
+    res.json({ message: '2FA setup not implemented yet' });
+});
+
 module.exports = router;
