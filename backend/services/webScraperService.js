@@ -360,8 +360,40 @@ async function generateIntents(scrapedData, anthropic) {
                 console.log(`✅ FAQ page detected with ${page.faqPairs.length} Q&A pairs - converting directly to intents`);
 
                 for (const faqPair of page.faqPairs) {
+                    // ✅ FIX: Remove duplicate text from answer (website HTML has answers repeated)
+                    let cleanAnswer = faqPair.answer.trim();
+
+                    // If answer is duplicated (same text repeated), take only first half
+                    const halfLength = Math.floor(cleanAnswer.length / 2);
+                    const firstHalf = cleanAnswer.substring(0, halfLength);
+                    const secondHalf = cleanAnswer.substring(halfLength);
+
+                    if (firstHalf === secondHalf && firstHalf.length > 20) {
+                        // Answer is exactly duplicated
+                        cleanAnswer = firstHalf.trim();
+                        console.log(`  🧹 Removed duplicate text from answer`);
+                    } else {
+                        // Check if answer contains repeated sentences
+                        const sentences = cleanAnswer.match(/[^.!?]+[.!?]+/g) || [cleanAnswer];
+                        const uniqueSentences = [];
+                        const seenSentences = new Set();
+
+                        for (const sent of sentences) {
+                            const normalized = sent.trim().toLowerCase();
+                            if (!seenSentences.has(normalized)) {
+                                seenSentences.add(normalized);
+                                uniqueSentences.push(sent.trim());
+                            }
+                        }
+
+                        if (uniqueSentences.length < sentences.length) {
+                            cleanAnswer = uniqueSentences.join(' ');
+                            console.log(`  🧹 Removed ${sentences.length - uniqueSentences.length} duplicate sentences`);
+                        }
+                    }
+
                     // Extract keywords from question and answer
-                    const combinedText = `${faqPair.question} ${faqPair.answer}`.toLowerCase();
+                    const combinedText = `${faqPair.question} ${cleanAnswer}`.toLowerCase();
                     const words = combinedText
                         .replace(/[^a-z0-9\s]/g, ' ')
                         .split(/\s+/)
@@ -372,8 +404,8 @@ async function generateIntents(scrapedData, anthropic) {
                         .filter(w => !['about', 'there', 'where', 'which', 'their', 'would', 'should', 'could'].includes(w))
                         .slice(0, 5);
 
-                    // Create 3 answer variations from the single FAQ answer
-                    const baseAnswer = faqPair.answer.trim();
+                    // Create 3 answer variations from the cleaned FAQ answer
+                    const baseAnswer = cleanAnswer;
                     const responses = [
                         baseAnswer,
                         // Variation 2: Add "According to Meydan Free Zone," prefix

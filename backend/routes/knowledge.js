@@ -58,35 +58,138 @@ function loadData() {
 
 
 // ===============================
-// SEARCH (UNCHANGED)
+// SEARCH (USES SAME LOGIC AS CHAT.JS)
 // ===============================
+
+// Normalize word (singular/plural, common variations)
+function normalizeWord(word) {
+    word = word.toLowerCase().trim();
+    // Handle plural/singular
+    if (word.endsWith('s')) return word.slice(0, -1);
+    return word;
+}
+
+// Simple Levenshtein distance for typo tolerance
+function levenshteinDistance(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
+// Helper: Randomly select a response from intent (supports multiple variations)
+function selectResponse(intent) {
+    // New format: multiple response variations
+    if (intent.responses && Array.isArray(intent.responses) && intent.responses.length > 0) {
+        const randomIndex = Math.floor(Math.random() * intent.responses.length);
+        return intent.responses[randomIndex];
+    }
+
+    // Old format: single response (backward compatibility)
+    if (intent.response) {
+        return intent.response;
+    }
+
+    return 'No response available';
+}
+
 function search(query) {
     if (!query || query.length < 2) {
         return { found: false };
     }
 
-    const q = query.toLowerCase();
-    for (const intent of intentsData) {
-        if (!intent || !intent.response) continue;
+    const q = query.toLowerCase().trim();
 
-        const keywords = intent.keywords || [];
-        for (const k of keywords) {
-            if (q.includes(k.toLowerCase())) {
+    // Normalize for matching (remove punctuation, extra spaces)
+    const qNormalized = q.replace(/[?!.,]/g, '').replace(/\s+/g, ' ').trim();
+    const qWords = qNormalized.split(/\s+/).map(normalizeWord);
+
+    console.log(`🔍 KB Search: "${q}"`);
+    console.log(`📝 Normalized: "${qNormalized}"`);
+    console.log(`📝 Words: [${qWords.join(', ')}]`);
+
+    for (const intent of intentsData) {
+        // Check if intent has valid response (support both new and old format)
+        const hasResponse = (intent.responses && Array.isArray(intent.responses) && intent.responses.length > 0) ||
+                           intent.response;
+
+        if (!intent || !hasResponse || !intent.keywords) continue;
+
+        for (const keyword of intent.keywords) {
+            const kw = keyword.toLowerCase();
+            const kwNormalized = kw.replace(/[?!.,]/g, '').replace(/\s+/g, ' ').trim();
+
+            // 1. Exact phrase match (after normalization)
+            if (qNormalized.includes(kwNormalized)) {
+                console.log(`✅ Intent matched (exact): "${intent.name}" via keyword "${keyword}"`);
                 return {
                     found: true,
                     type: 'intent',
-                    response: intent.response
+                    response: selectResponse(intent),
+                    intent: intent.name,
+                    keyword: keyword
+                };
+            }
+
+            // 2. Word-level matching - check if all important words from keyword appear in query
+            const kwWords = kwNormalized.split(/\s+/).filter(w => w.length > 2).map(normalizeWord);
+
+            // Must have at least 1 keyword word
+            if (kwWords.length === 0) continue;
+
+            const allWordsPresent = kwWords.every(kwWord =>
+                qWords.some(qWord => {
+                    // Exact match after normalization
+                    if (qWord === kwWord) return true;
+                    // Contains match (for compound words)
+                    if (qWord.length > 3 && kwWord.length > 3) {
+                        if (qWord.includes(kwWord) || kwWord.includes(qWord)) return true;
+                    }
+                    // Fuzzy match: allow 1 character difference for typos (only for longer words)
+                    if (kwWord.length > 4 && levenshteinDistance(qWord, kwWord) <= 1) return true;
+                    return false;
+                })
+            );
+
+            if (allWordsPresent) {
+                console.log(`✅ Intent matched (word-level): "${intent.name}" via keyword "${keyword}"`);
+                console.log(`   Matched words: [${kwWords.join(', ')}]`);
+                return {
+                    found: true,
+                    type: 'intent',
+                    response: selectResponse(intent),
+                    intent: intent.name,
+                    keyword: keyword
                 };
             }
         }
     }
+
+    console.log(`❌ No intent matched in KB search`);
     return { found: false };
 }
 
 // ===============================
 // ROUTES (VALID EXPRESS ROUTER)
 // ===============================
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
     res.json({
         ok: true,
         intents: intentsData.length,
@@ -94,7 +197,7 @@ router.get('/health', (req, res) => {
     });
 });
 
-router.get('/intents', (req, res) => {
+router.get('/intents', (_req, res) => {
     res.json({
         success: true,
         count: intentsData.length,
@@ -107,7 +210,7 @@ router.get('/search', (req, res) => {
     res.json(search(q));
 });
 
-router.post('/reload', (req, res) => {
+router.post('/reload', (_req, res) => {
     loadData();
     res.json({
         success: true,
@@ -116,7 +219,7 @@ router.post('/reload', (req, res) => {
 });
 
 // Stub endpoint for documents (not implemented yet)
-router.get('/documents', (req, res) => {
+router.get('/documents', (_req, res) => {
     res.json({ documents: documentsData });
 });
 
