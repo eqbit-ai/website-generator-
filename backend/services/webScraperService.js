@@ -40,21 +40,43 @@ async function scrapeWebsite(websiteUrl) {
 }
 
 /**
+ * Clean URL by removing fragments and trailing slashes
+ */
+function cleanUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        // Remove fragment (everything after #)
+        urlObj.hash = '';
+        // Remove trailing slash
+        let cleanedUrl = urlObj.href;
+        if (cleanedUrl.endsWith('/')) {
+            cleanedUrl = cleanedUrl.slice(0, -1);
+        }
+        return cleanedUrl;
+    } catch (e) {
+        return url;
+    }
+}
+
+/**
  * Recursively crawl pages
  */
 async function crawlPage(url, baseDomain, visitedUrls, scrapedPages, depth, maxDepth) {
-    // Stop if we've reached max depth or visited this URL
-    if (depth >= maxDepth || visitedUrls.has(url)) {
+    // Clean URL to avoid duplicates
+    const cleanedUrl = cleanUrl(url);
+
+    // Stop if we've reached max pages (absolute limit) or max depth or visited this URL
+    if (scrapedPages.length >= 10 || depth >= maxDepth || visitedUrls.has(cleanedUrl)) {
         return;
     }
 
-    visitedUrls.add(url);
+    visitedUrls.add(cleanedUrl);
 
     try {
-        console.log(`📄 Crawling: ${url}`);
+        console.log(`📄 Crawling: ${cleanedUrl} (${scrapedPages.length + 1}/10)`);
 
         // Fetch the page
-        const response = await axios.get(url, {
+        const response = await axios.get(cleanedUrl, {
             timeout: 10000,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (compatible; KnowledgeBaseScraper/1.0)'
@@ -102,12 +124,19 @@ async function crawlPage(url, baseDomain, visitedUrls, scrapedPages, depth, maxD
         // Save the page data
         if (content.length > 100) { // Only save if there's substantial content
             scrapedPages.push({
-                url: url,
+                url: cleanedUrl,
                 title: title,
                 content: content.substring(0, 10000), // Limit content length
                 headings: headings,
                 scrapedAt: new Date().toISOString()
             });
+
+            console.log(`✅ Saved page ${scrapedPages.length}/10: ${title}`);
+        }
+
+        // Stop if we've already hit the max page limit
+        if (scrapedPages.length >= 10) {
+            return;
         }
 
         // Find all links on the page
@@ -116,12 +145,15 @@ async function crawlPage(url, baseDomain, visitedUrls, scrapedPages, depth, maxD
             const href = $(elem).attr('href');
             if (href) {
                 try {
-                    const absoluteUrl = new URL(href, url).href;
+                    const absoluteUrl = new URL(href, cleanedUrl).href;
                     const linkUrl = new URL(absoluteUrl);
 
-                    // Only follow links within the same domain
-                    if (linkUrl.origin === baseDomain && !visitedUrls.has(absoluteUrl)) {
-                        links.push(absoluteUrl);
+                    // Clean the link URL
+                    const cleanedLink = cleanUrl(absoluteUrl);
+
+                    // Only follow links within the same domain that we haven't visited
+                    if (linkUrl.origin === baseDomain && !visitedUrls.has(cleanedLink)) {
+                        links.push(cleanedLink);
                     }
                 } catch (e) {
                     // Invalid URL, skip
@@ -129,9 +161,14 @@ async function crawlPage(url, baseDomain, visitedUrls, scrapedPages, depth, maxD
             }
         });
 
-        // Crawl child pages (limit to first 5 links per page)
-        const uniqueLinks = [...new Set(links)].slice(0, 5);
+        // Crawl child pages (limit to first 3 links per page to avoid explosion)
+        const uniqueLinks = [...new Set(links)].slice(0, 3);
         for (const link of uniqueLinks) {
+            // Stop if we've reached max pages
+            if (scrapedPages.length >= 10) {
+                console.log('⚠️ Reached max 10 pages limit, stopping crawl');
+                break;
+            }
             await crawlPage(link, baseDomain, visitedUrls, scrapedPages, depth + 1, maxDepth);
         }
 
@@ -153,16 +190,20 @@ async function generateIntents(scrapedData, anthropic) {
 
         const allIntents = [];
 
-        for (const page of scrapedData.pages) {
+        // Limit to first 10 pages to avoid timeout
+        const pagesToProcess = scrapedData.pages.slice(0, 10);
+        console.log(`Processing ${pagesToProcess.length} pages...`);
+
+        for (const page of pagesToProcess) {
             console.log(`📋 Processing: ${page.title}`);
 
-            // Split content into chunks if it's too long
-            const chunks = splitIntoChunks(page.content, 3000);
+            // Split content into chunks if it's too long (limit to first 2 chunks per page)
+            const chunks = splitIntoChunks(page.content, 3000).slice(0, 2);
 
             for (let i = 0; i < chunks.length; i++) {
                 const chunk = chunks[i];
 
-                const prompt = `Analyze this website content and generate 5-6 intents (questions users might ask) with comprehensive answers.
+                const prompt = `Analyze this website content and generate 3-4 intents (questions users might ask) with comprehensive answers.
 
 Website: ${page.title}
 URL: ${page.url}
@@ -182,8 +223,8 @@ Generate intents in this EXACT JSON format:
 }
 
 Requirements:
-1. Generate 5-6 diverse intents that users might ask
-2. Each answer should be comprehensive (2-4 sentences)
+1. Generate 3-4 diverse intents that users might ask
+2. Each answer should be comprehensive (2-3 sentences)
 3. Answers MUST be based ONLY on the provided content (no hallucination)
 4. Include relevant keywords for search
 5. Make questions natural and conversational
@@ -191,17 +232,17 @@ Requirements:
 
 Return ONLY the JSON, no explanation.`;
 
-                const response = await anthropic.messages.create({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 4000,
-                    temperature: 0.3, // Lower temperature for accuracy
-                    messages: [{ role: 'user', content: prompt }]
-                });
-
-                const responseText = response.content[0].text;
-
-                // Parse JSON response
                 try {
+                    const response = await anthropic.messages.create({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 3000,
+                        temperature: 0.3, // Lower temperature for accuracy
+                        messages: [{ role: 'user', content: prompt }]
+                    });
+
+                    const responseText = response.content[0].text;
+
+                    // Parse JSON response
                     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
                     if (jsonMatch) {
                         const parsed = JSON.parse(jsonMatch[0]);
@@ -211,14 +252,15 @@ Return ONLY the JSON, no explanation.`;
                                 source: page.url,
                                 sourceTitle: page.title
                             })));
+                            console.log(`  ✅ Generated ${parsed.intents.length} intents (Total: ${allIntents.length})`);
                         }
                     }
                 } catch (parseError) {
-                    console.error('❌ Failed to parse intent JSON:', parseError.message);
+                    console.error(`❌ Failed to process chunk: ${parseError.message}`);
                 }
 
                 // Wait a bit to avoid rate limits
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
 
