@@ -355,77 +355,105 @@ async function generateIntents(scrapedData, anthropic) {
             console.log(`📋 Processing: ${page.title}`);
 
             // ✅ SPECIAL HANDLING FOR FAQ PAGES
-            // If FAQ pairs were extracted, convert them directly to intents (no AI needed)
+            // Use AI to create proper short variations from FAQ Q&A pairs
             if (page.isFAQ && page.faqPairs && page.faqPairs.length > 0) {
-                console.log(`✅ FAQ page detected with ${page.faqPairs.length} Q&A pairs - converting directly to intents`);
+                console.log(`✅ FAQ page detected with ${page.faqPairs.length} Q&A pairs - using AI for short variations`);
 
-                for (const faqPair of page.faqPairs) {
-                    // ✅ FIX: Remove duplicate text from answer (website HTML has answers repeated)
-                    let cleanAnswer = faqPair.answer.trim();
+                // Process FAQ pairs in batches of 10 to avoid timeouts
+                const batchSize = 10;
+                for (let batchStart = 0; batchStart < page.faqPairs.length; batchStart += batchSize) {
+                    const batch = page.faqPairs.slice(batchStart, batchStart + batchSize);
+                    console.log(`  📋 Processing FAQ batch ${Math.floor(batchStart / batchSize) + 1} (${batch.length} Q&A pairs)`);
 
-                    // If answer is duplicated (same text repeated), take only first half
-                    const halfLength = Math.floor(cleanAnswer.length / 2);
-                    const firstHalf = cleanAnswer.substring(0, halfLength);
-                    const secondHalf = cleanAnswer.substring(halfLength);
+                    // Format batch for AI
+                    const faqText = batch.map((pair, idx) =>
+                        `${idx + 1}. Q: ${pair.question}\n   A: ${pair.answer}`
+                    ).join('\n\n');
 
-                    if (firstHalf === secondHalf && firstHalf.length > 20) {
-                        // Answer is exactly duplicated
-                        cleanAnswer = firstHalf.trim();
-                        console.log(`  🧹 Removed duplicate text from answer`);
-                    } else {
-                        // Check if answer contains repeated sentences
-                        const sentences = cleanAnswer.match(/[^.!?]+[.!?]+/g) || [cleanAnswer];
-                        const uniqueSentences = [];
-                        const seenSentences = new Set();
+                    const prompt = `You are converting FAQ Q&A pairs into conversational chatbot responses.
 
-                        for (const sent of sentences) {
-                            const normalized = sent.trim().toLowerCase();
-                            if (!seenSentences.has(normalized)) {
-                                seenSentences.add(normalized);
-                                uniqueSentences.push(sent.trim());
+FAQ Content:
+${faqText}
+
+For EACH question above, create 3 SHORT response variations (max 2 sentences each).
+
+CRITICAL RULES:
+1. Each variation must be DIFFERENT (different wording, not just prefixes)
+2. Keep responses SHORT (1-2 sentences maximum)
+3. Break long answers into key points
+4. Use conversational, natural language
+5. Responses must be based ONLY on the answer provided (no hallucination)
+6. Extract 3-5 SPECIFIC keywords from the Q&A (not generic words)
+
+Return EXACT JSON format:
+{
+  "intents": [
+    {
+      "question": "Original question",
+      "responses": [
+        "Short variation 1 (1-2 sentences, different phrasing)",
+        "Short variation 2 (1-2 sentences, completely different wording)",
+        "Short variation 3 (1-2 sentences, another angle)"
+      ],
+      "keywords": ["specific1", "specific2", "specific3"]
+    }
+  ]
+}
+
+EXAMPLES:
+
+Q: How many shareholders are allowed?
+A: A maximum of 50 shareholders are allowed on a license.A maximum of 50 shareholders are allowed on a license.
+
+Good variations:
+1. "You can have up to 50 shareholders on your license."
+2. "The maximum is 50 shareholders per license."
+3. "Meydan Free Zone allows a maximum of 50 shareholders."
+
+Bad variations (DON'T DO THIS):
+1. "A maximum of 50 shareholders are allowed on a license." (too repetitive of original)
+2. "According to Meydan Free Zone, a maximum of 50 shareholders..." (same answer with prefix)
+3. "Here's what you need to know: A maximum of 50 shareholders..." (same answer with prefix)
+
+Return ONLY the JSON, no explanation.`;
+
+                    try {
+                        const response = await anthropic.messages.create({
+                            model: 'claude-sonnet-4-20250514',
+                            max_tokens: 4000,
+                            temperature: 0.5, // Balanced for variation but not too creative
+                            messages: [{ role: 'user', content: prompt }]
+                        });
+
+                        const responseText = response.content[0].text;
+                        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+
+                        if (jsonMatch) {
+                            const parsed = JSON.parse(jsonMatch[0]);
+                            if (parsed.intents && Array.isArray(parsed.intents)) {
+                                for (const intent of parsed.intents) {
+                                    allIntents.push({
+                                        name: intent.question.substring(0, 60) + (intent.question.length > 60 ? '...' : ''),
+                                        question: intent.question,
+                                        responses: intent.responses || [intent.question],
+                                        keywords: intent.keywords || [],
+                                        source: page.url,
+                                        sourceTitle: page.title
+                                    });
+                                }
+                                console.log(`  ✅ Generated ${parsed.intents.length} FAQ intents (Total: ${allIntents.length})`);
                             }
                         }
-
-                        if (uniqueSentences.length < sentences.length) {
-                            cleanAnswer = uniqueSentences.join(' ');
-                            console.log(`  🧹 Removed ${sentences.length - uniqueSentences.length} duplicate sentences`);
-                        }
+                    } catch (parseError) {
+                        console.error(`  ❌ Failed to process FAQ batch: ${parseError.message}`);
                     }
 
-                    // Extract keywords from question and answer
-                    const combinedText = `${faqPair.question} ${cleanAnswer}`.toLowerCase();
-                    const words = combinedText
-                        .replace(/[^a-z0-9\s]/g, ' ')
-                        .split(/\s+/)
-                        .filter(w => w.length > 4); // Only meaningful words
-
-                    // Get unique important words as keywords (limit to 5)
-                    const keywords = [...new Set(words)]
-                        .filter(w => !['about', 'there', 'where', 'which', 'their', 'would', 'should', 'could'].includes(w))
-                        .slice(0, 5);
-
-                    // Create 3 answer variations from the cleaned FAQ answer
-                    const baseAnswer = cleanAnswer;
-                    const responses = [
-                        baseAnswer,
-                        // Variation 2: Add "According to Meydan Free Zone," prefix
-                        baseAnswer.length < 200 ? `According to Meydan Free Zone, ${baseAnswer.charAt(0).toLowerCase()}${baseAnswer.slice(1)}` : baseAnswer,
-                        // Variation 3: Add brief lead-in
-                        baseAnswer.length < 200 ? `Here's what you need to know: ${baseAnswer}` : baseAnswer
-                    ];
-
-                    allIntents.push({
-                        name: faqPair.question.substring(0, 60) + (faqPair.question.length > 60 ? '...' : ''),
-                        question: faqPair.question,
-                        responses: responses,
-                        keywords: keywords,
-                        source: page.url,
-                        sourceTitle: page.title
-                    });
+                    // Wait to avoid rate limits
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
 
-                console.log(`  ✅ Created ${page.faqPairs.length} intents from FAQ pairs (Total: ${allIntents.length})`);
-                continue; // Skip AI processing for FAQ pages
+                console.log(`✅ Created ${allIntents.length} intents from FAQ page`);
+                continue; // Skip regular AI processing for FAQ pages
             }
 
             // ✅ REGULAR CONTENT (NOT FAQ) - Use AI to generate intents
