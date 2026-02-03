@@ -597,9 +597,24 @@ router.post('/initiate', async (req, res) => {
 
         logVoice(callId, 'outgoing_call', { phone: cleanPhone, source: callSource });
 
-        // DON'T send SMS here - let the agent send it when user chooses SMS
-        // Just generate and store the OTP for later verification
-        console.log('📱 OTP generated (will be sent by agent): ', otp);
+        // For chatbot-initiated calls, send OTP automatically so user has it ready
+        // For form-initiated calls, let the agent send it when user chooses SMS
+        if (callSource === 'chatbot' && twilioClient && process.env.TWILIO_PHONE_NUMBER) {
+            try {
+                await twilioClient.messages.create({
+                    body: `Your Meydan Free Zone verification code is: ${otp}`,
+                    from: process.env.TWILIO_PHONE_NUMBER,
+                    to: cleanPhone
+                });
+                console.log(`📱 OTP ${otp} auto-sent to ${cleanPhone} (chatbot call)`);
+                logVoice(callId, 'otp_auto_sent', { phone: cleanPhone, otp });
+            } catch (smsError) {
+                console.log(`⚠️ Failed to auto-send OTP: ${smsError.message}`);
+                console.log(`📱 OTP ${otp} generated but not sent - agent must call send_otp`);
+            }
+        } else {
+            console.log('📱 OTP generated (will be sent by agent): ', otp);
+        }
 
         // Use chatbot-specific assistant if call is from chatbot, otherwise use default
         const assistantId = callSource === 'chatbot' && VAPI_CHATBOT_ASSISTANT_ID
