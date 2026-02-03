@@ -1,6 +1,6 @@
 // src/components/WebsiteGenerator.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Download, Code, Eye, RefreshCw, Rocket, Sparkles, MousePointer2, X, Send } from 'lucide-react';
 import PromptInput from './PromptInput';
 import Preview from './Preview';
@@ -13,6 +13,10 @@ const WebsiteGenerator = () => {
     const [css, setCss] = useState('');
     const [js, setJs] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    // Refs to prevent duplicate API calls (React StrictMode, double-clicks, etc.)
+    const isGeneratingRef = useRef(false);
+    const isEditingRef = useRef(false);
     const [viewMode, setViewMode] = useState('preview'); // 'preview' or 'code'
     const [error, setError] = useState(null);
     const [showDeployModal, setShowDeployModal] = useState(false);
@@ -33,6 +37,13 @@ const WebsiteGenerator = () => {
     const [isEditingElement, setIsEditingElement] = useState(false);
 
     const handleGenerate = async (prompt) => {
+        // Prevent duplicate calls
+        if (isGeneratingRef.current) {
+            console.log('⚠️ Generation already in progress, ignoring duplicate call');
+            return;
+        }
+
+        isGeneratingRef.current = true;
         setIsLoading(true);
         setError(null);
         setLoadingMessage('Creating your unique design with AI...');
@@ -70,6 +81,7 @@ const WebsiteGenerator = () => {
         } finally {
             setIsLoading(false);
             setLoadingMessage('');
+            isGeneratingRef.current = false;
         }
     };
 
@@ -84,6 +96,13 @@ const WebsiteGenerator = () => {
     const handleElementEdit = async () => {
         if (!selectedElement || !elementPrompt.trim()) return;
 
+        // Prevent duplicate calls
+        if (isEditingRef.current) {
+            console.log('⚠️ Element edit already in progress, ignoring duplicate call');
+            return;
+        }
+
+        isEditingRef.current = true;
         setIsEditingElement(true);
         setError(null);
 
@@ -135,6 +154,7 @@ const WebsiteGenerator = () => {
             setError(err.message || 'Failed to edit element');
         } finally {
             setIsEditingElement(false);
+            isEditingRef.current = false;
         }
     };
 
