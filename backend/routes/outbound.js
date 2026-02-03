@@ -207,7 +207,7 @@ router.post('/search-knowledge-base', async (req, res) => {
     if (knowledgeService) {
         try {
             const result = await knowledgeService.unifiedSearch(query, {
-                vectorThreshold: 0.5,
+                vectorThreshold: 0.4,
                 keywordFallback: true
             });
 

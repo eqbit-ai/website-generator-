@@ -129,7 +129,7 @@ class KnowledgeService {
      * @returns {Object} - { found: boolean, response: string, score: number, source: string, intentName: string }
      */
     async unifiedSearch(query, options = {}) {
-        const { vectorThreshold = 0.5, keywordFallback = true } = options;
+        const { vectorThreshold = 0.4, keywordFallback = true } = options;
 
         if (!query || query.length < 2) {
             return { found: false, response: null, score: 0, source: 'none' };

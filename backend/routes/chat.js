@@ -416,11 +416,11 @@ router.post('/message', async (req, res) => {
     if (!response && knowledgeService) {
         try {
             const searchResult = await knowledgeService.unifiedSearch(message, {
-                vectorThreshold: 0.5,
+                vectorThreshold: 0.4,
                 keywordFallback: false // We'll use checkIntent as fallback
             });
 
-            if (searchResult.found && searchResult.score >= 0.5) {
+            if (searchResult.found && searchResult.score >= 0.4) {
                 console.log(`✅ Unified search match: "${searchResult.intentName}" (${searchResult.source}, score: ${searchResult.score.toFixed(3)})`);
                 response = searchResult.response;
             }
