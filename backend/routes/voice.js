@@ -74,6 +74,7 @@ try {
 // Storage
 const callStore = new Map();
 if (!global.voiceLogs) global.voiceLogs = [];
+if (!global.verifiedSessions) global.verifiedSessions = new Map();
 
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -471,7 +472,25 @@ function verifyGoogleAuth(callData, code) {
 }
 
 function getAccountInfo(callData) {
-    if (!callData.googleVerified && !callData.smsVerified) {
+    // Check verification from callStore OR global.verifiedSessions (set by outbound routes)
+    let isVerified = callData.googleVerified || callData.smsVerified;
+
+    // Also check global verified sessions (populated by /api/outbound/verify-totp)
+    if (!isVerified && callData.phone && global.verifiedSessions) {
+        let cleanPhone = callData.phone.replace(/[^\d+]/g, '');
+        if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+        const session = global.verifiedSessions.get(cleanPhone);
+        if (session?.verified) {
+            // Check if verification is still valid (within 30 minutes)
+            const isRecent = (Date.now() - session.timestamp) < 30 * 60 * 1000;
+            if (isRecent) {
+                isVerified = true;
+                console.log('✅ User verified via global session:', cleanPhone);
+            }
+        }
+    }
+
+    if (!isVerified) {
         return { success: false, message: "Please verify your identity first." };
     }
 
@@ -644,9 +663,16 @@ router.post('/initiate', async (req, res) => {
 
         const vapiData = await vapiRes.json();
         if (vapiData.id) {
-            // Store phone AND OTP with multiple keys for OTP function calls
+            // Store phone, OTP, and TOTP secret with multiple keys for verification
             if (!global.phoneStore) global.phoneStore = new Map();
-            const callData = { phone: cleanPhone, otp, timestamp: Date.now() };
+            const totpSecret = user?.google_auth_secret || user?.totp_secret || null;
+            const callData = {
+                phone: cleanPhone,
+                otp,
+                totpSecret,  // Include TOTP secret for Google Auth verification
+                userId: user?.id,
+                timestamp: Date.now()
+            };
             global.phoneStore.set(vapiData.id, callData); // Vapi call ID
             global.phoneStore.set(callId, callData); // Our internal call ID
             if (sessionId) global.phoneStore.set(sessionId, callData); // Chat session ID
@@ -659,8 +685,8 @@ router.post('/initiate', async (req, res) => {
             if (sessionId) console.log(`   - sessionId: ${sessionId}`);
             console.log(`   - phone: ${cleanPhone}`);
             console.log(`🔐 OTP: ${otp} (stored globally for verification)`);
+            console.log(`🔐 TOTP Secret: ${totpSecret ? 'stored' : 'not available'}`);
             console.log(`⚠️ NOTE: Agent must call send_otp function to trigger SMS`);
-            console.log(`⚠️ Make sure Vapi assistant has send_otp function configured!`);
 
             res.json({ success: true, callId, otp });
         } else {

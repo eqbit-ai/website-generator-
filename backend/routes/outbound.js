@@ -371,22 +371,105 @@ router.post('/verify-otp', async (req, res) => {
     return res.json(respond(toolCallId, `Wrong code. ${3 - stored.attempts} tries left.`));
 });
 
+// TOTP Service
+let totpService = null;
+try {
+    totpService = require('../services/totpService');
+    console.log('✅ Outbound: TOTP service ready');
+} catch (e) {
+    console.log('⚠️ Outbound: TOTP service not available');
+}
+
+// Database for user lookup
+let db = null;
+try {
+    db = require('../database');
+    console.log('✅ Outbound: Database ready');
+} catch (e) {
+    console.log('⚠️ Outbound: Database not available');
+}
+
+// Track verified sessions (phone -> { verified: true, timestamp })
+if (!global.verifiedSessions) global.verifiedSessions = new Map();
+
 // Verify TOTP
 router.post('/verify-totp', async (req, res) => {
     const toolCallId = getToolCallId(req.body);
     const code = getCode(req.body);
+    const phone = getPhone(req.body);
 
-    console.log('🔐 Verify TOTP:', code);
-    logVoice('verify-totp', { code });
+    console.log('🔐 Verify TOTP - Code:', code, 'Phone:', phone);
+    logVoice('verify-totp', { code, phone });
 
     if (!code) return res.json(respond(toolCallId, 'Need 6-digit code from authenticator.'));
+    if (code.length !== 6) return res.json(respond(toolCallId, 'Code must be 6 digits.'));
 
-    if (code.length === 6) {
-        logVoice('totp-verified', {});
-        return res.json(respond(toolCallId, 'VERIFIED! Customer is verified.'));
+    // Look up user by phone to get their TOTP secret
+    let user = null;
+    let secret = null;
+
+    if (phone && db) {
+        let cleanPhone = phone.replace(/[^\d+]/g, '');
+        if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+
+        user = db.userAccounts?.getBy?.('phone', cleanPhone);
+        if (user) {
+            secret = user.google_auth_secret || user.totp_secret;
+            console.log('👤 Found user:', user.email, 'Has secret:', !!secret);
+        }
     }
 
-    return res.json(respond(toolCallId, 'Invalid code.'));
+    // If no user found, try to get secret from phoneStore (set during call initiation)
+    if (!secret && phone) {
+        let cleanPhone = phone.replace(/[^\d+]/g, '');
+        if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+        const storedData = global.phoneStore?.get(cleanPhone);
+        if (storedData?.totpSecret) {
+            secret = storedData.totpSecret;
+            console.log('🔑 Found TOTP secret in phoneStore');
+        }
+    }
+
+    // Actually verify the TOTP code
+    let isValid = false;
+
+    if (totpService && secret) {
+        isValid = totpService.verifyCode(secret, code);
+        console.log('🔐 TOTP verification result:', isValid);
+    } else if (!secret) {
+        // No secret found - check if this is a test/demo scenario
+        // For production, you should require a valid secret
+        console.log('⚠️ No TOTP secret found for user - cannot verify');
+
+        // Allow test code "123456" only in development
+        if (code === '123456' && process.env.NODE_ENV !== 'production') {
+            console.log('⚠️ Using test code 123456 (dev mode only)');
+            isValid = true;
+        }
+    }
+
+    if (isValid) {
+        // Mark this phone as verified
+        if (phone) {
+            let cleanPhone = phone.replace(/[^\d+]/g, '');
+            if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+            global.verifiedSessions.set(cleanPhone, {
+                verified: true,
+                method: 'totp',
+                timestamp: Date.now(),
+                userId: user?.id
+            });
+            console.log('✅ Session verified for:', cleanPhone);
+        }
+
+        logVoice('totp-verified', { phone, userId: user?.id });
+        return res.json(respond(toolCallId, 'VERIFIED! Customer identity confirmed.'));
+    }
+
+    // Verification failed
+    console.log('❌ TOTP verification failed for code:', code);
+    logVoice('totp-failed', { phone, code });
+    return res.json(respond(toolCallId, 'That code is incorrect. Please check your authenticator app and try again.'));
 });
 
 // Get Verification Method
