@@ -150,6 +150,23 @@ try {
     console.log('⚠️ Outbound: Could not load intents:', e.message);
 }
 
+// Knowledge service for unified search
+let knowledgeService = null;
+try {
+    knowledgeService = require('../services/knowledgeService');
+} catch (e) {
+    console.log('⚠️ Outbound: Knowledge service not available');
+}
+
+// Helper to select response from intent (handles both response and responses formats)
+function selectIntentResponse(intent) {
+    if (intent.responses && Array.isArray(intent.responses) && intent.responses.length > 0) {
+        const randomIndex = Math.floor(Math.random() * intent.responses.length);
+        return intent.responses[randomIndex];
+    }
+    return intent.response || 'No response available';
+}
+
 // Normalize numbers (convert spelled-out to digits)
 function normalizeNumbers(text) {
     const numberMap = {
@@ -186,19 +203,44 @@ router.post('/search-knowledge-base', async (req, res) => {
     const q = normalizeNumbers(query.toLowerCase());
     console.log('📝 Normalized query:', q);
 
-    // Search intents
+    // 1. Try unified search (vector + keyword) via knowledgeService
+    if (knowledgeService) {
+        try {
+            const result = await knowledgeService.unifiedSearch(query, {
+                vectorThreshold: 0.5,
+                keywordFallback: true
+            });
+
+            if (result.found) {
+                console.log(`✅ Found via ${result.source}: "${result.intentName}" (score: ${result.score.toFixed(3)})`);
+                logVoice('kb-found', { query, intent: result.intentName, source: result.source, score: result.score });
+                return res.json(respond(toolCallId, JSON.stringify({
+                    found: true,
+                    answer: result.response
+                })));
+            }
+        } catch (e) {
+            console.log('⚠️ Unified search error:', e.message);
+        }
+    }
+
+    // 2. Fallback: Search intents directly (keyword matching)
+    // FIX: Check both intent.responses (array) AND intent.response (string)
     let checkedIntents = 0;
     for (const intent of intentsData) {
-        if (!intent || !intent.response || !intent.keywords) continue;
+        const hasResponse = (intent.responses && intent.responses.length > 0) || intent.response;
+        if (!intent || !hasResponse || !intent.keywords) continue;
         checkedIntents++;
 
         for (const keyword of intent.keywords) {
             const kw = keyword.toLowerCase();
             if (q.includes(kw)) {
+                const response = selectIntentResponse(intent);
                 console.log(`✅ Found intent: "${intent.name}" via keyword "${keyword}"`);
+                logVoice('kb-found', { query, intent: intent.name, source: 'keyword-fallback' });
                 return res.json(respond(toolCallId, JSON.stringify({
                     found: true,
-                    answer: intent.response
+                    answer: response
                 })));
             }
         }
@@ -206,23 +248,26 @@ router.post('/search-knowledge-base', async (req, res) => {
 
     console.log(`❌ No intent matched (checked ${checkedIntents} intents)`);
 
-    // If no intent match, try knowledgeService chunks
+    // 3. If no intent match, try knowledgeService TF-IDF chunks
     try {
-        const knowledgeService = require('../services/knowledgeService');
-        const results = knowledgeService.search(query, 1);
+        if (knowledgeService) {
+            const results = knowledgeService.search(query, 1);
 
-        if (results.length > 0 && results[0].score > 0.05) {
-            console.log(`✅ Found in KB chunks (score: ${results[0].score})`);
-            return res.json(respond(toolCallId, JSON.stringify({
-                found: true,
-                answer: results[0].content
-            })));
+            if (results.length > 0 && results[0].score > 0.05) {
+                console.log(`✅ Found in KB chunks (score: ${results[0].score})`);
+                logVoice('kb-found', { query, source: 'tfidf-chunks', score: results[0].score });
+                return res.json(respond(toolCallId, JSON.stringify({
+                    found: true,
+                    answer: results[0].content
+                })));
+            }
         }
     } catch (e) {
         console.log('⚠️ KB service error:', e.message);
     }
 
     // No match found
+    logVoice('kb-not-found', { query });
     return res.json(respond(toolCallId, JSON.stringify({
         found: false,
         answer: "I don't have specific information about that. Would you like me to connect you with our team?"

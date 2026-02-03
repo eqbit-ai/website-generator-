@@ -412,7 +412,24 @@ router.post('/message', async (req, res) => {
         response += `\n\nOur voice agent will call you at ${session.phone} in a few moments. Please answer the call to proceed with verification. You'll receive an SMS with a verification code shortly.`;
     }
 
-    // 5️⃣ Check intents first
+    // 5️⃣ Try unified search (vector + keyword) first
+    if (!response && knowledgeService) {
+        try {
+            const searchResult = await knowledgeService.unifiedSearch(message, {
+                vectorThreshold: 0.5,
+                keywordFallback: false // We'll use checkIntent as fallback
+            });
+
+            if (searchResult.found && searchResult.score >= 0.5) {
+                console.log(`✅ Unified search match: "${searchResult.intentName}" (${searchResult.source}, score: ${searchResult.score.toFixed(3)})`);
+                response = searchResult.response;
+            }
+        } catch (e) {
+            console.log('⚠️ Unified search error:', e.message);
+        }
+    }
+
+    // 5.5️⃣ Fall back to keyword-based intent check
     if (!response) {
         response = checkIntent(message);
     }

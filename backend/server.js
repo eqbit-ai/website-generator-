@@ -26,6 +26,34 @@ const db = require('./database');
 // SERVICES
 // ============================================
 let knowledgeService;
+let embeddingService;
+let intentsData = [];
+
+// Load intents from config
+try {
+    const possiblePaths = [
+        path.join(__dirname, 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json'),
+        path.join(process.cwd(), 'config', 'meydan_intents.json')
+    ];
+
+    let intentsPath = null;
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            intentsPath = p;
+            break;
+        }
+    }
+
+    if (intentsPath) {
+        const data = JSON.parse(fs.readFileSync(intentsPath, 'utf-8'));
+        intentsData = data.intents || [];
+        console.log(`✅ Server: Loaded ${intentsData.length} intents from ${intentsPath}`);
+    }
+} catch (e) {
+    console.log('⚠️ Could not load intents:', e.message);
+}
+
 try {
     knowledgeService = require('./services/knowledgeService');
 
@@ -34,11 +62,37 @@ try {
         knowledgeService.init();
     }
 
+    // Set intents for unified search
+    if (intentsData.length > 0) {
+        knowledgeService.setIntents(intentsData);
+    }
+
     const stats = knowledgeService.getStats();
     console.log(`📚 Knowledge base: ${stats.chunks} chunks loaded`);
 
 } catch (e) {
     console.log('⚠️ Knowledge service not available:', e.message);
+}
+
+// Initialize embedding service asynchronously (don't block startup)
+try {
+    embeddingService = require('./services/embeddingService');
+
+    if (intentsData.length > 0 && process.env.OPENAI_API_KEY) {
+        // Initialize asynchronously
+        embeddingService.init(intentsData)
+            .then(() => {
+                const status = embeddingService.getStatus();
+                console.log(`🧠 Embedding service ready: ${status.embeddingsCount} embeddings`);
+            })
+            .catch(err => {
+                console.log('⚠️ Embedding service init failed:', err.message);
+            });
+    } else if (!process.env.OPENAI_API_KEY) {
+        console.log('⚠️ OPENAI_API_KEY not set, vector search disabled');
+    }
+} catch (e) {
+    console.log('⚠️ Embedding service not available:', e.message);
 }
 
 // ============================================
@@ -137,10 +191,18 @@ app.use('/uploads', express.static(uploadsDir));
 // HEALTH CHECK
 // ============================================
 app.get('/health', (req, res) => {
+    const embeddingStatus = embeddingService ? embeddingService.getStatus() : { initialized: false };
+
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime()
+        uptime: process.uptime(),
+        embeddings: {
+            initialized: embeddingStatus.initialized,
+            count: embeddingStatus.embeddingsCount || 0,
+            model: embeddingStatus.model || null
+        },
+        intents: intentsData.length
     });
 });
 
