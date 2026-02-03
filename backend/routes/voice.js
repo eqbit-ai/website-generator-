@@ -799,4 +799,63 @@ router.post('/setup-2fa', async (req, res) => {
     }
 });
 
+// Verify 2FA setup - confirm the code works and enable 2FA
+router.post('/verify-2fa-setup', async (req, res) => {
+    try {
+        const { email, code } = req.body;
+
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ success: false, error: 'Valid email required' });
+        }
+
+        if (!code || code.length !== 6) {
+            return res.status(400).json({ success: false, error: '6-digit code required' });
+        }
+
+        if (!totpService) {
+            return res.status(500).json({ success: false, error: 'TOTP service not available' });
+        }
+
+        // Get user and their TOTP secret
+        const user = db.userAccounts.getBy('email', email.toLowerCase());
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found. Please set up 2FA first.' });
+        }
+
+        const secret = user.totp_secret || user.google_auth_secret;
+        if (!secret) {
+            return res.status(400).json({ success: false, error: 'No 2FA secret found. Please set up 2FA first.' });
+        }
+
+        // Verify the code
+        const isValid = totpService.verifyCode(secret, code);
+
+        if (isValid) {
+            // Enable 2FA for this user
+            db.userAccounts.update(user.id, {
+                totp_enabled: true,
+                google_auth_secret: secret, // Also set google_auth_secret for voice verification
+                google_auth_enabled: true
+            });
+
+            console.log(`✅ 2FA enabled for user: ${email}`);
+
+            return res.json({
+                success: true,
+                message: '2FA has been enabled successfully!'
+            });
+        } else {
+            console.log(`❌ 2FA verification failed for user: ${email}, code: ${code}`);
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid code. Please check your authenticator app and try again.'
+            });
+        }
+
+    } catch (error) {
+        console.error('2FA verification error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 module.exports = router;
