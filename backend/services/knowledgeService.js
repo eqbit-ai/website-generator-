@@ -218,6 +218,31 @@ class KnowledgeService {
         }
         return intent.response || 'No response available';
     }
+
+    /**
+     * Get top N matches from vector search (regardless of threshold)
+     * Used for RAG - letting AI decide relevance
+     */
+    async getTopMatches(query, limit = 3) {
+        if (!embeddingService || !embeddingService.initialized || this.intents.length === 0) {
+            console.log('⚠️ Embedding service not ready for getTopMatches');
+            return [];
+        }
+
+        try {
+            const vectorResults = await embeddingService.search(query, this.intents, limit);
+
+            return vectorResults.map(result => ({
+                intentName: result.intentName,
+                response: this.selectIntentResponse(result.intent),
+                score: result.score,
+                source: 'vector'
+            }));
+        } catch (error) {
+            console.error('❌ getTopMatches error:', error.message);
+            return [];
+        }
+    }
 }
 
 module.exports = new KnowledgeService();

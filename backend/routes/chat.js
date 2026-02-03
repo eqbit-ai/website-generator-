@@ -412,17 +412,54 @@ router.post('/message', async (req, res) => {
         response += `\n\nOur voice agent will call you at ${session.phone} in a few moments. Please answer the call to proceed with verification. You'll receive an SMS with a verification code shortly.`;
     }
 
-    // 5️⃣ Try unified search (vector + keyword) first
+    // 5️⃣ Smart RAG Search: Vector + AI for semantic understanding
+    // This allows questions like "do i have to come myself" to match "physical presence"
     if (!response && knowledgeService) {
         try {
             const searchResult = await knowledgeService.unifiedSearch(message, {
-                vectorThreshold: 0.4,
-                keywordFallback: false // We'll use checkIntent as fallback
+                vectorThreshold: 0.3, // Lower threshold to catch more semantic matches
+                keywordFallback: false
             });
 
-            if (searchResult.found && searchResult.score >= 0.4) {
-                console.log(`✅ Unified search match: "${searchResult.intentName}" (${searchResult.source}, score: ${searchResult.score.toFixed(3)})`);
-                response = searchResult.response;
+            if (searchResult.found) {
+                if (searchResult.score >= 0.5) {
+                    // HIGH confidence (>= 0.5): Return directly
+                    console.log(`✅ High confidence match: "${searchResult.intentName}" (${searchResult.source}, score: ${searchResult.score.toFixed(3)})`);
+                    response = searchResult.response;
+                } else if (searchResult.score >= 0.3 && anthropic) {
+                    // MEDIUM confidence (0.3-0.5): Use AI to verify semantic match
+                    console.log(`🤔 Medium confidence match: "${searchResult.intentName}" (score: ${searchResult.score.toFixed(3)}) - verifying with AI`);
+
+                    const verifyPrompt = `USER QUESTION: "${message}"
+
+POTENTIAL ANSWER FROM KNOWLEDGE BASE:
+Topic: ${searchResult.intentName}
+Answer: ${searchResult.response}
+
+TASK: Does this knowledge base answer address the user's question? The user might phrase the question differently but mean the same thing.
+- "do i have to come myself" = "physical presence required"
+- "how much money do i need" = "capital requirements"
+- "can i work from home" = "physical presence"
+
+If the answer is RELEVANT to the question (even if worded differently), respond with ONLY the answer text.
+If the answer is NOT relevant, respond with exactly: "NOT_RELEVANT"`;
+
+                    const verification = await anthropic.messages.create({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 200,
+                        temperature: 0.1,
+                        messages: [{ role: 'user', content: verifyPrompt }]
+                    });
+
+                    const aiResponse = verification.content[0].text.trim();
+
+                    if (aiResponse !== 'NOT_RELEVANT' && !aiResponse.includes('NOT_RELEVANT')) {
+                        console.log(`✅ AI verified semantic match for "${searchResult.intentName}"`);
+                        response = searchResult.response;
+                    } else {
+                        console.log(`❌ AI rejected match - not semantically relevant`);
+                    }
+                }
             }
         } catch (e) {
             console.log('⚠️ Unified search error:', e.message);
@@ -434,111 +471,59 @@ router.post('/message', async (req, res) => {
         response = checkIntent(message);
     }
 
-    // 6️⃣ Conversational AI with Knowledge Base context (ONLY if KB has high confidence)
-    if (!response && anthropic) {
+    // 6️⃣ RAG with AI: Get top KB matches and let AI answer creatively
+    if (!response && anthropic && knowledgeService) {
         try {
-            // Search knowledge base for relevant information
-            let kbContext = '';
-            let kbScore = 0;
+            // Get top 3 vector matches regardless of score
+            const topMatches = await knowledgeService.getTopMatches(message, 3);
 
-            if (knowledgeService) {
-                const results = knowledgeService.search(message, 3);
-                if (results.length > 0) {
-                    kbScore = results[0].score;
-                    console.log(`🔍 KB Search Score: ${kbScore.toFixed(3)} for "${message}"`);
+            if (topMatches && topMatches.length > 0) {
+                console.log(`🧠 RAG Mode: Found ${topMatches.length} potential matches`);
+                topMatches.forEach((m, i) => console.log(`   ${i + 1}. ${m.intentName} (score: ${m.score.toFixed(3)})`));
 
-                    // ⚠️ CRITICAL: Only use KB if confidence is HIGH (>= 0.6)
-                    if (kbScore >= 0.6) {
-                        kbContext = results.slice(0, 3).map(r => r.content).join('\n\n');
-                        console.log(`✅ KB context found (score ${kbScore.toFixed(3)}):`, kbContext.substring(0, 100) + '...');
-                    } else {
-                        console.log(`⚠️ KB score too low (${kbScore.toFixed(3)} < 0.6), escalating to human`);
-                    }
-                }
-            }
+                // Build context from top matches
+                const kbContext = topMatches.map(m =>
+                    `Topic: ${m.intentName}\nAnswer: ${m.response}`
+                ).join('\n\n---\n\n');
 
-            // If KB confidence is too low, escalate immediately
-            if (!kbContext || kbScore < 0.6) {
-                console.log(`❌ No relevant KB found, escalating`);
-                response = `I don't have specific information about that.\n\nWould you like me to connect you with our team? They can help with company setup, visas, and licensing questions.`;
-            } else {
-                // KB confidence is high - use AI with strict KB-only constraint
-                console.log(`✅ Using AI with KB context (score: ${kbScore.toFixed(3)})`);
+                const ragPrompt = `You are a helpful assistant for Meydan Free Zone Dubai.
 
-                // ✅ CRITICAL: Embed KB context IN the user message (not system prompt)
-                const kbConstrainedMessage = `USER QUESTION:
-"${message}"
+USER QUESTION: "${message}"
 
-KNOWLEDGE BASE CONTEXT (ONLY USE THIS):
+KNOWLEDGE BASE ENTRIES (use these to answer):
 ${kbContext}
 
-TASK:
-Answer the question ONLY if the KB context above clearly contains the answer.
-If the KB context does NOT contain relevant information, say: "I don't have information about that."
+INSTRUCTIONS:
+1. If ANY of the knowledge base entries can answer the user's question (even if worded differently), provide that answer
+2. Understand semantic meaning: "come myself" = "physical presence", "how old" = "minimum age", etc.
+3. Keep your answer brief (1-2 sentences)
+4. If NONE of the entries are relevant, say exactly: "NO_MATCH"
+5. Do NOT make up information - only use what's in the knowledge base`;
 
-Keep answer to 2 sentences maximum.`;
-
-                const systemPrompt = `You are a professional consultant for Meydan Free Zone Dubai.
-
-CRITICAL RULES:
-1. Answer ONLY from the provided KB context
-2. If KB doesn't contain the answer, say you don't have that information
-3. NEVER invent or guess information
-4. NEVER use information not in the provided context
-5. Keep answers brief (1-2 sentences)
-6. Do NOT over-apologize`;
-
-                const ai = await anthropic.messages.create({
+                const ragResponse = await anthropic.messages.create({
                     model: 'claude-sonnet-4-20250514',
-                    max_tokens: 150,
-                    temperature: 0.3, // Lower temperature = more focused
-                    system: systemPrompt,
-                    messages: [{ role: 'user', content: kbConstrainedMessage }]
+                    max_tokens: 200,
+                    temperature: 0.2,
+                    messages: [{ role: 'user', content: ragPrompt }]
                 });
 
-                response = ai.content[0].text.trim();
-                console.log(`🤖 AI Response: "${response}"`);
+                const aiAnswer = ragResponse.content[0].text.trim();
 
-                // ⚠️ CRITICAL VALIDATION: Check if response is relevant to question
-                // Extract key terms from question
-                const questionTerms = message.toLowerCase().split(/\s+/)
-                    .filter(w => w.length > 3)
-                    .map(w => w.replace(/[^a-z]/g, ''));
-
-                // Extract key terms from response
-                const responseTerms = response.toLowerCase().split(/\s+/)
-                    .filter(w => w.length > 3)
-                    .map(w => w.replace(/[^a-z]/g, ''));
-
-                // Check if response shares at least ONE keyword with question OR explicitly admits uncertainty
-                const admitsUncertainty = response.toLowerCase().includes('don\'t have') ||
-                    response.toLowerCase().includes('not sure') ||
-                    response.toLowerCase().includes('cannot find') ||
-                    response.toLowerCase().includes('don\'t know');
-
-                const hasSharedTerms = questionTerms.some(qt => responseTerms.includes(qt));
-
-                if (!admitsUncertainty && !hasSharedTerms && questionTerms.length > 0) {
-                    // Response is completely unrelated to question - AI hallucinated
-                    console.log(`⚠️ AI response unrelated to question! Rejecting.`);
-                    console.log(`   Question terms: [${questionTerms.join(', ')}]`);
-                    console.log(`   Response terms: [${responseTerms.join(', ')}]`);
-                    response = `I don't have specific information about that.\n\nWould you like me to connect you with our team?`;
-                }
-
-                // If AI admitted uncertainty, provide escalation
-                if (admitsUncertainty) {
-                    response = `I don't have specific information about that.\n\nWould you like me to connect you with our team? They can provide detailed answers about company setup, visas, and licensing.`;
+                if (aiAnswer !== 'NO_MATCH' && !aiAnswer.includes('NO_MATCH')) {
+                    console.log(`✅ RAG AI answered from KB context`);
+                    response = aiAnswer;
+                } else {
+                    console.log(`❌ RAG AI found no relevant KB match`);
                 }
             }
         } catch (err) {
-            console.log('AI error:', err.message);
-            response = null; // Fall through to default fallback
+            console.log('⚠️ RAG search error:', err.message);
         }
     }
 
-    // 7️⃣ Fallback (LAST)
+    // 7️⃣ Final fallback if no answer found
     if (!response) {
+        console.log(`❌ No KB match found, offering help`);
         response = `I can help you with information about:
 
 • Company setup and business licenses
