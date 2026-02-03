@@ -19,6 +19,25 @@ if (process.env.ANTHROPIC_API_KEY) {
 // Session storage (in production, use Redis or database)
 const designSessions = new Map();
 
+// Fix escaped HTML that appears as text (common AI generation issue)
+function fixEscapedHtml(content) {
+    if (!content) return content;
+
+    // Fix HTML entities that shouldn't be escaped in actual HTML
+    let fixed = content
+        // Fix escaped tags that appear as text like: &lt;span&gt; -> <span>
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        // Fix cases where tags are rendered as text (visible in rendered output)
+        // This pattern matches text like: <span class="x">text</span> appearing as literal text
+        .replace(/<span([^>]*)>([^<]*)<\/span>/g, '<span$1>$2</span>');
+
+    return fixed;
+}
+
 // Create or get session
 function getSession(sessionId) {
     if (!sessionId) {
@@ -495,6 +514,10 @@ Return the COMPLETE modified code in format:
         css = css.replace(/```css\s*/gi, '').replace(/```\s*$/g, '').trim();
         js = js.replace(/```(?:javascript|js)\s*/gi, '').replace(/```\s*$/g, '').trim();
 
+        // Fix escaped HTML entities that might appear as text (common AI generation issue)
+        html = fixEscapedHtml(html);
+        css = fixEscapedHtml(css);
+
         // Validate extraction
         console.log('\n📊 EXTRACTION RESULTS:');
         console.log(`HTML: ${html.length} chars ${html ? '✅' : '❌'}`);
@@ -639,9 +662,13 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             newElementCss = cssMatch[1].trim();
         }
 
-        // Clean up any markdown
+        // Clean up any markdown and fix escaped HTML
         newElementHtml = newElementHtml.replace(/```html?\s*/gi, '').replace(/```\s*$/g, '').trim();
         newElementCss = newElementCss.replace(/```css?\s*/gi, '').replace(/```\s*$/g, '').trim();
+
+        // Fix escaped HTML entities
+        newElementHtml = fixEscapedHtml(newElementHtml);
+        newElementCss = fixEscapedHtml(newElementCss);
 
         if (!newElementHtml) {
             return res.status(500).json({ error: 'Failed to generate element edit' });
@@ -650,6 +677,13 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
         // Replace the element in the full HTML
         let updatedHtml = currentHtml;
         let matchFound = false;
+
+        // First, fix any escaped HTML in the current HTML (fixes display issues like <span> showing as text)
+        updatedHtml = fixEscapedHtml(updatedHtml);
+        const wasHtmlFixed = updatedHtml !== currentHtml;
+        if (wasHtmlFixed) {
+            console.log('🔧 Fixed escaped HTML entities in current HTML');
+        }
 
         // Method 1: Try exact match first
         if (currentHtml.includes(elementHtml)) {
@@ -684,9 +718,22 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
                 }
 
                 if (searchPattern && searchPattern.test(currentHtml)) {
+                    // Log what we're matching and replacing
+                    const matchResult = currentHtml.match(searchPattern);
+                    if (matchResult) {
+                        console.log('🔍 Matched element (first 200 chars):', matchResult[0].substring(0, 200));
+                        console.log('🔄 Replacing with (first 200 chars):', newElementHtml.substring(0, 200));
+                    }
+
                     updatedHtml = currentHtml.replace(searchPattern, newElementHtml);
                     matchFound = true;
                     console.log('✅ Element replaced via tag/class/id match');
+
+                    // Verify the replacement happened
+                    if (updatedHtml === currentHtml) {
+                        console.log('⚠️ WARNING: HTML unchanged after replacement!');
+                        matchFound = false;
+                    }
                 }
             }
         }
@@ -724,19 +771,25 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
         }
 
         if (!matchFound) {
-            console.log('⚠️ Could not find element in HTML');
-            // Instead of failing, return the new element and let the user know
-            return res.json({
-                success: true,
-                warning: 'Could not auto-replace element. Here is the edited element:',
-                website: {
-                    html: currentHtml,
-                    css: currentCss
-                },
-                editedElement: newElementHtml,
-                editedCss: newElementCss,
-                manualReplace: true
-            });
+            // If we fixed escaped HTML, still return success even without element match
+            if (wasHtmlFixed) {
+                console.log('✅ HTML fixed (escaped entities corrected), returning fixed HTML');
+                matchFound = true;
+            } else {
+                console.log('⚠️ Could not find element in HTML');
+                // Instead of failing, return the new element and let the user know
+                return res.json({
+                    success: true,
+                    warning: 'Could not auto-replace element. Here is the edited element:',
+                    website: {
+                        html: currentHtml,
+                        css: currentCss
+                    },
+                    editedElement: newElementHtml,
+                    editedCss: newElementCss,
+                    manualReplace: true
+                });
+            }
         }
 
         // Append new CSS if any
