@@ -97,9 +97,23 @@ const WebsiteGenerator = () => {
             );
 
             if (result.success) {
-                setHtml(result.website.html);
-                setCss(result.website.css);
-                if (result.website.js) setJs(result.website.js);
+                // Check if it's a manual replace scenario
+                if (result.manualReplace) {
+                    // Show the edited element to user and offer to copy
+                    const userChoice = window.confirm(
+                        `Element edited but couldn't auto-replace.\n\n` +
+                        `The edited element has been copied to clipboard.\n` +
+                        `You can switch to Code view and paste it manually.\n\n` +
+                        `Click OK to copy, Cancel to dismiss.`
+                    );
+                    if (userChoice && result.editedElement) {
+                        navigator.clipboard.writeText(result.editedElement);
+                    }
+                } else {
+                    setHtml(result.website.html);
+                    setCss(result.website.css);
+                    if (result.website.js) setJs(result.website.js);
+                }
 
                 // Add to history
                 setPromptHistory(prev => [...prev, {
@@ -318,8 +332,10 @@ ${js}
                         )}
                     </div>
 
-                    {/* Element Edit Panel */}
+                    {/* Element Edit Panel - Modal Style */}
                     {selectedElement && (
+                        <>
+                        <div className="element-edit-backdrop" onClick={handleCancelEdit} />
                         <div className="element-edit-panel">
                             <div className="element-edit-header">
                                 <div className="selected-element-info">
@@ -362,6 +378,7 @@ ${js}
                                 Press Enter to apply changes • Uses ~90% fewer tokens than full-page edits
                             </div>
                         </div>
+                        </>
                     )}
                 </main>
             </div>
@@ -409,34 +426,53 @@ ${js}
                 }
 
                 .element-edit-panel {
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    right: 0;
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 90%;
+                    max-width: 600px;
                     background: #1e1e2e;
-                    border-top: 1px solid #333;
-                    padding: 16px;
-                    z-index: 100;
-                    animation: slideUp 0.2s ease;
+                    border: 1px solid #444;
+                    border-radius: 16px;
+                    padding: 20px;
+                    z-index: 10000;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    animation: popIn 0.2s ease;
                 }
 
-                @keyframes slideUp {
-                    from { transform: translateY(100%); opacity: 0; }
-                    to { transform: translateY(0); opacity: 1; }
+                .element-edit-backdrop {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.6);
+                    z-index: 9999;
+                    animation: fadeIn 0.2s ease;
+                }
+
+                @keyframes popIn {
+                    from { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+                    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
 
                 .element-edit-header {
                     display: flex;
                     justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 12px;
+                    align-items: flex-start;
+                    margin-bottom: 16px;
                 }
 
                 .selected-element-info {
                     display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    flex-wrap: wrap;
+                    flex-direction: column;
+                    gap: 6px;
                 }
 
                 .element-tag {
@@ -447,6 +483,8 @@ ${js}
                     font-family: monospace;
                     font-size: 13px;
                     font-weight: 600;
+                    display: inline-block;
+                    width: fit-content;
                 }
 
                 .element-path {
@@ -458,24 +496,27 @@ ${js}
                 .element-preview {
                     color: #10b981;
                     font-size: 12px;
-                    max-width: 300px;
+                    max-width: 400px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
+                    background: rgba(16, 185, 129, 0.1);
+                    padding: 4px 8px;
+                    border-radius: 4px;
                 }
 
                 .close-button {
-                    background: transparent;
+                    background: #333;
                     border: none;
                     color: #888;
                     cursor: pointer;
-                    padding: 4px;
-                    border-radius: 4px;
+                    padding: 8px;
+                    border-radius: 8px;
                     transition: all 0.15s;
                 }
 
                 .close-button:hover {
-                    background: #333;
+                    background: #444;
                     color: white;
                 }
 
@@ -486,12 +527,12 @@ ${js}
 
                 .element-prompt-input {
                     flex: 1;
-                    padding: 12px 16px;
+                    padding: 14px 16px;
                     background: #2a2a3e;
-                    border: 1px solid #444;
-                    border-radius: 8px;
+                    border: 2px solid #444;
+                    border-radius: 10px;
                     color: white;
-                    font-size: 14px;
+                    font-size: 15px;
                     outline: none;
                     transition: border-color 0.15s;
                 }
@@ -505,16 +546,17 @@ ${js}
                 }
 
                 .element-submit-button {
-                    padding: 12px 20px;
+                    padding: 14px 24px;
                     background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
                     border: none;
-                    border-radius: 8px;
+                    border-radius: 10px;
                     color: white;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     transition: opacity 0.15s, transform 0.15s;
+                    font-weight: 600;
                 }
 
                 .element-submit-button:hover:not(:disabled) {
@@ -528,9 +570,10 @@ ${js}
                 }
 
                 .element-edit-hint {
-                    margin-top: 8px;
-                    font-size: 11px;
+                    margin-top: 12px;
+                    font-size: 12px;
                     color: #666;
+                    text-align: center;
                 }
 
                 .loading-spinner {

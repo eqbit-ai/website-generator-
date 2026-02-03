@@ -648,31 +648,95 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
         }
 
         // Replace the element in the full HTML
-        // Try to find and replace by the original element
         let updatedHtml = currentHtml;
+        let matchFound = false;
 
-        // Escape special regex characters in the element HTML
-        const escapedOriginal = elementHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        // Try exact match first
+        // Method 1: Try exact match first
         if (currentHtml.includes(elementHtml)) {
             updatedHtml = currentHtml.replace(elementHtml, newElementHtml);
+            matchFound = true;
             console.log('✅ Element replaced via exact match');
-        } else {
-            // Try regex match (handles whitespace differences)
+        }
+
+        // Method 2: Try matching by opening tag (class/id based)
+        if (!matchFound) {
+            // Extract the opening tag from the original element
+            const openingTagMatch = elementHtml.match(/^<(\w+)([^>]*)>/);
+            if (openingTagMatch) {
+                const tagName = openingTagMatch[1];
+                const attributes = openingTagMatch[2];
+
+                // Extract class and id for matching
+                const classMatch = attributes.match(/class\s*=\s*["']([^"']+)["']/);
+                const idMatch = attributes.match(/id\s*=\s*["']([^"']+)["']/);
+
+                let searchPattern = null;
+
+                if (idMatch) {
+                    // Match by ID (most specific)
+                    const escapedId = idMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    searchPattern = new RegExp(`<${tagName}[^>]*id\\s*=\\s*["']${escapedId}["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
+                } else if (classMatch) {
+                    // Match by class (get first class for specificity)
+                    const firstClass = classMatch[1].split(/\s+/)[0];
+                    const escapedClass = firstClass.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    searchPattern = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${escapedClass}[^"']*["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
+                }
+
+                if (searchPattern && searchPattern.test(currentHtml)) {
+                    updatedHtml = currentHtml.replace(searchPattern, newElementHtml);
+                    matchFound = true;
+                    console.log('✅ Element replaced via tag/class/id match');
+                }
+            }
+        }
+
+        // Method 3: Try flexible whitespace matching
+        if (!matchFound) {
+            const escapedOriginal = elementHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const flexibleRegex = new RegExp(escapedOriginal.replace(/\s+/g, '\\s*'), 'i');
             if (flexibleRegex.test(currentHtml)) {
                 updatedHtml = currentHtml.replace(flexibleRegex, newElementHtml);
-                console.log('✅ Element replaced via flexible match');
-            } else {
-                console.log('⚠️ Could not find element in HTML, appending change note');
-                // If we can't find the exact element, return the new element with instructions
-                return res.status(400).json({
-                    error: 'Could not locate element in HTML',
-                    suggestion: 'Try selecting the element again or use the main prompt to make this change',
-                    newElementHtml
-                });
+                matchFound = true;
+                console.log('✅ Element replaced via flexible whitespace match');
             }
+        }
+
+        // Method 4: Try matching just by the element's text content (for simple elements)
+        if (!matchFound && elementPath) {
+            // For elements with unique identifiers in the path, try to find similar structure
+            const pathParts = elementPath.split('.');
+            if (pathParts.length > 1) {
+                const className = pathParts[pathParts.length - 1];
+                const tagName = pathParts[0].split('#')[0];
+
+                // Find elements with this class
+                const classRegex = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${className}[^"']*["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'gi');
+                const matches = currentHtml.match(classRegex);
+
+                if (matches && matches.length === 1) {
+                    // Only one match, safe to replace
+                    updatedHtml = currentHtml.replace(matches[0], newElementHtml);
+                    matchFound = true;
+                    console.log('✅ Element replaced via path-based class match');
+                }
+            }
+        }
+
+        if (!matchFound) {
+            console.log('⚠️ Could not find element in HTML');
+            // Instead of failing, return the new element and let the user know
+            return res.json({
+                success: true,
+                warning: 'Could not auto-replace element. Here is the edited element:',
+                website: {
+                    html: currentHtml,
+                    css: currentCss
+                },
+                editedElement: newElementHtml,
+                editedCss: newElementCss,
+                manualReplace: true
+            });
         }
 
         // Append new CSS if any
