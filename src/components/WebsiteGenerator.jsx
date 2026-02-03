@@ -1,12 +1,12 @@
 // src/components/WebsiteGenerator.jsx
 
 import React, { useState } from 'react';
-import { Download, Code, Eye, RefreshCw, Rocket, Sparkles } from 'lucide-react';
+import { Download, Code, Eye, RefreshCw, Rocket, Sparkles, MousePointer2, X, Send } from 'lucide-react';
 import PromptInput from './PromptInput';
 import Preview from './Preview';
 import CodeEditor from './CodeEditor';
 import DeployModal from './DeployModal';
-import { generateWebsite, clearSession } from '../services/api';
+import { generateWebsite, clearSession, editElement } from '../services/api';
 
 const WebsiteGenerator = () => {
     const [html, setHtml] = useState('');
@@ -25,6 +25,12 @@ const WebsiteGenerator = () => {
 
     // Prompt history (session-only, clears on refresh)
     const [promptHistory, setPromptHistory] = useState([]);
+
+    // NEW: Element editing mode
+    const [editMode, setEditMode] = useState(false);
+    const [selectedElement, setSelectedElement] = useState(null);
+    const [elementPrompt, setElementPrompt] = useState('');
+    const [isEditingElement, setIsEditingElement] = useState(false);
 
     const handleGenerate = async (prompt) => {
         setIsLoading(true);
@@ -65,6 +71,64 @@ const WebsiteGenerator = () => {
             setIsLoading(false);
             setLoadingMessage('');
         }
+    };
+
+    // NEW: Handle element selection
+    const handleElementSelect = (element) => {
+        setSelectedElement(element);
+        setElementPrompt('');
+        console.log('Selected element:', element.path, element.outerHTML.substring(0, 100));
+    };
+
+    // NEW: Handle element edit submission
+    const handleElementEdit = async () => {
+        if (!selectedElement || !elementPrompt.trim()) return;
+
+        setIsEditingElement(true);
+        setError(null);
+
+        try {
+            const result = await editElement(
+                sessionId,
+                selectedElement.outerHTML,
+                selectedElement.path,
+                elementPrompt,
+                { html, css }
+            );
+
+            if (result.success) {
+                setHtml(result.website.html);
+                setCss(result.website.css);
+                if (result.website.js) setJs(result.website.js);
+
+                // Add to history
+                setPromptHistory(prev => [...prev, {
+                    text: `[Element: ${selectedElement.path}] ${elementPrompt}`,
+                    timestamp: new Date().toLocaleTimeString()
+                }]);
+
+                // Clear selection
+                setSelectedElement(null);
+                setElementPrompt('');
+                setEditMode(false);
+
+                console.log(`✅ Element edited: ${selectedElement.path}`);
+            } else {
+                setError(result.error || 'Failed to edit element');
+            }
+        } catch (err) {
+            console.error('Element edit error:', err);
+            setError(err.message || 'Failed to edit element');
+        } finally {
+            setIsEditingElement(false);
+        }
+    };
+
+    // NEW: Cancel element selection
+    const handleCancelEdit = () => {
+        setSelectedElement(null);
+        setElementPrompt('');
+        setEditMode(false);
     };
 
     const handleExport = () => {
@@ -114,6 +178,9 @@ ${js}
         setIsNewDesign(true);
         setDesignStyle(null);
         setPromptHistory([]); // Clear prompt history
+        setEditMode(false);
+        setSelectedElement(null);
+        setElementPrompt('');
     };
 
     return (
@@ -139,6 +206,20 @@ ${js}
                 <div className="header-actions">
                     {html && (
                         <>
+                            <button
+                                className={`action-button ${editMode ? 'active edit-mode-active' : ''}`}
+                                onClick={() => {
+                                    setEditMode(!editMode);
+                                    if (editMode) {
+                                        setSelectedElement(null);
+                                        setElementPrompt('');
+                                    }
+                                }}
+                                title="Click to select and edit individual elements"
+                            >
+                                <MousePointer2 size={18} />
+                                {editMode ? 'Exit Edit Mode' : 'Edit Element'}
+                            </button>
                             <button className="action-button" onClick={handleReset}>
                                 <RefreshCw size={18} />
                                 New Design
@@ -173,10 +254,17 @@ ${js}
                         </div>
                     )}
 
-                    {html && !isNewDesign && (
+                    {html && !isNewDesign && !editMode && (
                         <div className="iteration-tip">
                             💡 <strong>Tip:</strong> Your next prompt will improve the current design.
                             Say "make new design" to start fresh.
+                        </div>
+                    )}
+
+                    {editMode && !selectedElement && (
+                        <div className="edit-mode-tip">
+                            <MousePointer2 size={16} />
+                            <span><strong>Edit Mode Active</strong> — Click any element in the preview to select it for editing</span>
                         </div>
                     )}
                 </aside>
@@ -199,12 +287,25 @@ ${js}
                             <Code size={18} />
                             Code
                         </button>
+                        {editMode && (
+                            <span className="edit-mode-indicator">
+                                <MousePointer2 size={14} />
+                                Element Selection Active
+                            </span>
+                        )}
                     </div>
 
                     {/* Content Area */}
                     <div className="content-area">
                         {viewMode === 'preview' ? (
-                            <Preview html={html} css={css} js={js} />
+                            <Preview
+                                html={html}
+                                css={css}
+                                js={js}
+                                editMode={editMode}
+                                onElementSelect={handleElementSelect}
+                                selectedElement={selectedElement}
+                            />
                         ) : (
                             <CodeEditor
                                 html={html}
@@ -216,6 +317,52 @@ ${js}
                             />
                         )}
                     </div>
+
+                    {/* Element Edit Panel */}
+                    {selectedElement && (
+                        <div className="element-edit-panel">
+                            <div className="element-edit-header">
+                                <div className="selected-element-info">
+                                    <span className="element-tag">&lt;{selectedElement.tagName}&gt;</span>
+                                    <span className="element-path">{selectedElement.path}</span>
+                                    {selectedElement.textContent && (
+                                        <span className="element-preview">
+                                            "{selectedElement.textContent.substring(0, 50)}{selectedElement.textContent.length > 50 ? '...' : ''}"
+                                        </span>
+                                    )}
+                                </div>
+                                <button className="close-button" onClick={handleCancelEdit}>
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            <div className="element-edit-body">
+                                <input
+                                    type="text"
+                                    className="element-prompt-input"
+                                    placeholder="Describe what you want to change (e.g., 'make text blue', 'change to larger font', 'add shadow')"
+                                    value={elementPrompt}
+                                    onChange={(e) => setElementPrompt(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleElementEdit()}
+                                    disabled={isEditingElement}
+                                    autoFocus
+                                />
+                                <button
+                                    className="element-submit-button"
+                                    onClick={handleElementEdit}
+                                    disabled={isEditingElement || !elementPrompt.trim()}
+                                >
+                                    {isEditingElement ? (
+                                        <span className="loading-spinner" />
+                                    ) : (
+                                        <Send size={18} />
+                                    )}
+                                </button>
+                            </div>
+                            <div className="element-edit-hint">
+                                Press Enter to apply changes • Uses ~90% fewer tokens than full-page edits
+                            </div>
+                        </div>
+                    )}
                 </main>
             </div>
 
@@ -227,6 +374,182 @@ ${js}
                 css={css}
                 js={js}
             />
+
+            {/* Element Edit Styles */}
+            <style>{`
+                .edit-mode-active {
+                    background: #3b82f6 !important;
+                    color: white !important;
+                    border-color: #3b82f6 !important;
+                }
+
+                .edit-mode-tip {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px;
+                    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+                    color: white;
+                    border-radius: 8px;
+                    margin-top: 12px;
+                    font-size: 13px;
+                }
+
+                .edit-mode-indicator {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    margin-left: auto;
+                    padding: 4px 12px;
+                    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+                    color: white;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+
+                .element-edit-panel {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: #1e1e2e;
+                    border-top: 1px solid #333;
+                    padding: 16px;
+                    z-index: 100;
+                    animation: slideUp 0.2s ease;
+                }
+
+                @keyframes slideUp {
+                    from { transform: translateY(100%); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+
+                .element-edit-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 12px;
+                }
+
+                .selected-element-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+
+                .element-tag {
+                    background: #3b82f6;
+                    color: white;
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    font-size: 13px;
+                    font-weight: 600;
+                }
+
+                .element-path {
+                    color: #888;
+                    font-family: monospace;
+                    font-size: 12px;
+                }
+
+                .element-preview {
+                    color: #10b981;
+                    font-size: 12px;
+                    max-width: 300px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .close-button {
+                    background: transparent;
+                    border: none;
+                    color: #888;
+                    cursor: pointer;
+                    padding: 4px;
+                    border-radius: 4px;
+                    transition: all 0.15s;
+                }
+
+                .close-button:hover {
+                    background: #333;
+                    color: white;
+                }
+
+                .element-edit-body {
+                    display: flex;
+                    gap: 10px;
+                }
+
+                .element-prompt-input {
+                    flex: 1;
+                    padding: 12px 16px;
+                    background: #2a2a3e;
+                    border: 1px solid #444;
+                    border-radius: 8px;
+                    color: white;
+                    font-size: 14px;
+                    outline: none;
+                    transition: border-color 0.15s;
+                }
+
+                .element-prompt-input:focus {
+                    border-color: #3b82f6;
+                }
+
+                .element-prompt-input::placeholder {
+                    color: #666;
+                }
+
+                .element-submit-button {
+                    padding: 12px 20px;
+                    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+                    border: none;
+                    border-radius: 8px;
+                    color: white;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: opacity 0.15s, transform 0.15s;
+                }
+
+                .element-submit-button:hover:not(:disabled) {
+                    opacity: 0.9;
+                    transform: scale(1.02);
+                }
+
+                .element-submit-button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+                .element-edit-hint {
+                    margin-top: 8px;
+                    font-size: 11px;
+                    color: #666;
+                }
+
+                .loading-spinner {
+                    width: 18px;
+                    height: 18px;
+                    border: 2px solid rgba(255,255,255,0.3);
+                    border-top-color: white;
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+
+                .content-area {
+                    position: relative;
+                }
+            `}</style>
         </div>
     );
 };

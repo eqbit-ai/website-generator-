@@ -60,8 +60,38 @@ export const clearSession = async (sessionId) => {
     }
 };
 
+// Edit a single element (token-efficient)
+export const editElement = async (sessionId, elementHtml, elementPath, prompt, currentCode) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/generator/edit-element`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId,
+                elementHtml,
+                elementPath,
+                prompt,
+                currentHtml: currentCode.html,
+                currentCss: currentCode.css
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to edit element');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
 export default {
     generateWebsite,
     getSession,
-    clearSession
+    clearSession,
+    editElement
 };

@@ -563,6 +563,154 @@ Return the COMPLETE modified code in format:
     }
 });
 
+// Edit a single element (token-efficient)
+router.post('/edit-element', async (req, res) => {
+    try {
+        const { sessionId, elementHtml, elementPath, prompt, currentHtml, currentCss } = req.body;
+
+        if (!elementHtml || !prompt || !currentHtml) {
+            return res.status(400).json({ error: 'Element HTML, prompt, and current HTML are required' });
+        }
+
+        if (!anthropic) {
+            return res.status(500).json({ error: 'AI service not available' });
+        }
+
+        console.log(`🎯 Element Edit: "${elementPath}" - "${prompt.substring(0, 50)}..."`);
+
+        // Token-efficient prompt - only send the element, not the full page
+        const systemPrompt = `You are an expert front-end developer making a TARGETED EDIT to a single HTML element.
+
+TASK: Modify ONLY the provided element based on the user's request.
+
+RULES:
+1. Return ONLY the modified element HTML - nothing else
+2. If CSS changes are needed, include them in a style attribute OR return a separate CSS block
+3. Keep the element structure intact unless explicitly asked to change it
+4. Preserve all existing classes, IDs, and attributes unless the change requires modifying them
+5. Be precise - change only what's requested
+
+RESPONSE FORMAT:
+If only HTML changes:
+<!-- ELEMENT -->
+<modified element html here>
+
+If CSS changes are also needed:
+<!-- ELEMENT -->
+<modified element html here>
+
+/* ELEMENT_CSS */
+.selector { property: value; }`;
+
+        const userMessage = `ELEMENT TO EDIT (${elementPath}):
+${elementHtml}
+
+USER REQUEST: ${prompt}
+
+Return the modified element. If you need to add/modify CSS, include it in a /* ELEMENT_CSS */ block.`;
+
+        const response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 2000,
+            temperature: 0.3,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userMessage }]
+        });
+
+        const result = response.content[0].text;
+        console.log('📝 Element edit response:', result.substring(0, 200));
+
+        // Parse the response
+        let newElementHtml = '';
+        let newElementCss = '';
+
+        // Extract element HTML
+        const elementMatch = result.match(/<!--\s*ELEMENT\s*-->([\s\S]*?)(?=\/\*\s*ELEMENT_CSS\s*\*\/|$)/i);
+        if (elementMatch) {
+            newElementHtml = elementMatch[1].trim();
+        } else {
+            // Fallback: assume the whole response is the element
+            newElementHtml = result.replace(/\/\*\s*ELEMENT_CSS\s*\*\/[\s\S]*$/, '').trim();
+        }
+
+        // Extract CSS if present
+        const cssMatch = result.match(/\/\*\s*ELEMENT_CSS\s*\*\/([\s\S]*?)$/i);
+        if (cssMatch) {
+            newElementCss = cssMatch[1].trim();
+        }
+
+        // Clean up any markdown
+        newElementHtml = newElementHtml.replace(/```html?\s*/gi, '').replace(/```\s*$/g, '').trim();
+        newElementCss = newElementCss.replace(/```css?\s*/gi, '').replace(/```\s*$/g, '').trim();
+
+        if (!newElementHtml) {
+            return res.status(500).json({ error: 'Failed to generate element edit' });
+        }
+
+        // Replace the element in the full HTML
+        // Try to find and replace by the original element
+        let updatedHtml = currentHtml;
+
+        // Escape special regex characters in the element HTML
+        const escapedOriginal = elementHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Try exact match first
+        if (currentHtml.includes(elementHtml)) {
+            updatedHtml = currentHtml.replace(elementHtml, newElementHtml);
+            console.log('✅ Element replaced via exact match');
+        } else {
+            // Try regex match (handles whitespace differences)
+            const flexibleRegex = new RegExp(escapedOriginal.replace(/\s+/g, '\\s*'), 'i');
+            if (flexibleRegex.test(currentHtml)) {
+                updatedHtml = currentHtml.replace(flexibleRegex, newElementHtml);
+                console.log('✅ Element replaced via flexible match');
+            } else {
+                console.log('⚠️ Could not find element in HTML, appending change note');
+                // If we can't find the exact element, return the new element with instructions
+                return res.status(400).json({
+                    error: 'Could not locate element in HTML',
+                    suggestion: 'Try selecting the element again or use the main prompt to make this change',
+                    newElementHtml
+                });
+            }
+        }
+
+        // Append new CSS if any
+        let updatedCss = currentCss;
+        if (newElementCss) {
+            updatedCss = currentCss + '\n\n/* Element Edit */\n' + newElementCss;
+            console.log('✅ CSS updated');
+        }
+
+        // Update session if it exists
+        if (sessionId) {
+            const session = designSessions.get(sessionId);
+            if (session) {
+                session.currentDesign = `<!-- HTML -->\n${updatedHtml}\n\n/* CSS */\n${updatedCss}`;
+            }
+        }
+
+        console.log(`✅ Element edit complete: ${newElementHtml.length} chars HTML, ${newElementCss.length} chars CSS`);
+
+        res.json({
+            success: true,
+            website: {
+                html: updatedHtml,
+                css: updatedCss
+            },
+            elementPath,
+            tokensUsed: 'minimal'
+        });
+
+    } catch (error) {
+        console.error('❌ Element edit error:', error);
+        res.status(500).json({
+            error: 'Element edit failed',
+            message: error.message
+        });
+    }
+});
+
 // Get session info
 router.get('/session/:sessionId', (req, res) => {
     const session = designSessions.get(req.params.sessionId);
