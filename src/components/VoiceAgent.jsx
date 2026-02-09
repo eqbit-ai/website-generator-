@@ -82,7 +82,7 @@ const VoiceAgent = ({ isOpen, onClose }) => {
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="Karen"
+                                    placeholder="Karen Smith"
                                     required
                                 />
                             </div>
