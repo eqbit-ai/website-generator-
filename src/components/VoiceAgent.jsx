@@ -82,7 +82,7 @@ const VoiceAgent = ({ isOpen, onClose }) => {
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="John Doe"
+                                    placeholder="Karen"
                                     required
                                 />
                             </div>
@@ -93,7 +93,7 @@ const VoiceAgent = ({ isOpen, onClose }) => {
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    placeholder="john@example.com"
+                                    placeholder="test@test.com
                                     required
                                 />
                             </div>
