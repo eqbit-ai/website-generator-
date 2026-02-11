@@ -1767,6 +1767,630 @@
       ],
       "source": "price-list.pdf",
       "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Business Card Premium Package",
+      "category": "mcore",
+      "question": "What's included in Business Card Premium?",
+      "responses": [
+        "Business Card Premium includes everything in the Starter package plus a phone answering service. You get a custom logo with one revision, up to 5 email addresses for a year, a shared PO Box, social media accounts on LinkedIn, Instagram, and X, plus a UAE landline with personalized phone answering by a multilingual agent during business hours. Voicemails are forwarded to your email instantly.",
+        "The Premium package upgrades your Business Card Starter with a full phone answering service — a dedicated UAE landline number, multilingual agent answering during business hours, voicemail with instant email notifications. Plus you still get the custom logo, 5 email addresses, domain assistance, shared PO Box, and social media setup.",
+        "Think of Business Card Premium as Starter on steroids. Same custom logo, domain assistance, email addresses, PO Box, and social media setup — but with a professional phone answering service added. A multilingual agent handles your calls during business hours, forwards messages, and you get instant email notifications for everything."
+      ],
+      "keywords": [
+        "business card premium",
+        "premium business card",
+        "phone answering card",
+        "business card upgrade",
+        "premium package",
+        "business card with phone",
+        "premium vs starter",
+        "business card comparison"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Corporate Tax CT 300 Package",
+      "category": "maccounting",
+      "question": "What is the CT 300 package?",
+      "responses": [
+        "CT 300 is the comprehensive corporate tax package at AED 10,800 per year. It includes 1,200 minutes of advisory calls, bookkeeping for up to 3,600 transactions annually, management accounts, CT return filing, VAT registration and quarterly filings if applicable, monthly financial statements, FTA profile amendments, annual financial review, payroll processing for up to 50 employees, document archiving, and a dedicated account manager. It's the all-in-one solution for businesses with moderate activity.",
+        "The CT 300 package costs AED 10,800/year and is designed for businesses with small to moderate transaction volumes. You get a dedicated account manager, bookkeeping up to 3,600 transactions/year, monthly financial statements, corporate tax return filing, VAT registration and quarterly filings, payroll for 50 employees, 1,200 minutes of advisory calls, and document archiving. Basically everything tax and accounting in one package.",
+        "For AED 10,800 per year, CT 300 gives you the full accounting and tax suite: dedicated account manager, 3,600 annual transactions in bookkeeping, corporate tax returns, VAT registration and quarterly filings, monthly financial statements, payroll for up to 50 staff, 1,200 minutes of advisory calls, FTA profile management, annual financial review, and document archiving. Service activates within 1 day."
+      ],
+      "keywords": [
+        "ct 300",
+        "corporate tax 300",
+        "ct 300 package",
+        "10800 tax",
+        "comprehensive tax package",
+        "full accounting package",
+        "ct 300 cost",
+        "tax and accounting bundle",
+        "dedicated account manager",
+        "annual tax package"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Corporate Tax Deregistration",
+      "category": "maccounting",
+      "question": "How do I deregister from corporate tax?",
+      "responses": [
+        "Corporate tax deregistration costs AED 2,100 and includes your final CT return filing plus the actual deregistration with FTA. Very important — if you don't deregister within 3 months of liquidation or license cancellation, you'll face a fine of AED 10,000 charged to the partner or shareholder. So don't delay this one.",
+        "The CT deregistration service is AED 2,100. It covers filing your final corporate tax return and completing the deregistration with the Federal Tax Authority. Heads up: there's a strict 3-month deadline after liquidation or license cancellation. Miss it and FTA will hit you with an AED 10,000 penalty against the partner/shareholder personally.",
+        "Deregistering from corporate tax costs AED 2,100 and covers your final CT return and FTA deregistration. Critical warning: you must complete this within 3 months of company liquidation or license cancellation. Failing to do so results in a hefty AED 10,000 fine to the partner or shareholder. We handle the filing and deregistration process for you."
+      ],
+      "keywords": [
+        "ct deregistration",
+        "corporate tax deregistration",
+        "cancel corporate tax",
+        "deregister tax",
+        "fta deregistration",
+        "tax cancellation",
+        "2100 deregistration",
+        "close tax account",
+        "tax penalty 10000",
+        "deregister fta"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Liquidation Services Overview",
+      "category": "maccounting",
+      "question": "How much does company liquidation cost?",
+      "responses": [
+        "Liquidation pricing depends on your company size. Liquidation Report alone is AED 1,000 — that's a prerequisite for license cancellation. Liquidation Starter is AED 9,000 for companies with 0-50 employees (14 days for 0 employees, 5-9 weeks for 1-50). For companies with 50+ employees, Liquidation 50 is AED 12,600 and takes 9-16 weeks. All packages include shareholders resolution, appointed liquidator, liquidation certificate, Arabic and English advertisement, clearance from FTA, Dubai Customs, Dubai Investment, Emirates Post, DEWA, and RTA, plus assistance with bank account closure.",
+        "We have three liquidation tiers. The basic Liquidation Report is AED 1,000 — just the report needed before license cancellation. Liquidation Starter at AED 9,000 covers the full process for companies up to 50 employees: shareholders resolution, liquidator appointment, clearances from all relevant authorities (FTA, Customs, Dubai Investment, Emirates Post, DEWA, RTA), advertisement in English and Arabic, bank closure assistance, and the final cancellation certificates. For 50+ employees, it's AED 12,600 with a 9-16 week timeline.",
+        "Company liquidation runs from AED 1,000 to AED 12,600 depending on complexity. A simple Liquidation Report is AED 1,000. The full Liquidation Starter at AED 9,000 handles everything — shareholders resolution, appointed liquidator, government clearances (FTA VAT/CT, Dubai Customs, Dubai Investment, Emirates Post, DEWA, RTA), newspaper advertisement in both languages, bank account closure support, and final cancellation certificates. Processing is 14 days for zero-employee companies, 5-9 weeks for up to 50. Above 50 employees, the Liquidation 50 package is AED 12,600 taking 9-16 weeks. Note: establishment card and active visas must be cancelled first."
+      ],
+      "keywords": [
+        "liquidation",
+        "company liquidation",
+        "liquidation cost",
+        "close company",
+        "wind up company",
+        "liquidation starter",
+        "liquidation 50",
+        "liquidation report",
+        "company closure",
+        "9000 liquidation",
+        "12600 liquidation",
+        "dissolve company"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Financial Audit Report",
+      "category": "maccounting",
+      "question": "How much does a financial audit cost?",
+      "responses": [
+        "A financial audit report costs AED 3,000 and takes about 14 business days. You'll receive audited financial statements plus the audit report signed and stamped by a certified accountant from the Ministry of Economics. This is a prerequisite for company renewal, so make sure to plan ahead.",
+        "The financial audit service is AED 3,000 with a 14-day turnaround. A certified accountant from the Ministry of Economics examines your company's financials for the fiscal year and provides signed, stamped audited statements and an audit report. Important: this is required for your company renewal.",
+        "Financial audit is AED 3,000, processed within 14 business days. It covers a thorough examination of your company's financial reports by a Ministry of Economics certified accountant. You get audited financial statements and a signed and stamped audit report. Keep in mind this is a prerequisite for license renewal, so factor it into your renewal timeline."
+      ],
+      "keywords": [
+        "financial audit",
+        "audit report",
+        "audit cost",
+        "3000 audit",
+        "audited statements",
+        "company audit",
+        "annual audit",
+        "audit for renewal",
+        "financial statements audit",
+        "moe audit"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Financial Advisory Service",
+      "category": "maccounting",
+      "question": "What is the Financial Advisory service?",
+      "responses": [
+        "Financial Advisory is a premium service at AED 36,000 that gives you monthly 90-minute video calls with a financial expert. Topics covered include financial forecasting, budgeting, cash flow management, financial risk management, working capital advisory, start-up advisory, and cost optimization. You get personalized recommendations and specific next steps after each session. Processing starts within 7 business days.",
+        "For AED 36,000, the Financial Advisory service provides ongoing monthly consultations via 90-minute video calls. Your advisor covers everything from budgeting and forecasting to cash flow management, risk assessment, working capital, startup guidance, and cost optimization. Each session ends with a financial review and specific action items tailored to your business. Takes 7 business days to set up.",
+        "The Financial Advisory package costs AED 36,000 and includes monthly 90-minute video consultations with a dedicated financial advisor. They cover a wide range of topics — financial forecasting, budgeting, cash flow management, risk management, working capital optimization, startup guidance, and cost reduction strategies. After each call, you receive a review of your financial statements and personalized recommendations with clear next steps."
+      ],
+      "keywords": [
+        "financial advisory",
+        "financial advisor",
+        "advisory service",
+        "36000 advisory",
+        "monthly financial advice",
+        "financial consulting",
+        "cash flow advisory",
+        "budgeting advice",
+        "financial expert",
+        "financial guidance"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Forecasting and Budgeting Report",
+      "category": "maccounting",
+      "question": "What is the Forecasting and Budgeting Report?",
+      "responses": [
+        "The Forecasting and Budgeting Report costs AED 6,000 and takes 7-10 business days. It provides projections of your future revenues and expenses for up to 3 years. You receive an Excel workbook with detailed analysis and workings covering financial challenges and opportunities. We'll need your historical financial statements (last 3-5 years) and any market research data you have.",
+        "For AED 6,000, you get a comprehensive financial forecast covering up to 3 years of projected revenues and expenses. The deliverable is a detailed Excel workbook analyzing your financial challenges and opportunities. Processing takes 7-10 business days. You'll need to provide historical financial statements from the last 3-5 years and any market research data if available.",
+        "A Forecasting and Budgeting Report is AED 6,000 with a 7-10 day turnaround. It gives your business a clear picture of past, current, and projected financial conditions — projecting revenue and expenses up to 3 years out. You receive a detailed Excel workbook with all the analysis. We just need your last 3-5 years of financial statements and any relevant market research data to get started."
+      ],
+      "keywords": [
+        "forecasting report",
+        "budgeting report",
+        "financial forecast",
+        "3 year projection",
+        "revenue projection",
+        "6000 forecast",
+        "financial planning",
+        "budget planning",
+        "expense projection",
+        "business forecast"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Business Valuation Report",
+      "category": "maccounting",
+      "question": "How much does a business valuation cost?",
+      "responses": [
+        "A Business Valuation Report costs AED 10,000. It provides an in-depth analysis of your business's worth, covering current and future revenue streams, associated costs, and KPIs. Includes a high-level review of your historical financial statements and preparation of the valuation report with one revision. You'll need to provide your financial statements (audited or non-audited), manager details, and an overview of your business model and projections.",
+        "The Valuation Report service is AED 10,000 and gives you a comprehensive analysis of what your business is worth. It identifies revenue streams, costs, and key performance indicators, reviews your historical financials, and produces a detailed valuation report (with one revision included). Ideal for investment rounds, partnerships, or strategic planning. We'll need your financial statements, forecasts, and business model overview.",
+        "For AED 10,000, our Business Valuation service delivers an in-depth report analyzing your company's worth. The analysis covers current and future revenue streams, cost structures, and KPIs, alongside a review of your historical financial statements. You receive a comprehensive valuation report with one revision included. Great for investors, potential acquisitions, or understanding your business's market value."
+      ],
+      "keywords": [
+        "valuation report",
+        "business valuation",
+        "company valuation",
+        "10000 valuation",
+        "business worth",
+        "company worth",
+        "valuation cost",
+        "business appraisal",
+        "value assessment",
+        "investment valuation"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Medical Insurance Categories",
+      "category": "mresidency",
+      "question": "What are the medical insurance categories and pricing?",
+      "responses": [
+        "Medical insurance in Dubai is mandatory for all residents. There are 4 categories: Category A for employees earning above AED 4,000 — costs AED 1,680. Category B for employees earning below AED 4,000 — also AED 1,680. Category C for dependent children — AED 1,376. Category D for dependent spouses — AED 3,160. All categories are processed within 1 business day.",
+        "Here's the medical insurance breakdown by category: Cat A (employee salary >4,000) — AED 1,680, Cat B (employee salary <4,000) — AED 1,680, Cat C (dependent children) — AED 1,376, Cat D (dependent spouse) — AED 3,160. Each one processes in just 1 day. Remember, medical insurance is mandatory for all UAE residents — investors, employees, dependents, and domestic workers.",
+        "Medical insurance is mandatory for all Dubai residents and comes in 4 categories. Employees with salary above AED 4,000 (Cat A) or below AED 4,000 (Cat B) both cost AED 1,680. Dependent children (Cat C) are AED 1,376 and dependent spouses (Cat D) are AED 3,160. All policies are activated within 1 business day. We handle the application with the insurance provider and deliver your policy certificate."
+      ],
+      "keywords": [
+        "medical insurance category",
+        "insurance category a",
+        "insurance category b",
+        "insurance category c",
+        "insurance category d",
+        "1680 insurance",
+        "1376 insurance",
+        "3160 insurance",
+        "employee insurance",
+        "dependent insurance",
+        "spouse insurance",
+        "children insurance"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Dependent Visa Cancellation",
+      "category": "mresidency",
+      "question": "How do I cancel a dependent visa?",
+      "responses": [
+        "Dependent visa cancellation costs AED 1,000 and takes about 2 business days. You'll need the dependent's Emirates ID (original or copy) or UAE Pass access. The cancellation terminates the current residence visa of the dependent. Pretty straightforward process.",
+        "Cancelling a dependent residence visa is AED 1,000 with a 2-day processing time. Just bring the Emirates ID original or copy (or UAE Pass if the physical card isn't available). The process terminates the dependent's current residence visa in the UAE.",
+        "To cancel a dependent's residence visa, the fee is AED 1,000 and it's processed within 2 days. Requirements are simple — Emirates ID original or copy, or UAE Pass if the card isn't available. Once processed, the dependent's residence visa is formally terminated."
+      ],
+      "keywords": [
+        "cancel dependent visa",
+        "dependent visa cancellation",
+        "1000 cancel visa",
+        "terminate dependent visa",
+        "cancel spouse visa",
+        "cancel child visa",
+        "dependent visa cancel cost",
+        "end dependent visa"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "EID Card Delivery Service",
+      "category": "mresidency",
+      "question": "Can I get my Emirates ID delivered?",
+      "responses": [
+        "Yes! Meydan Free Zone offers a free EID card delivery service to eliminate the need for you to visit the office for collection. This service is available for clients in Dubai and Sharjah. Delivery typically takes 1-2 working days after the card is ready.",
+        "Meydan offers free Emirates ID card delivery — no need to come to the office to pick it up. The service covers Dubai and Sharjah residents and takes 1-2 working days. Just provide your delivery details and we'll get your EID card to your door.",
+        "The EID Card Delivery service is free of charge and delivers your Emirates ID card directly to you, so you don't have to visit the Meydan Free Zone office. Currently available for clients in Dubai and Sharjah only, with a 1-2 working day delivery timeline."
+      ],
+      "keywords": [
+        "eid delivery",
+        "emirates id delivery",
+        "deliver eid",
+        "eid card delivery",
+        "collect emirates id",
+        "eid to door",
+        "eid pickup",
+        "emirates id collection"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Exploration Visa",
+      "category": "mresidency",
+      "question": "What is the Exploration Visa and how much does it cost?",
+      "responses": [
+        "The Exploration Visa is a single-entry visa for people looking to explore job or business opportunities in the UAE. Pricing is tiered by duration: AED 3,500 for 1-60 days, AED 7,100 for 61-120 days, and AED 13,500 for 121-180 days. There's also a refundable deposit of AED 1,604 plus AED 10 each for knowledge and innovation fees. Processed within 2 business days. You'll need your passport, bank statement, and university degree.",
+        "An Exploration Visa lets you enter the UAE to explore job or business opportunities. It comes in three tiers: 60 days for AED 3,500, 120 days for AED 7,100, or 180 days for AED 13,500. On top of the visa fee, there's a refundable security deposit of AED 1,604 and small knowledge/innovation fees of AED 10 each. Takes just 2 business days to process. Bring your passport, bank statement, and university degree.",
+        "Looking to explore opportunities in the UAE? The Exploration Visa gives you a single-entry visa with flexible duration options. For 1-60 days it's AED 3,500, 61-120 days is AED 7,100, and 121-180 days runs AED 13,500. You'll also pay a refundable deposit of AED 1,604 and AED 20 in knowledge and innovation fees. Processing takes 2 business days. Documents needed: passport, bank statement, and university degree. Health insurance is also included."
+      ],
+      "keywords": [
+        "exploration visa",
+        "explore visa",
+        "explore uae visa",
+        "3500 visa",
+        "7100 visa",
+        "13500 visa",
+        "short term visa",
+        "job exploration visa",
+        "business exploration visa",
+        "visit visa explore",
+        "60 day visa",
+        "120 day visa",
+        "180 day visa"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Family and Friends Visa",
+      "category": "mresidency",
+      "question": "What is the Family and Friends Visa?",
+      "responses": [
+        "The Family and Friends Visa is for inviting family or friends to visit you in the UAE without needing a sponsor. It comes as a single-entry or multi-entry visa for either 30 or 90 days. The application includes health insurance. You'll need a passport copy, marriage certificate if applicable, and proof of relationship.",
+        "Want to bring family or friends to visit? The Family and Friends Visa provides single-entry or multi-entry options for 30 or 90 days — and doesn't require a sponsor. Health insurance is included with the application. Documents needed are passport copy, marriage certificate (if applicable), and proof of relationship.",
+        "The Family and Friends Visa lets you invite your loved ones to the UAE for 30 or 90 days. Available as single-entry or multi-entry, no sponsor required. The package includes health insurance. Just submit a passport copy, marriage certificate if relevant, and documentation proving the relationship."
+      ],
+      "keywords": [
+        "family visa",
+        "friends visa",
+        "family and friends visa",
+        "visit visa family",
+        "invite family uae",
+        "30 day visit visa",
+        "90 day visit visa",
+        "multi entry visa",
+        "visitor visa",
+        "family visit"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Golden Visa",
+      "category": "mresidency",
+      "question": "What is the Golden Visa and how much does it cost?",
+      "responses": [
+        "The Golden Visa is a long-term UAE visa available for 5 years (AED 1,550) or 10 years (AED 4,000). It's available for entrepreneurs, investors, property investors, high school students, ratified university graduates, scientists, and specialists. Additional costs include AED 300 for the medical test and AED 10 for biometrics. We handle the medical and Emirates ID application, schedule appointments, and assist throughout the process.",
+        "Golden Visa gives you 5 or 10 years of UAE residency. A 5-year Golden Visa costs AED 1,550 and a 10-year costs AED 4,000, plus AED 300 for medical and AED 10 for biometrics. Eligible categories include entrepreneurs, investors, property investors, top graduates, scientists, and specialists. We manage the full process — medical test scheduling, biometrics appointments, Emirates ID application, and everything in between.",
+        "The UAE Golden Visa provides long-term residency for qualified professionals and investors. Pricing: AED 1,550 for 5 years or AED 4,000 for 10 years, plus AED 300 medical test and AED 10 biometrics fee. Eligible categories: entrepreneurs, investors, property investors, high school students, university graduates, scientists, and specialists. Our team handles the full application — from medical appointments to Emirates ID processing."
+      ],
+      "keywords": [
+        "golden visa",
+        "10 year visa",
+        "5 year visa",
+        "golden visa cost",
+        "1550 visa",
+        "4000 visa",
+        "long term visa uae",
+        "golden visa meydan",
+        "entrepreneur visa",
+        "investor golden visa",
+        "golden visa categories",
+        "golden visa eligibility"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Virtual Assistant Starter",
+      "category": "massist",
+      "question": "What is the Virtual Assistant Starter service?",
+      "responses": [
+        "Virtual Assistant Starter costs AED 12,000 and gives you a virtual assistant for 6 hours per week. They handle customer support, administration tasks, data entry, and other business activities. Perfect for entrepreneurs who need help but aren't ready for a full-time hire. Service activates within 5 business days.",
+        "The VA Starter package is AED 12,000 for a virtual assistant working 6 hours a week. Your VA can manage customer support, admin tasks, data entry, and various business operations. Great for solo entrepreneurs who need reliable support without the overhead of a full-time employee. Setup takes about 5 business days.",
+        "For AED 12,000, Virtual Assistant Starter provides 6 hours per week of dedicated support. Your VA handles customer service, administrative work, data entry, and other tasks you need off your plate. Ideal for startups and small business owners who want to focus on growth. Activation within 5 business days — just provide your contact details and VA requirements."
+      ],
+      "keywords": [
+        "virtual assistant starter",
+        "va starter",
+        "virtual assistant",
+        "12000 va",
+        "6 hours assistant",
+        "remote assistant",
+        "virtual assistant cost",
+        "va service",
+        "business assistant",
+        "admin assistant"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Virtual Assistant Dedicated",
+      "category": "massist",
+      "question": "What is the Dedicated Virtual Assistant service?",
+      "responses": [
+        "The Dedicated Virtual Assistant is the premium tier at AED 90,000. You get a full-time VA working 8 hours a day (9 AM to 5 PM), maxing at 40 hours per week. They handle email management, customer support, data entry, scheduling, and all your administrative needs. Essentially a full-time remote employee dedicated exclusively to your business. Activates within 5 business days.",
+        "For AED 90,000, the Dedicated VA service gives you a virtual assistant for 8 hours daily, Monday through Friday (9 AM - 5 PM). That's up to 40 hours per week of dedicated support — email management, customer service, admin tasks, data entry, and more. It's like having a full-time team member without the office overhead. Ready in 5 business days.",
+        "The Dedicated Virtual Assistant package costs AED 90,000 and provides 8 hours of daily support (9:00 AM to 5:00 PM, 40 hours/week max). Your dedicated VA manages customer support, email, data entry, scheduling, and any administrative tasks your business needs. This is the ultimate solution for businesses that need consistent, full-time remote support. Setup takes 5 business days."
+      ],
+      "keywords": [
+        "dedicated virtual assistant",
+        "va dedicated",
+        "full time va",
+        "90000 va",
+        "8 hours assistant",
+        "dedicated assistant",
+        "full time virtual assistant",
+        "premium va",
+        "40 hours assistant",
+        "dedicated remote support"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Social Media Management Service",
+      "category": "massist",
+      "question": "What is the Social Media Management service?",
+      "responses": [
+        "Social Media Management comes in two tiers: Starter at AED 500 and Premium at AED 1,000. It's an AI-powered platform for creating, scheduling, and managing your social media posts across multiple platforms. Features include AI-generated content with tailored text and design, a content planner calendar, a media library, performance tracking dashboard for engagement and growth metrics, and hashtag search tools. Starter gets you 16 posts/month, Premium gives you 28 posts/month. Setup within 2 business days.",
+        "We offer AI-powered social media management starting at AED 500 (Starter) or AED 1,000 (Premium). The platform handles content creation with AI-generated posts, scheduling, publishing, analytics, and hashtag research. Starter plan includes 16 posts per month and Premium gives you 28 posts monthly, plus a dedicated social media team. Ready in 2 business days.",
+        "The Social Media Management service uses AI to handle your social presence. Two plans: Starter (AED 500, 16 posts/month) and Premium (AED 1,000, 28 posts/month). Both include AI content creation, content calendar and scheduling, media library, performance analytics dashboard, and hashtag search. The Premium tier adds a dedicated marketing team. Activates in 2 business days."
+      ],
+      "keywords": [
+        "social media management",
+        "social media service",
+        "500 social media",
+        "1000 social media",
+        "social media posts",
+        "ai social media",
+        "instagram management",
+        "content creation",
+        "social media marketing",
+        "social media starter",
+        "social media premium"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "PO Box Cancellation",
+      "category": "massist",
+      "question": "How much does PO Box cancellation cost?",
+      "responses": [
+        "PO Box cancellation costs AED 500. Just provide your PO Box number and we'll process the termination. The cancellation permanently terminates the PO Box number registered under your company.",
+        "Cancelling your PO Box is AED 500. Once cancelled, the PO Box number registered under your company is terminated permanently. You just need to provide the PO Box number to initiate the process.",
+        "To cancel your PO Box service, the fee is AED 500. This terminates the PO Box number registered under your company. Pretty straightforward — just give us the PO Box number and we handle the rest."
+      ],
+      "keywords": [
+        "po box cancellation",
+        "cancel po box",
+        "po box cancel cost",
+        "500 po box",
+        "terminate po box",
+        "close po box",
+        "po box cancel fee"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "NOC Authority Specific Pricing",
+      "category": "mpro",
+      "question": "How much does each NOC authority cost?",
+      "responses": [
+        "NOC fees vary by authority. Here's the breakdown: DMA (Dubai Maritime Authority) — AED 825, 3-4 days. RERA (Real Estate Regulatory Agency) — AED 825, 2-5 days. MOCACE (Ministry of Economy) — AED 825, 4-10 days. DOPA (Dubai Police) — AED 825, 3-5 days. DCAA (Dubai Civil Aviation) — AED 1,100. DSC (Dubai Sports Council) — AED 1,100-5,800. RTA (Roads and Transport) — AED 1,100, 10-15 days. SIRA (Security Industry) — AED 1,200. KHDA (Knowledge and Human Development) — AED 18,000, 20 days. UAEMC (UAE Ministry of Economy) — AED 25,000, 15-20 days.",
+        "Each NOC authority has different pricing and timelines. Budget options: DMA, RERA, MOCACE, DOPA at AED 825 each (3-10 days). Mid-range: DCAA and DSC at AED 1,100, RTA at AED 1,100 (10-15 days), SIRA at AED 1,200. Premium: KHDA at AED 18,000 (20 days) for training courses, and UAEMC at AED 25,000 (15-20 days). DSC can also be AED 5,800 depending on service type. Timeline varies by authority.",
+        "Here's the NOC pricing per authority: DMA — AED 825 (3-4 days), RERA — AED 825 (2-5 days), MOCACE — AED 825 (4-10 days), DOPA — AED 825 (3-5 days), DCAA — AED 1,100, DSC — AED 1,100 to AED 5,800, RTA — AED 1,100 (10-15 days), SIRA — AED 1,200, KHDA — AED 18,000 (20 days, for training), UAEMC — AED 25,000 (15-20 days). Prices may vary based on specific NOC type within each authority."
+      ],
+      "keywords": [
+        "noc pricing",
+        "noc authority cost",
+        "dcaa noc",
+        "dma noc",
+        "dsc noc",
+        "rera noc",
+        "sira noc",
+        "uaemc noc",
+        "mocace noc",
+        "rta noc",
+        "khda noc",
+        "dopa noc",
+        "noc fee by authority",
+        "specific noc cost"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "UID Number Merge Service",
+      "category": "mpro",
+      "question": "What is UID Number Merge?",
+      "responses": [
+        "UID Number Merge resolves the issue of individuals being assigned multiple Unified Identification Numbers in the UAE immigration system. It costs AED 275 and involves updating immigration records by merging the duplicate UIDs. This prevents complications with visa processing and immigration records. You'll need your passports (old and new), Emirates ID, and residence visa if applicable.",
+        "If you've been assigned multiple UIDs in the UAE immigration system, the UID Number Merge service fixes that for AED 275. It updates your immigration records by merging the duplicates, ensuring accurate records and preventing future complications. Bring your passports, Emirates ID, and residence visa copy if applicable.",
+        "The UID Number Merge service costs AED 275 and fixes the common issue of having multiple Unified Identification Numbers in the UAE system. This can happen when passports change or immigration records get duplicated. We merge the UIDs in your immigration records to keep everything clean and avoid processing issues. Documents needed: all passports, Emirates ID, and residence visa."
+      ],
+      "keywords": [
+        "uid merge",
+        "uid number merge",
+        "unified identification number",
+        "275 uid",
+        "merge uid",
+        "duplicate uid",
+        "immigration uid",
+        "multiple uid",
+        "uid fix"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Movement Report Service",
+      "category": "mpro",
+      "question": "What is a Movement Report?",
+      "responses": [
+        "A Movement Report is an official entry/exit list from immigration showing all dates an expatriate entered and left the UAE. It costs AED 300 and is processed within 1 business day. Typically needed for residence visa cancellations from outside the country, company closures, police requests, or immigration status updates. Just provide the passport number and port details.",
+        "The Movement Report service costs AED 300 and takes just 1 day. It's an official immigration document listing every entry and exit date for an expatriate to and from the UAE. You'll need this for visa cancellations when abroad, company closures, police requests, or status updates. We just need the passport number used for travel.",
+        "Need a record of your UAE entries and exits? The Movement Report is AED 300, processed in 1 business day. It's an official immigration document showing all entry and exit dates. Common uses include visa cancellations from overseas, company wind-downs, police requirements, and immigration status updates. Provide your passport number and we handle the rest."
+      ],
+      "keywords": [
+        "movement report",
+        "entry exit report",
+        "300 movement report",
+        "immigration report",
+        "travel history uae",
+        "entry exit list",
+        "movement history",
+        "immigration movement"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Employee List from Immigration",
+      "category": "mpro",
+      "question": "How do I get an Employee List from immigration?",
+      "responses": [
+        "The Employee List service provides a comprehensive list from immigration of all employees under your company's sponsorship. It costs AED 500 and takes 3 business days to process. This is an official immigration document useful for audits, compliance, and company administration.",
+        "For AED 500, you can get an official Immigration Employee List showing all employees sponsored under your company. Processing takes 3 business days. This is the definitive record from immigration of everyone under your company's visa sponsorship.",
+        "An Employee List from immigration costs AED 500 and takes 3 days. It gives you a complete, official list of all employees under your company's sponsorship directly from the immigration authority. Useful for compliance checks, audits, or internal records."
+      ],
+      "keywords": [
+        "employee list",
+        "immigration employee list",
+        "500 employee list",
+        "sponsored employees",
+        "company employees list",
+        "employees under sponsorship",
+        "immigration list",
+        "staff list immigration"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Dubai Chambers Services",
+      "category": "mpro",
+      "question": "What are the Dubai Chambers services?",
+      "responses": [
+        "We offer two Dubai Chambers services. Company Registration costs AED 825 (service fee) plus AED 2,200 (authority fee) — you'll get portal credentials and a company registration number. Document Attestation is AED 550 (service fee) plus AED 150 (authority fee), processed in 2 business days — covers bills of origin, invoices, employee letters, and other documents that need Chamber attestation.",
+        "Dubai Chambers services include: 1) Company Registration at AED 825 service fee + AED 2,200 authority fee — we register your company and provide you with portal access credentials and registration number. 2) Document Attestation at AED 550 service + AED 150 authority fee, done in 2 business days — for attesting bills of origin, invoices, employee letters, and other official documents through the Chamber.",
+        "For Dubai Chambers, we handle two key services. Registration costs AED 3,025 total (AED 825 service + AED 2,200 authority fee) and sets you up with a company registration number plus portal login. Document Attestation is AED 700 total (AED 550 service + AED 150 authority fee), taking 2 business days for attestation of invoices, bills of origin, employee letters, and similar documents."
+      ],
+      "keywords": [
+        "dubai chambers",
+        "chamber registration",
+        "chamber of commerce",
+        "dubai chamber",
+        "chamber attestation",
+        "document attestation chamber",
+        "825 chamber",
+        "2200 chamber",
+        "chamber company registration",
+        "chamber document"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Dubai Municipality Services",
+      "category": "mpro",
+      "question": "What are the Dubai Municipality services?",
+      "responses": [
+        "We handle two Dubai Municipality services. Company Registration costs AED 825 with no authority fee, done in 2 business days — you get portal credentials for the municipality system. Product Registration costs AED 825 service fee plus authority fees (AED 220 for non-edible products, AED 920 for edible products), taking up to 22 business days. For product registration you'll need product specs on company letterhead, free sale certificate, and product photos including packaging.",
+        "Dubai Municipality services include: 1) Company Registration — AED 825, processed in 2 business days, gives you a username and password for the municipality portal. 2) Product Registration — AED 825 service fee + AED 220 authority fee for non-edible products or AED 920 for edible products, taking up to 22 business days. Product registration requires specifications on letterhead, free sale certificate from the import country, product photos, and packaging description.",
+        "For Dubai Municipality, we offer Company Registration at AED 825 (2 business days) which gets you set up on the municipality portal. Product Registration is also AED 825 service fee, plus AED 220 authority fee for non-edible or AED 920 for edible products, with a timeline of up to 22 business days. You'll need product specifications, free sale certificate, product photos, and packaging details."
+      ],
+      "keywords": [
+        "dubai municipality",
+        "municipality registration",
+        "product registration",
+        "municipality product",
+        "food registration",
+        "edible registration",
+        "municipality company",
+        "dm registration",
+        "municipality portal",
+        "register product dubai"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Ecommerce Account Setup Service",
+      "category": "mcore",
+      "question": "What does the Ecommerce Account Setup include?",
+      "responses": [
+        "The Ecommerce Account Setup service costs AED 1,000 and takes 10 business days. We set up your seller account on two ecommerce marketplaces and list your first SKU on both platforms. It's designed for business owners and entrepreneurs who want to start selling online quickly. Payment is required upfront to initiate the process.",
+        "For AED 1,000, our Ecommerce Account Setup gets you a seller account on 2 ecommerce marketplaces with your first product (1 SKU) listed on both. Takes about 10 business days from start to finish. Perfect for businesses looking to break into online selling without the hassle of figuring out marketplace setup.",
+        "The E-Commerce setup service is AED 1,000 with a 10-day turnaround. We handle creating your seller accounts on two ecommerce platforms and listing one SKU on both marketplaces. Great for entrepreneurs who want to get their products online quickly. Payment upfront to get started."
+      ],
+      "keywords": [
+        "ecommerce setup",
+        "ecommerce account",
+        "seller account",
+        "1000 ecommerce",
+        "marketplace setup",
+        "online selling",
+        "ecommerce starter",
+        "sell online",
+        "amazon seller",
+        "noon seller",
+        "ecommerce registration"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Corporate Secretarial Services",
+      "category": "mpro",
+      "question": "What are Corporate Secretarial services?",
+      "responses": [
+        "Corporate Secretarial services cost AED 275 and are completed within 3 business days. Meydan Free Zone handles corporate governance, company administration, ensuring compliance with statutory and regulatory requirements, and implementing Board of Directors decisions. This covers all the essential corporate paperwork and compliance tasks.",
+        "For AED 275, our Corporate Secretarial service covers corporate governance, company administration, regulatory compliance, and implementing board decisions. Processing takes 3 business days. It ensures your company stays compliant with all statutory requirements without you having to manage the paperwork yourself.",
+        "Corporate Secretarial is AED 275, processed in 3 business days. It includes maintaining robust corporate governance, effective administration of your company, ensuring compliance with all statutory and regulatory requirements, and implementing decisions made by your Board of Directors. Essential for keeping your company in good standing."
+      ],
+      "keywords": [
+        "corporate secretarial",
+        "secretary service",
+        "275 secretarial",
+        "corporate governance",
+        "company secretary",
+        "corporate compliance",
+        "board resolution",
+        "company administration",
+        "regulatory compliance"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
     }
   ]
 }
