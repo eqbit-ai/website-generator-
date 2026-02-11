@@ -491,6 +491,1282 @@
       "keywords": [
         "where is the meydan share desk office"
       ]
+    },
+    {
+      "name": "License Package Cost",
+      "question": "How much does a Meydan Free Zone license cost?",
+      "responses": [
+        "A new corporate license at Meydan Free Zone is AED 12,125. That's an all-in package — it covers your company formation, the trade license itself, one visa allocation, and a flexi desk. You also get 3 business activities included, so you're pretty much set to start operating right away.",
+        "The license package is AED 12,125, and honestly it's great value because it bundles everything together — formation, license, visa allocation, and flexi desk, plus 3 business activities. Renewal is the same price. No hidden costs.",
+        "It's AED 12,125 for a new license, which includes formation, the license, a visa allocation, and flexi desk — all packaged together. You get up to 3 business activities included in that price. Same cost applies when you renew."
+      ],
+      "keywords": [
+        "license cost",
+        "how much is a license",
+        "license price",
+        "trade license fee",
+        "cost of license meydan",
+        "license package price",
+        "12125",
+        "what does a license cost",
+        "meydan license fee",
+        "corporate license price",
+        "new license price",
+        "license charges"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "License Renewal Cost",
+      "question": "How much does it cost to renew my license?",
+      "responses": [
+        "License renewal is AED 12,125 — same as a new license. It includes your license, visa allocation, and flexi desk. And here's a nice perk: if you need any amendments done at renewal time, those are completely free.",
+        "Renewal is AED 12,125. Same package deal — license, visa allocation, flexi desk, 3 activities. The good news? If you want to make changes like updating your business activities or shareholders, amendments at renewal are free of charge.",
+        "It's AED 12,125 to renew, identical to the new license cost. Everything's included — license, visa, flexi desk. Pro tip: time your amendments with your renewal since they're free at that point."
+      ],
+      "keywords": [
+        "license renewal cost",
+        "renew license price",
+        "renewal fee",
+        "license renewal charges",
+        "how much to renew",
+        "annual renewal cost",
+        "renewal price meydan",
+        "renew my license",
+        "license renewal"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "What's Included in License Package",
+      "question": "What's included in the Meydan Free Zone license package?",
+      "responses": [
+        "Your license package includes everything you need to get started: company formation, the trade license, one visa allocation, a flexi desk, and 3 business activities. It's AED 12,125 all-in. You literally just need to submit your documents and you're up and running.",
+        "The AED 12,125 package bundles it all — formation of your company, the actual trade license, a visa allocation so you can sponsor employees, a flexi desk for your workspace, and 3 business activities. It's designed so you don't have to pay for things separately.",
+        "For AED 12,125 you get: company formation, trade license, one visa allocation, flexi desk access, and 3 business activities included. It's a complete startup package. If you need more activities or visas, those can be added separately."
+      ],
+      "keywords": [
+        "what's included in license",
+        "license package includes",
+        "what do I get with license",
+        "license inclusions",
+        "package contents",
+        "what comes with the license",
+        "license benefits",
+        "license package details",
+        "flexi desk included"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "License Amendment Cost",
+      "question": "How much does a license amendment cost?",
+      "responses": [
+        "A license amendment is AED 2,000. But here's a tip — if you time your amendment with your license renewal, it's completely free. So if your renewal is coming up, it's worth waiting a bit to save that 2,000.",
+        "It's AED 2,000 for a license amendment. However, if you do it at the same time as your license renewal, there's no charge at all. Same goes if you combine it with formation — AED 0 at renewal time.",
+        "License amendments cost AED 2,000. Quick tip though: amendments are free if done during renewal. So unless it's urgent, you might want to bundle it with your next renewal cycle."
+      ],
+      "keywords": [
+        "license amendment cost",
+        "amendment fee",
+        "change license cost",
+        "modify license",
+        "license amendment price",
+        "amend license",
+        "amendment charges",
+        "license change fee",
+        "2000 amendment"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Additional Business Activity Cost",
+      "question": "How much does it cost to add more business activities?",
+      "responses": [
+        "Adding an extra business activity is AED 1,000 each. Remember, your license already comes with 3 activities included. So you only pay for the 4th one onwards. Removing or editing an activity is also treated as an amendment at AED 1,000.",
+        "It's AED 1,000 per additional business activity. Your standard license includes 3 activities for free, so you'd only need this if you want a 4th, 5th, etc. Just note — even removing an activity counts as an amendment at the same price.",
+        "Each additional business activity costs AED 1,000. Since the license already covers 3 activities, most clients don't need extras. But if your business expands into new areas, it's a straightforward AED 1,000 per activity to add."
+      ],
+      "keywords": [
+        "additional business activity",
+        "add activity cost",
+        "extra activity price",
+        "business activity fee",
+        "more activities",
+        "4th activity cost",
+        "add new activity",
+        "additional activity charges",
+        "1000 activity"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Shareholder Limits and Extra Fees",
+      "question": "How many shareholders can I have and is there an extra cost?",
+      "responses": [
+        "You can have up to 50 shareholders on your license. The first 6 are included in your standard package at no extra cost. From the 7th shareholder onwards, it's AED 2,000 per additional shareholder. Most small businesses are well within the 6 included.",
+        "Up to 50 shareholders are allowed. The first 6 come at no additional charge — you only start paying AED 2,000 per shareholder from number 7 onwards. So for most companies, there's no extra shareholder cost at all.",
+        "Meydan allows a maximum of 50 shareholders per license. Six shareholders are included for free. After that, each additional shareholder is AED 2,000. If you're a small team, you're covered without any extra fees."
+      ],
+      "keywords": [
+        "how many shareholders",
+        "shareholder limit",
+        "extra shareholder cost",
+        "maximum shareholders",
+        "shareholder fee",
+        "additional shareholder",
+        "number of shareholders",
+        "shareholder charges",
+        "6 shareholders",
+        "50 shareholders"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Employment Visa Cost",
+      "question": "How much does an employment visa cost?",
+      "responses": [
+        "A new employment visa is AED 3,500, and renewal is the same — AED 3,500. Cancellation is AED 800. If you need it processed urgently, there's an additional AED 1,000 urgent service fee. The visa covers your employee's residency in the UAE.",
+        "Employment visa is AED 3,500 for new and AED 3,500 for renewal. If you ever need to cancel, that's AED 800. For urgent processing, add AED 1,000 to the base fee. Pretty standard across free zones, and Meydan handles the whole process for you.",
+        "It's AED 3,500 for a new employment visa, same for renewal. Cancellation costs AED 800. Need it fast? The urgent service is an extra AED 1,000. This covers the full residence visa for your employee."
+      ],
+      "keywords": [
+        "employment visa cost",
+        "employee visa price",
+        "visa fee",
+        "how much is employment visa",
+        "work visa cost",
+        "residence visa cost",
+        "new visa price",
+        "visa charges",
+        "3500 visa",
+        "employee visa fee",
+        "employment visa"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Investor Partner Visa Cost",
+      "question": "How much does an investor or partner visa cost?",
+      "responses": [
+        "An investor or partner visa is AED 4,000 for new issuance, and the same AED 4,000 for renewal. Cancellation is AED 800. It's a bit more than the employment visa because it carries investor/partner status, which gives you additional benefits.",
+        "The investor/partner visa is AED 4,000 — both for new and renewal. Cancellation is AED 800 if needed. This is the visa you'd get as a business owner or shareholder in the company. Slightly higher than employee visa but comes with partner status.",
+        "It costs AED 4,000 for a new investor or partner visa, same for renewal. If you need to cancel down the line, that's AED 800. As a shareholder or investor, this is the visa type you'll be applying for."
+      ],
+      "keywords": [
+        "investor visa cost",
+        "partner visa price",
+        "investor visa fee",
+        "partner visa cost",
+        "shareholder visa",
+        "owner visa cost",
+        "4000 visa",
+        "investor partner visa",
+        "business owner visa"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Visa Allocation Cost",
+      "question": "How much does a visa allocation cost?",
+      "responses": [
+        "Visa allocation is AED 1,850 per allocation. But if you need bulk allocations, there are discounts — for 50 or more, it drops to AED 1,000 each, and for 500 or more, it's just AED 950 each. One visa allocation is already included in your license package.",
+        "Each visa allocation costs AED 1,850. Volume discounts kick in at 50+ allocations (AED 1,000 each) and 500+ allocations (AED 950 each). Remember, your license package already includes one allocation, so you're only paying for additional ones.",
+        "It's AED 1,850 per visa allocation. Good news is there are bulk rates — AED 1,000 per allocation when you get 50+, and AED 950 per allocation at 500+. Your initial license package comes with one allocation included."
+      ],
+      "keywords": [
+        "visa allocation cost",
+        "visa allocation price",
+        "how much visa allocation",
+        "visa allocation fee",
+        "per visa cost",
+        "visa quota price",
+        "1850 visa",
+        "bulk visa discount",
+        "visa allocation charges"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Dependent Visa Cost",
+      "question": "How much does a dependent visa cost?",
+      "responses": [
+        "A dependent visa is AED 6,000 — that's an all-inclusive price covering entry permit, change of status if applicable, stamping, medical, and Emirates ID. Renewal is also AED 6,000. Cancellation is AED 1,000. For investor/partner sponsors, there's a AED 3,000 deposit per dependent. Employee sponsors have no deposit.",
+        "Dependent visa runs AED 6,000 for new and AED 6,000 for renewal. This is a complete package — entry, status change, stamping, medical, EID, everything handled. Cancellation is AED 1,000. If you're on an investor/partner visa, there's a AED 3,000 refundable deposit per dependent. Employees don't need the deposit.",
+        "It's AED 6,000 for a new dependent visa and the same for renewal. That covers the whole process — entry permit, medical, Emirates ID, stamping, everything. If you're an investor or partner, you'll also need a AED 3,000 deposit per dependent. If you're on an employment visa, no deposit needed. Cancellation is AED 1,000."
+      ],
+      "keywords": [
+        "dependent visa cost",
+        "family visa price",
+        "spouse visa cost",
+        "dependant visa fee",
+        "dependent visa meydan",
+        "6000 dependent",
+        "family visa fee",
+        "children visa cost",
+        "wife visa cost",
+        "husband visa",
+        "dependent visa charges"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Temporary Work Permit Options",
+      "question": "What are the temporary work permit options and costs?",
+      "responses": [
+        "We have temporary work permits for different durations: 21 days is AED 1,000, 1 month is AED 1,350, 3 months is AED 2,000, 6 months is AED 2,500, and 12 months is AED 3,400. These are great if you need someone working for a short project without going through the full visa process.",
+        "Temporary work permits start at AED 1,000 for 21 days, then AED 1,350 for 1 month, AED 2,000 for 3 months, AED 2,500 for 6 months, and AED 3,400 for 12 months. They're ideal for short-term hires, project-based workers, or while you're waiting for a full visa to process.",
+        "Here are the work permit options: 21 days — AED 1,000, 1 month — AED 1,350, 3 months — AED 2,000, 6 months — AED 2,500, and a full year at AED 3,400. Perfect for contractors or temporary staff. Much faster to process than a full employment visa."
+      ],
+      "keywords": [
+        "temporary work permit",
+        "work permit cost",
+        "short term work permit",
+        "temporary permit price",
+        "21 day permit",
+        "3 month work permit",
+        "work permit options",
+        "temporary employee",
+        "project work permit",
+        "work permit meydan"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Office Options and Pricing",
+      "question": "What office options does Meydan Free Zone offer?",
+      "responses": [
+        "We have several options depending on your needs. Co-working shared desk is AED 375 for 4 hours. Dedicated desk is AED 3,500 per month. Shared office is AED 15,000 per year. Dedicated office is AED 30,000 per year and includes phone answering, mail management, and 3 hours of meeting room. There's also a flexi desk included free with your license package.",
+        "Here's the full range: Flexi desk comes free with your license. Co-working shared desk is AED 375 for 4 hours if you need a drop-in space. Dedicated desk is AED 3,500/month for a permanent spot. Shared office is AED 15,000/year. And a dedicated private office is AED 30,000/year — that one includes phone answering, mail management, and meeting room access.",
+        "Meydan offers everything from a basic flexi desk (included free in your license) all the way to a dedicated private office at AED 30,000/year. In between, you've got shared co-working at AED 375 for 4 hours, dedicated desk at AED 3,500/month, and shared office at AED 15,000/year. The dedicated office comes with extra perks — dedicated phone answering, mail management, and 3 hours of meeting room."
+      ],
+      "keywords": [
+        "office options",
+        "office pricing",
+        "office cost",
+        "workspace meydan",
+        "co-working desk",
+        "shared office price",
+        "dedicated office cost",
+        "flexi desk",
+        "office facilities",
+        "workspace options",
+        "office space meydan",
+        "desk options",
+        "hot desk",
+        "co-working price"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Grandstand Business Center Offices",
+      "question": "What about the Grandstand Business Center offices?",
+      "responses": [
+        "The Grandstand Business Center has dedicated offices ranging from AED 35,000 to AED 210,000 per year, depending on the size and visa allocations. They come with 2 to 14 free visa allocations, 6 to 14 workstations, and free meeting room hours. We also have a dedicated desk option at AED 7,000/year and shared office at AED 20,000/year.",
+        "Grandstand offices are our premium option. Dedicated offices start at AED 35,000/year for a 2-desk office with 6 visa allocations, going up to AED 210,000/year for a 10-desk setup with 14 visa allocations. Each office includes free meeting hours. There's also a dedicated desk at AED 7,000/year or a shared office at AED 20,000/year if you want something smaller.",
+        "The Grandstand Business Center is our physical office space at Meydan Hotel. Prices range from AED 35,000 to AED 210,000 annually depending on the office size. The bigger offices come with more free visa allocations and workstations. For example, office 651 has 10 workstations, 14 visa allocations, and 10 free meeting hours per month at AED 210,000/year."
+      ],
+      "keywords": [
+        "grandstand office",
+        "business center",
+        "physical office meydan",
+        "grandstand pricing",
+        "meydan office space",
+        "office at meydan hotel",
+        "grandstand business center",
+        "premium office",
+        "dedicated office grandstand",
+        "office 651"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Meeting Room Cost",
+      "question": "How much does a meeting room cost?",
+      "responses": [
+        "Meeting rooms are AED 150 per hour through Meydan+ services. If you'd prefer a monthly arrangement, there's also a meeting room facility at AED 6,500 per month. Amendment and cancellation of meeting room bookings are free.",
+        "It's AED 150 per hour for meeting room rental. If you use meeting rooms frequently, the monthly option at AED 6,500 might be more cost-effective. Booking changes and cancellations come at no charge.",
+        "Meeting rooms cost AED 150/hour. For regular users, there's a monthly package at AED 6,500. If you have a Grandstand dedicated office, you already get free meeting hours included in your lease — ranges from 2 to 10 hours per month depending on the office."
+      ],
+      "keywords": [
+        "meeting room cost",
+        "meeting room price",
+        "meeting room hourly rate",
+        "conference room",
+        "meeting room rental",
+        "meeting room booking",
+        "150 per hour meeting",
+        "meeting room meydan",
+        "book meeting room"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Immigration Card Cost",
+      "question": "How much does an immigration card cost?",
+      "responses": [
+        "A new immigration card is AED 2,000, renewal is AED 2,200, and amendment or cancellation is AED 2,000 each. It's also called an establishment card — basically your company's immigration identity. Watch out for late renewal — there's a AED 250 penalty per month after expiry.",
+        "Immigration card — also known as establishment card — costs AED 2,000 new, AED 2,200 for renewal, and AED 2,000 for any amendments or cancellation. Make sure to renew on time because late fees are AED 250 per month after the expiry date.",
+        "The establishment or immigration card is AED 2,000 for a new one, AED 2,200 to renew, and AED 2,000 if you need to amend or cancel. One thing to note: if you're late on renewal, it's AED 250 per month penalty, so best to set a reminder."
+      ],
+      "keywords": [
+        "immigration card cost",
+        "establishment card price",
+        "immigration card fee",
+        "establishment card renewal",
+        "immigration card renewal",
+        "2000 immigration card",
+        "establishment card meydan",
+        "immigration card charges"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Medical and Emirates ID Assistance",
+      "question": "Do you help with medical and Emirates ID processing?",
+      "responses": [
+        "Absolutely! Through Meydan+ we handle the whole thing. Medical and Emirates ID together is AED 2,250 — includes home pick-up, VIP medical, and Emirates ID fee. If you need them separately: medical assistance alone is AED 2,000, and Emirates ID alone is AED 750. For urgent Emirates ID processing with biometrics appointment, it's AED 1,250, or AED 2,750 with medical included.",
+        "Yes, Meydan+ has you covered. The combined medical and Emirates ID package is AED 2,250, which includes home pick-up, VIP medical, and the EID fee. Medical only is AED 2,000, EID only is AED 750. Need it done fast? Urgent EID is AED 1,250, or AED 2,750 for urgent medical + EID with biometrics appointment.",
+        "We do! Meydan+ offers full assistance — medical and EID combined for AED 2,250 with home pick-up and VIP treatment. You can also get them separately: AED 2,000 for medical, AED 750 for Emirates ID. For urgent processing including biometrics appointment, it's AED 2,750 for the full package or AED 1,250 for just the urgent EID."
+      ],
+      "keywords": [
+        "medical assistance",
+        "emirates ID help",
+        "EID processing",
+        "medical test visa",
+        "medical and EID cost",
+        "emirates ID fee",
+        "medical exam",
+        "biometrics appointment",
+        "VIP medical",
+        "home pick up medical",
+        "2250 medical EID"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Medical Insurance Options",
+      "question": "What are the medical insurance options and costs?",
+      "responses": [
+        "Meydan+ offers medical insurance in 4 categories: Category A is AED 1,400 for investors and employees with salary above AED 4,000. Category B is AED 900 for employees with salary below AED 4,000. Category C is AED 1,200 for dependents like children. Category D is AED 2,700 for dependent housewives. Medical insurance is mandatory for all visa holders in the UAE.",
+        "We have 4 tiers: Cat A — AED 1,400 for investors and higher-salary employees (above 4K). Cat B — AED 900 for employees earning below AED 4,000. Cat C — AED 1,200 for dependent children and others. Cat D — AED 2,700 for dependent housewives. Every visa holder needs medical insurance, so this is a must-have.",
+        "Medical insurance through Meydan+ comes in 4 categories based on your status: Investors and employees earning above AED 4,000 — AED 1,400. Employees below AED 4,000 salary — AED 900. Dependent child/other — AED 1,200. Dependent housewife — AED 2,700. It's mandatory in the UAE for all residents."
+      ],
+      "keywords": [
+        "medical insurance cost",
+        "health insurance meydan",
+        "insurance categories",
+        "medical insurance price",
+        "employee insurance",
+        "dependent insurance",
+        "category A insurance",
+        "mandatory insurance",
+        "health cover cost",
+        "medical insurance options"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "PO Box Service",
+      "question": "Can I get a PO Box with Meydan?",
+      "responses": [
+        "Yes! A PO Box through Meydan+ is AED 1,700 for new setup and the same AED 1,700 for annual renewal. Cancellation is AED 500. This gives you a physical mailing address for your business correspondence.",
+        "Definitely. PO Box service costs AED 1,700 new and AED 1,700 per year for renewal. If you need to cancel, that's AED 500. It's great for having a professional mailing address for your company.",
+        "Meydan+ offers PO Box at AED 1,700 per year, same for initial setup and renewal. Cancellation fee is AED 500. A lot of clients combine this with mail management service at AED 750/year so someone handles receiving and organizing your mail."
+      ],
+      "keywords": [
+        "po box cost",
+        "po box meydan",
+        "mailing address",
+        "po box price",
+        "po box service",
+        "1700 po box",
+        "postal box",
+        "meydan po box",
+        "po box fee",
+        "business mailing address"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Phone Answering Service",
+      "question": "What is the phone answering service?",
+      "responses": [
+        "Meydan+ offers a dedicated phone answering service with a Dubai 04 number for AED 3,775 per year. You get a professional receptionist answering calls in your company name, and calls can be forwarded to your mobile. There's a AED 2,000 refundable deposit for call forwarding charges. Amendment and cancellation are free.",
+        "It's a dedicated phone answering service — you get your own 04 Dubai landline number with a professional team answering calls on behalf of your company. Costs AED 3,775/year. There's a AED 2,000 security deposit for call forwarding (local and international charges apply per UAE telecom rates). Amendments and cancellations are at no charge.",
+        "The phone answering service gives your business a dedicated Dubai 04 number for AED 3,775/year. A professional team answers calls in your company name and forwards them to you. Setup and renewal are the same price. You'll need a AED 2,000 deposit for the call forwarding feature. It's great for looking professional without hiring a receptionist."
+      ],
+      "keywords": [
+        "phone answering service",
+        "dedicated phone number",
+        "04 number",
+        "phone answering cost",
+        "receptionist service",
+        "business phone",
+        "phone answering meydan",
+        "3775 phone",
+        "virtual receptionist",
+        "dubai phone number",
+        "landline number"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "VAT Registration",
+      "question": "Can Meydan help with VAT registration?",
+      "responses": [
+        "Yes, Meydan+ handles VAT registration for AED 1,500. Whether it's a new registration, amendment, or de-registration (cancellation), each is AED 1,500. They take care of the whole process with the Federal Tax Authority on your behalf.",
+        "Absolutely. VAT registration through Meydan+ is AED 1,500 for new registration, amendments, or cancellation. They handle everything with the FTA. If you've hit the mandatory threshold of AED 375,000 in taxable supplies, you need to register.",
+        "Meydan+ does VAT registration at AED 1,500 each for new, amendment, or de-registration. The team handles the FTA submission for you. Super straightforward — just provide your financial details and they do the rest."
+      ],
+      "keywords": [
+        "VAT registration",
+        "VAT registration cost",
+        "register for VAT",
+        "VAT help",
+        "VAT filing",
+        "VAT meydan",
+        "1500 VAT",
+        "tax registration",
+        "FTA registration",
+        "VAT de-registration"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Corporate Tax Starter Package",
+      "question": "Do you offer corporate tax services?",
+      "responses": [
+        "Yes! The Corporate Tax Starter Package through Meydan+ is AED 1,200. This helps you get set up with UAE corporate tax requirements. For more comprehensive support, there's also the CT 300 package and CT deregistration services. The compliance team can guide you through what's needed based on your business size.",
+        "Meydan+ offers a Corporate Tax Starter Package for AED 1,200 to help you comply with UAE corporate tax regulations. For ongoing compliance, there's also the Compliance Notification Filing at AED 1,300 and Compliance Assessment at AED 1,800. These cover ESR, GO AML, UBO, and other regulatory submissions.",
+        "Absolutely. The CT Starter package is AED 1,200 through Meydan+. For businesses with more complex needs, there's the ESR Comprehensive Assessment at AED 5,250 which involves a deep dive into financial transactions. Compliance Notification Filing is AED 1,300 for authority portal submissions."
+      ],
+      "keywords": [
+        "corporate tax",
+        "corporate tax package",
+        "CT starter",
+        "tax services meydan",
+        "corporate tax help",
+        "tax compliance",
+        "1200 tax",
+        "corporate tax registration",
+        "UAE corporate tax",
+        "tax starter package"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Bookkeeping Services",
+      "question": "Does Meydan offer bookkeeping services?",
+      "responses": [
+        "Yes! Through Meydan+, bookkeeping is available in two tiers: Category A is AED 1,000 per month, and Category B is AED 1,500 per month for more complex needs. They also offer financial audit reports at AED 3,000 and liquidation reports at AED 1,000.",
+        "Meydan+ offers bookkeeping at AED 1,000/month for Category A and AED 1,500/month for Category B, depending on the complexity of your accounts. If you need an audit, the financial audit report is AED 3,000. They handle everything so you can focus on your business.",
+        "Bookkeeping through Meydan+ starts at AED 1,000 per month for Category A and AED 1,500 per month for Category B. It's a hassle-free way to keep your books in order. They also do financial audit reports for AED 3,000 if you need them."
+      ],
+      "keywords": [
+        "bookkeeping cost",
+        "bookkeeping service",
+        "accounting service",
+        "bookkeeping meydan",
+        "monthly bookkeeping",
+        "accounting help",
+        "financial records",
+        "bookkeeping price",
+        "1000 bookkeeping",
+        "accounting meydan"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "MOFA Attestation",
+      "question": "How much does MOFA attestation cost?",
+      "responses": [
+        "MOFA attestation through Meydan+ is AED 575 for individual documents and AED 2,900 for corporate documents. The team handles the whole process — you just provide the documents and they take care of the Ministry of Foreign Affairs attestation.",
+        "Individual MOFA attestation is AED 575, and corporate attestation is AED 2,900. This is for getting your documents officially attested by the Ministry of Foreign Affairs, which is required for various legal and business processes.",
+        "Through Meydan+ services: MOFA attestation for individual documents is AED 575, and for corporate documents it's AED 2,900. They also do document legal translation at AED 250 per page if you need that alongside the attestation."
+      ],
+      "keywords": [
+        "MOFA attestation",
+        "MOFA cost",
+        "attestation price",
+        "ministry foreign affairs",
+        "document attestation",
+        "MOFA fee",
+        "corporate attestation",
+        "individual attestation",
+        "MOFA meydan",
+        "575 attestation"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "DET Permit for Mainland Operations",
+      "question": "Can I operate in Dubai mainland with a free zone license?",
+      "responses": [
+        "Yes, you can! You'll need a DET (Department of Economy and Tourism) permit, which costs AED 9,500 through Meydan+. This covers one activity as confirmed by DET. If you need additional activities, each one is AED 5,000. Renewal is also AED 9,500 per year.",
+        "Absolutely — with a DET permit you can operate on the mainland. The approval through Meydan+ is AED 9,500, which covers one activity. Additional activities under the DET permit are AED 5,000 each. It's renewed annually at AED 9,500.",
+        "You can! Meydan+ helps you get DET approval to operate in Dubai mainland for AED 9,500. That covers one business activity. Need more activities? Each additional one is AED 5,000 on top. The permit renews annually at the same price."
+      ],
+      "keywords": [
+        "DET permit",
+        "mainland operations",
+        "operate mainland",
+        "DED approval",
+        "free zone mainland",
+        "DET cost",
+        "9500 DET",
+        "dual license",
+        "mainland permit",
+        "dubai mainland",
+        "department of economy",
+        "DET approval"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Customs Code",
+      "question": "How do I get a customs code?",
+      "responses": [
+        "A customs code through Meydan+ is AED 525 — same price for new, renewal, or cancellation. You'll need this if your business involves importing or exporting goods. The team handles the registration process for you.",
+        "Customs code costs AED 525 whether it's new registration, renewal, or cancellation. It's essential for any import/export activities. Meydan+ takes care of the whole process with Dubai Customs.",
+        "Meydan+ handles customs code registration at AED 525. Same price for new, renewal, and cancellation. If you're in the trading business and need to import or export, this is one of the first things you'll want to set up."
+      ],
+      "keywords": [
+        "customs code",
+        "customs code cost",
+        "import export code",
+        "customs registration",
+        "525 customs",
+        "customs code meydan",
+        "trade code",
+        "import code",
+        "export code",
+        "customs clearance"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Company Formation Process",
+      "question": "How do I start a company with Meydan Free Zone?",
+      "responses": [
+        "Starting a company is pretty straightforward. Company formation itself is free — AED 0. You'll get it packaged with your license at AED 12,125 which covers formation, license, visa allocation, and flexi desk. The process starts with name reservation at AED 500 (valid 30 days), then you submit your documents for pre-approval at AED 500, and once approved, you get your license issued. The whole thing can be done remotely.",
+        "It's simple! First, reserve your company name for AED 500 (holds for 30 days). Then apply for pre-approval at AED 500. Once approved, the license package is AED 12,125 which includes formation, license, visa allocation, and flexi desk. Formation itself doesn't cost extra — it's included. You don't even need to be physically present to set everything up.",
+        "Great question! Here's how it works: Reserve your trade name (AED 500 for 30 days), get pre-approval (AED 500), then your license package is AED 12,125 all-in — that's formation, license, visa allocation, and flexi desk bundled together. Formation is free when packaged with the license. If you want urgent company setup, there's an express service for AED 1,050. The whole process can be done online."
+      ],
+      "keywords": [
+        "start company",
+        "company formation",
+        "open business meydan",
+        "register company",
+        "setup company",
+        "how to start",
+        "new company",
+        "business setup",
+        "company registration",
+        "form a company",
+        "create company",
+        "incorporate",
+        "start a business"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Name Reservation",
+      "question": "How do I reserve a company name?",
+      "responses": [
+        "Name reservation is AED 500 and it holds your chosen name for 30 days. Renewal is also AED 500 for another 30 days if you need more time. Make sure to check name availability first — the team can help with that.",
+        "It costs AED 500 to reserve a company name, valid for 30 days. If you need to extend, you can renew for another AED 500. This ensures nobody else takes your preferred business name while you're preparing your documents.",
+        "Company name reservation is AED 500 for a 30-day hold. If you need more time to finalize your setup, you can renew it for another AED 500. I'd recommend having 2-3 name options ready in case your first choice is already taken."
+      ],
+      "keywords": [
+        "name reservation",
+        "reserve company name",
+        "trade name",
+        "business name",
+        "name reservation cost",
+        "500 name",
+        "company name",
+        "reserve name",
+        "name booking"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "License Cancellation",
+      "question": "How much does it cost to cancel a license?",
+      "responses": [
+        "License cancellation is AED 2,000. This is a one-time fee covering both the license and formation cancellation. Before cancelling, you'll need to make sure all visas are cancelled and any outstanding obligations are settled.",
+        "Cancellation is AED 2,000 for both the license and formation together. Keep in mind you'll need to cancel all active visas first and clear any compliance requirements. If your license expired and you're past the 30-day grace period, there's also a AED 500 late fee.",
+        "It's AED 2,000 to cancel your license and formation. Just a heads up — you'll need to cancel all employee and partner visas, settle any dues, and handle compliance filings before the license can be fully cancelled."
+      ],
+      "keywords": [
+        "cancel license",
+        "license cancellation cost",
+        "close company",
+        "cancel company",
+        "license cancellation fee",
+        "2000 cancellation",
+        "close business",
+        "wind up company",
+        "terminate license",
+        "shut down company"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Late Fees and Penalties",
+      "question": "What are the late fees for renewals?",
+      "responses": [
+        "For license renewal, there's a 30-day grace period after expiry. After that, it's a one-time AED 500 late fee. For the establishment/immigration card, it's AED 250 per month after expiry with no grace period. So definitely try to renew on time to avoid these charges.",
+        "Late fees are: AED 500 one-time for license renewal (kicks in after a 30-day grace period post-expiry), and AED 250 per month for establishment card renewal (applies immediately after expiry). Set yourself a reminder a month before each expiry date.",
+        "License late renewal fee is AED 500, but you get a 30-day grace period first. Establishment card late fee is AED 250 per month starting right from expiry. My recommendation: renew at least 2 weeks before expiry to avoid any stress."
+      ],
+      "keywords": [
+        "late fee",
+        "late renewal penalty",
+        "renewal penalty",
+        "overdue fee",
+        "late fees meydan",
+        "grace period",
+        "500 late fee",
+        "250 per month",
+        "penalty charges",
+        "expired license fee"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Share Pledge Service",
+      "question": "What is the share pledge service?",
+      "responses": [
+        "Share pledge is AED 1,000 whether it's new, amendment, or cancellation. It's used when you need to pledge your shares in the company as collateral, usually for bank financing or investment purposes.",
+        "A share pledge — new, amend, or cancel — costs AED 1,000 each. This service is typically needed when a shareholder wants to use their company shares as collateral for a loan or as part of an investment agreement.",
+        "Share pledge service is AED 1,000 for any action — new pledge, amendment, or cancellation. Companies usually use this when securing bank loans or investment deals where shares serve as security."
+      ],
+      "keywords": [
+        "share pledge",
+        "share pledge cost",
+        "pledge shares",
+        "share collateral",
+        "1000 share pledge",
+        "share pledge fee",
+        "shares as collateral",
+        "pledge cost"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "mElite Service",
+      "question": "What is mElite?",
+      "responses": [
+        "mElite is Meydan's premium concierge service at AED 3,000 per year for up to 3 stakeholders. Each additional stakeholder is AED 1,000/year. A stakeholder here means any unique investor, partner, director, manager, or employee. It's designed to give you a VIP experience with priority handling.",
+        "mElite is your VIP pass at Meydan Free Zone — AED 3,000 per year covering up to 3 stakeholders, with AED 1,000/year for each additional one. Stakeholders include investors, partners, directors, managers, and employees. Think of it as priority service for your most important people.",
+        "It's Meydan's premium membership at AED 3,000/year for up to 3 stakeholders. Extra stakeholders are AED 1,000 each per year. A stakeholder is any unique person — investor, partner, director, manager, or employee. Gives you priority handling and VIP treatment across all Meydan services."
+      ],
+      "keywords": [
+        "mElite",
+        "mElite service",
+        "mElite cost",
+        "premium service",
+        "VIP service",
+        "mElite meydan",
+        "3000 mElite",
+        "priority service",
+        "concierge service",
+        "mElite membership"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Bank Account Assistance",
+      "question": "Can Meydan help me open a bank account?",
+      "responses": [
+        "Yes! Bank account assistance through Meydan+ is AED 1,500. They help facilitate the process with partner banks, prepare the required documentation, and guide you through the application. It significantly improves your chances of getting approved quickly.",
+        "Absolutely. Meydan+ offers bank account assistance for AED 1,500. They work with several partner banks and help prepare all your documents to make the process smooth. Having a free zone company sometimes makes it tricky to open bank accounts, so having this assistance is really helpful.",
+        "Meydan+ provides bank account opening assistance at AED 1,500. They coordinate with partner banks, prepare your documentation, and guide the whole process. Highly recommended — it makes what can be a frustrating process much smoother."
+      ],
+      "keywords": [
+        "bank account",
+        "open bank account",
+        "bank account help",
+        "bank account assistance",
+        "1500 bank",
+        "corporate bank account",
+        "business bank account",
+        "bank opening",
+        "bank account meydan"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "PRO Services",
+      "question": "What PRO services does Meydan offer?",
+      "responses": [
+        "Meydan+ offers PRO Services Package A at AED 3,000, which gives you 11 hours of support for government-related tasks. They handle things like NOCs from various authorities, customs code registration, employee list processing, MOFA attestation, Dubai Chamber registration, and more. It covers all the government-facing admin work you'd rather not deal with yourself.",
+        "The PRO Services Package A is AED 3,000 for 11 hours of support. This covers all government liaison work — NOC applications from authorities like SIRA, RERA, DCAA, TDRA, customs codes, Dubai Chamber registration and document attestation, MOFA attestation, employee lists, and more. Basically everything that requires going to a government office.",
+        "PRO services through Meydan+ start at AED 3,000 for Package A which includes 11 hours of government-related support. They handle all the running around — NOCs from 15+ government authorities, customs registration, Dubai Chamber work, MOFA attestation, you name it. Individual services are also available à la carte if you don't need the full package."
+      ],
+      "keywords": [
+        "PRO services",
+        "PRO service cost",
+        "government services",
+        "PRO package",
+        "3000 PRO",
+        "government liaison",
+        "PRO meydan",
+        "government tasks",
+        "admin services",
+        "PRO support"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "NOC from Government Authorities",
+      "question": "How much do NOCs from government authorities cost?",
+      "responses": [
+        "NOC costs depend on the authority. Most are AED 825 — that covers RERA, DMCA, Culture Ministry, Dubai Sport Council, TDRA, MOCCA, KHDA, Dubai Police, and Dubai Municipality. DCAA and SIRA NOCs are AED 1,100. Department of Petroleum (DOPA) is AED 550. RTA NOC is also AED 1,100. Dubai Chamber registration is AED 825.",
+        "Here's the breakdown: AED 825 for NOCs from RERA, DMCA, Ministry of Culture & Youth, Dubai Sport Council, TDRA, MOCCA, KHDA, Dubai Police, Dubai Municipality, and Dubai Chamber. Higher at AED 1,100 for DCAA (aviation) and SIRA (security). DOPA is lower at AED 550. RTA is AED 1,100.",
+        "Most government authority NOCs through Meydan+ are AED 825 — this covers authorities like RERA, DMCA, KHDA, TDRA, Dubai Police, and several others. Aviation (DCAA) and security (SIRA) NOCs are AED 1,100. Petroleum (DOPA) is AED 550. All of these are NOCs required before your final license can be issued for certain activities."
+      ],
+      "keywords": [
+        "NOC cost",
+        "government NOC",
+        "authority NOC",
+        "NOC price",
+        "RERA NOC",
+        "SIRA NOC",
+        "DCAA NOC",
+        "DMCA NOC",
+        "KHDA NOC",
+        "government authority approval",
+        "825 NOC",
+        "1100 NOC"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Meydan Commerce E-Commerce Services",
+      "question": "What e-commerce services does Meydan offer?",
+      "responses": [
+        "Meydan has a full e-commerce suite through Meydan+. The Commerce Starter package is AED 350, with additional product listings at AED 100 per SKU per marketplace. The on-boarding package is AED 6,000 plus AED 2,000 per additional marketplace. For full seller account management, it's AED 24,000 plus AED 12,000 per additional marketplace. There's also an E-Commerce Starter service for getting set up.",
+        "Here's the e-commerce lineup: Meydan Commerce Starter at AED 350 gets you started, with AED 100 per additional SKU per marketplace. For full on-boarding support, it's AED 6,000 (plus AED 2,000 per marketplace). If you want them to manage your seller accounts, that's AED 24,000 per year (plus AED 12,000 per marketplace). They basically handle everything from listing to selling.",
+        "Meydan+ offers e-commerce services at multiple levels. Starter package is AED 350 to get you set up. On-boarding package at AED 6,000 helps you get onto marketplaces (AED 2,000 per additional marketplace). Full seller account management is AED 24,000 annually with AED 12,000 per additional marketplace. Great for businesses wanting to sell on Amazon, Noon, etc."
+      ],
+      "keywords": [
+        "e-commerce",
+        "meydan commerce",
+        "online selling",
+        "marketplace",
+        "e-commerce cost",
+        "commerce starter",
+        "seller account",
+        "online business",
+        "amazon seller",
+        "marketplace management",
+        "ecommerce meydan"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Digital Business Card Service",
+      "question": "What is the digital business card service?",
+      "responses": [
+        "The digital business card is a free service included when you form your company. You get a QR code business card with your company logo, name, designation, and contact details. It also comes with a mini website at companyname.fz.mllc.ae, a company email address, and a phone extension where incoming calls are forwarded as voicemail to your email. All valid till end of calendar year.",
+        "It's a complimentary service! When you register your company, you get a digital business card with a QR code that stores your contact details. Plus you get a free mini-website at companyname.fz.mllc.ae, a company email ID, and a phone number extension. Calls to the extension are forwarded as voicemail to your email. Pretty neat for AED 0.",
+        "Digital business card is free — AED 0. It includes a QR-code based business card with your company logo and contact info, a simple website at companyname.fz.mllc.ae, a company email address (info@companyname.fz.mllc.ae), and a phone extension with voicemail forwarding. It's automatically generated when you register your company."
+      ],
+      "keywords": [
+        "digital business card",
+        "free business card",
+        "QR code card",
+        "business card meydan",
+        "digital card",
+        "company website",
+        "free website",
+        "mllc.ae",
+        "digital business card service",
+        "business card cost"
+      ],
+      "source": "meydan_services_defination_ppt.pdf",
+      "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Business Card Starter Package",
+      "question": "What is the Business Card Starter package?",
+      "responses": [
+        "The Business Card Starter is AED 3,500. This is an upgrade from the free digital card — it gives you professional physical business cards along with enhanced digital presence. It's part of the mCore services suite.",
+        "Business Card Starter costs AED 3,500. It's the premium version beyond the free digital business card, giving you a more professional business identity package for your company.",
+        "It's AED 3,500 for the Business Card Starter package. This is for clients who want something more polished than the free digital card — better branding, professional design, and physical card options."
+      ],
+      "keywords": [
+        "business card starter",
+        "3500 business card",
+        "business card package",
+        "professional business card",
+        "physical business card",
+        "business card upgrade"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Long Term Visit Visa",
+      "question": "Can I get a long-term visit visa through Meydan?",
+      "responses": [
+        "Yes! Meydan+ offers long-term visit visa processing for AED 4,000. This is useful if you need to stay in the UAE for an extended period without a full residence visa.",
+        "Meydan+ can arrange a long-term visit visa for AED 4,000. It's a good option if you need to be in the UAE for a longer duration while your company is being set up or for other business purposes.",
+        "Long-term visit visa through Meydan+ is AED 4,000. Handy for situations where you need extended UAE stay — like during company setup, business meetings, or while waiting for your residence visa to process."
+      ],
+      "keywords": [
+        "long term visit visa",
+        "visit visa cost",
+        "long visit",
+        "4000 visit visa",
+        "extended visit visa",
+        "long stay visa",
+        "visit visa meydan"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Company Stamp",
+      "question": "How do I get a company stamp?",
+      "responses": [
+        "A physical company stamp through Meydan+ is AED 200. Simple and quick — they'll make your official company stamp that you can use for signing documents, contracts, and official correspondence.",
+        "Company stamp is AED 200 through Meydan+. It's your official rubber stamp with your company name and details. Useful for bank documents, contracts, and any official paperwork.",
+        "Meydan+ provides company stamps for AED 200. It's a physical rubber stamp with your company details. While not always mandatory these days, many banks and government entities still ask for a stamped copy of documents."
+      ],
+      "keywords": [
+        "company stamp",
+        "stamp cost",
+        "rubber stamp",
+        "company stamp price",
+        "official stamp",
+        "200 stamp",
+        "business stamp",
+        "company seal"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Document Translation",
+      "question": "Does Meydan offer document translation?",
+      "responses": [
+        "Yes! Legal document translation through Meydan+ is AED 250 per page. This is certified legal translation, typically from English to Arabic or vice versa, which is required for many government submissions.",
+        "Meydan+ offers legal document translation at AED 250 per page. It's certified translation, usually English-Arabic, needed for contracts, court documents, government submissions, and legal proceedings.",
+        "Legal translation is available at AED 250 per page through Meydan+. It's certified and accepted by all UAE government authorities. Essential for Arabic translations of your corporate documents."
+      ],
+      "keywords": [
+        "document translation",
+        "legal translation",
+        "translation cost",
+        "translate documents",
+        "250 per page",
+        "Arabic translation",
+        "certified translation",
+        "translation service"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Compliance Services",
+      "question": "What compliance services are available?",
+      "responses": [
+        "Meydan+ offers several compliance services: Compliance Notification Filing at AED 1,300 for portal submissions, Compliance Assessment at AED 1,800 covering ESR, GO AML, and UBO requirements, and ESR Comprehensive Assessment at AED 5,250 for businesses needing a deep dive into financial transactions. These keep you compliant with UAE regulatory requirements.",
+        "Here's what's available: Compliance Notification Filing — AED 1,300 (submission on authority portals). Compliance Assessment — AED 1,800 (covers ESR, GO AML, UBO). ESR Comprehensive Assessment — AED 5,250 (deep financial analysis). These are important because UAE has strict compliance requirements and penalties for non-compliance can be significant.",
+        "Meydan+ handles all compliance: Notification Filing at AED 1,300 for authority portal submissions, general Compliance Assessment at AED 1,800 for ESR, GO AML, and UBO, and the ESR Comprehensive Assessment at AED 5,250 for detailed financial transaction analysis. Every free zone company needs to stay compliant, so these services are essential."
+      ],
+      "keywords": [
+        "compliance services",
+        "ESR filing",
+        "compliance cost",
+        "GO AML",
+        "UBO reporting",
+        "compliance assessment",
+        "ESR assessment",
+        "regulatory compliance",
+        "compliance meydan",
+        "1300 compliance",
+        "1800 compliance"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Visa Physical Stamping",
+      "question": "Do I need to get my visa physically stamped?",
+      "responses": [
+        "No, visa stamping is not mandatory anymore per immigration rules. However, if you'd like a physical stamp on your passport, Meydan can arrange it for AED 1,000. It's completely optional.",
+        "Physical visa stamping is optional now — immigration doesn't require it anymore. But if you want the stamp on your passport for peace of mind or any other reason, it's AED 1,000 through Meydan.",
+        "Not required! As per current immigration rules, physical visa stamping is no longer mandatory. Your residence visa is digital and valid without a stamp. If you still want one, Meydan offers it as an optional service for AED 1,000."
+      ],
+      "keywords": [
+        "visa stamping",
+        "physical stamp",
+        "passport stamp",
+        "visa stamp cost",
+        "1000 stamping",
+        "residence visa stamp",
+        "stamp passport",
+        "visa stamping mandatory"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Employee Contract Services",
+      "question": "How much does an employment contract cost?",
+      "responses": [
+        "Employment contract services are: AED 350 for new, amendment, or renewal. Cancellation is AED 100, but only if you're on a contract or combined with residence visa cancellation. The employment contract is only needed separately if it's not bundled with the visa process.",
+        "New employment contract is AED 350, same for amendments and renewals. Cancellation is just AED 100 (only applicable if on contract, otherwise AED 0 when done with residence visa cancellation). This is a separate service only needed when the employment contract isn't part of your standard visa package.",
+        "Employment contracts through Meydan are AED 350 each for new, amendment, or renewal. Cancellation is AED 100. These are only applicable when the employment contract is handled separately from the visa process."
+      ],
+      "keywords": [
+        "employment contract",
+        "contract cost",
+        "employee contract",
+        "employment contract fee",
+        "350 contract",
+        "labor contract",
+        "work contract",
+        "contract meydan"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Change of Status Cost",
+      "question": "How much does a change of status cost?",
+      "responses": [
+        "Change of status is AED 1,500 for employees. This applies when someone is already in the UAE on a different visa type and needs to switch to an employment or partner visa status without leaving the country.",
+        "It's AED 1,500 for a change of status. This is used when a person is currently in the UAE on a visit visa, tourist visa, or another type and needs to change to a residence visa status. Saves you the trip of leaving and re-entering the country.",
+        "Status change costs AED 1,500. It's needed when converting from one visa type to another within the UAE — for example, switching from a visit visa to an employment visa. Much more convenient than doing an exit and re-entry."
+      ],
+      "keywords": [
+        "change of status",
+        "status change cost",
+        "visa status change",
+        "convert visa",
+        "1500 status change",
+        "change visa type",
+        "status conversion",
+        "visit to employment visa"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Absconding Case",
+      "question": "What if an employee absconds?",
+      "responses": [
+        "Filing a new absconding case costs AED 7,500. Cancelling an absconding case is AED 250. This is the legal process you'd need to follow if an employee leaves without proper notice or visa cancellation. It protects you as the employer from liability.",
+        "Absconding case filing is AED 7,500 for new cases and AED 250 to cancel. It's an unfortunate situation but necessary to protect your company legally when an employee disappears without going through proper exit procedures.",
+        "For absconding cases: filing is AED 7,500, cancellation is AED 250. It's the formal process to report an employee who has abandoned their position. Important to file this to avoid any immigration liability on your company."
+      ],
+      "keywords": [
+        "absconding",
+        "absconding case",
+        "employee absconding",
+        "absconding cost",
+        "7500 absconding",
+        "file absconding",
+        "report absconding",
+        "employee disappeared"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Meydan Pay Service",
+      "question": "What is Meydan Pay?",
+      "responses": [
+        "Meydan Pay is a free payment service — AED 0. It's available to all Meydan Free Zone companies and helps facilitate payments. For Channel Partner clients, it's also offered free of charge.",
+        "Meydan Pay is a complimentary service — absolutely free. It's a payment facilitation tool for Meydan Free Zone companies. If you're a Channel Partner (CP) client, you also get it at no cost.",
+        "It's free! Meydan Pay costs AED 0 and is available to all Meydan Free Zone companies. Channel Partner clients also get it for free. It's designed to make your payment processes smoother."
+      ],
+      "keywords": [
+        "meydan pay",
+        "payment service",
+        "meydan pay cost",
+        "free payment",
+        "payment system",
+        "meydan pay service"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Refund Processing Fee",
+      "question": "Is there a refund processing fee?",
+      "responses": [
+        "Yes, there's a AED 2,000 admin fee when processing refunds for rejected Establishment Card or Partner Visa applications. This is the processing charge for handling the refund back to you.",
+        "Refund processing fee is AED 2,000. This applies when you need a refund for a rejected establishment card or partner visa application. It covers the administrative costs of processing the refund.",
+        "There's a AED 2,000 refund processing fee, which kicks in when an establishment card or partner visa application gets rejected and you need your money back. It's an admin charge for processing the refund."
+      ],
+      "keywords": [
+        "refund fee",
+        "refund processing",
+        "2000 refund",
+        "rejection refund",
+        "get refund",
+        "money back",
+        "refund charges"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Return Permit for Residents Abroad",
+      "question": "What if I've been outside the UAE for more than 6 months?",
+      "responses": [
+        "If you've been outside the UAE for more than 6 months, you'll need a Return Permit to re-enter. Meydan+ handles this for AED 850. Without it, your residence visa might be at risk of cancellation due to extended absence.",
+        "Meydan+ offers a Return Permit for AED 850 for residents who've been outside the UAE for more than 6 months. This is important because your residence visa can be affected if you stay away too long. The permit ensures you can re-enter without issues.",
+        "You'll need a Return Permit — AED 850 through Meydan+. Being outside the UAE for over 6 months can jeopardize your residence visa status. This permit ensures you can return and your visa stays active."
+      ],
+      "keywords": [
+        "return permit",
+        "outside UAE 6 months",
+        "re-entry permit",
+        "850 return permit",
+        "long absence UAE",
+        "return permit cost",
+        "residence visa abroad"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Mail Management Service",
+      "question": "What is the mail management service?",
+      "responses": [
+        "Mail management through Meydan+ is AED 750 per year for both new and renewal. Cancellation is free. The team receives, sorts, and manages your physical mail on your behalf. Great if you don't have a physical office presence.",
+        "Meydan+ mail management costs AED 750/year. They handle receiving and organizing all your company mail. New setup and renewal are the same price, and cancellation is AED 0. It pairs well with the PO Box service.",
+        "It's AED 750 per year. Meydan+ receives and manages your postal mail for you. Super useful if you're running your business remotely or don't have a physical office. Cancellation is free whenever you want."
+      ],
+      "keywords": [
+        "mail management",
+        "mail service",
+        "mail handling",
+        "750 mail",
+        "postal management",
+        "receive mail",
+        "mail management cost",
+        "business mail"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Document Pick Up and Drop Off",
+      "question": "Can Meydan pick up or deliver documents for me?",
+      "responses": [
+        "Yes! Meydan+ offers document pick-up and drop-off services within Dubai. Pick-up is AED 250, drop-off is AED 250, or you can get both together for AED 500. Very handy when you can't make it to the office.",
+        "Absolutely. Document pick-up is AED 250 and drop-off is AED 250 — both within Dubai. If you need a combined pick-up and drop-off, it's AED 500. Saves you the trip when you need to submit or collect documents.",
+        "Meydan+ does document pick-up for AED 250 and drop-off for AED 250, all within Dubai. Combined service is AED 500. Really useful if you're busy or not near the Meydan office."
+      ],
+      "keywords": [
+        "document pick up",
+        "document delivery",
+        "pick up drop off",
+        "collect documents",
+        "deliver documents",
+        "250 pick up",
+        "500 pick up drop off",
+        "document courier"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Overstay Fine Settlement",
+      "question": "What about overstay fines?",
+      "responses": [
+        "Overstay fine settlement fee through Meydan is AED 250 — that's their processing fee to handle the settlement. The actual overstay fine amount depends on how long the overstay period is, as per UAE immigration rules.",
+        "The processing fee for overstay fine settlement is AED 250 through Meydan. This is separate from the actual government overstay fine, which varies based on the number of days overstayed.",
+        "Meydan charges AED 250 as a settlement processing fee for overstay fines. The government fine itself is separate and depends on how many days the person overstayed. Best to resolve it quickly as fines accumulate daily."
+      ],
+      "keywords": [
+        "overstay fine",
+        "overstay penalty",
+        "overstay settlement",
+        "visa overstay",
+        "overstay cost",
+        "250 overstay",
+        "overstay fee",
+        "fine settlement"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Total Startup Cost Estimate",
+      "question": "What's the total cost to set up a company in Meydan Free Zone?",
+      "responses": [
+        "For a basic setup, here's what you're looking at: License package AED 12,125 (includes formation, license, visa allocation, flexi desk). Then you'll need your visa — employment visa AED 3,500 or investor visa AED 4,000. Add medical and Emirates ID at AED 2,250. So roughly AED 17,875 to AED 18,375 to be fully set up and operational. Name reservation and pre-approval add AED 1,000 upfront.",
+        "Ballpark for a basic setup: License package is AED 12,125 all-in. Visa is AED 3,500 (employee) or AED 4,000 (investor/partner). Medical + EID is AED 2,250. So you're looking at about AED 18,000-19,000 total to get your company running with one person. Optional add-ons like PO Box, phone answering, and medical insurance are extra.",
+        "A typical startup costs roughly AED 18,000-19,000. That breaks down to: AED 12,125 for the license package (formation + license + visa allocation + flexi desk), AED 3,500-4,000 for your visa, and AED 2,250 for medical and EID. Plus AED 500 for name reservation and AED 500 for pre-approval. Everything else — office upgrades, PO Box, phone answering — is optional depending on your needs."
+      ],
+      "keywords": [
+        "total cost",
+        "startup cost",
+        "how much to start",
+        "total setup cost",
+        "company setup cost",
+        "overall cost",
+        "budget needed",
+        "how much money needed",
+        "total investment",
+        "cost breakdown",
+        "what will it cost me"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Urgent Services",
+      "question": "Are there urgent or express processing options?",
+      "responses": [
+        "Yes! Urgent company setup is AED 1,050 for expedited processing. Urgent employee service (for visa new/renew/cancel) is AED 1,000 extra. Urgent Emirates ID with biometrics appointment is AED 1,250, or AED 2,750 combined with medical assistance. These get your requests prioritized and processed faster.",
+        "Meydan offers several express options: Urgent company setup at AED 1,050, urgent visa processing at AED 1,000 extra (covers new, renewal, or cancellation), and urgent Emirates ID at AED 1,250 (with biometrics appointment included). If you need medical + urgent EID, that's AED 2,750. Worth it when time is critical.",
+        "Express processing is available for most services. Company setup can be expedited for AED 1,050. Visa processing urgency is an extra AED 1,000. Urgent EID processing with biometrics is AED 1,250 or AED 2,750 with medical. If you're in a rush, these services are lifesavers."
+      ],
+      "keywords": [
+        "urgent service",
+        "express processing",
+        "fast track",
+        "expedited",
+        "urgent setup",
+        "1050 urgent",
+        "quick processing",
+        "rush service",
+        "urgent visa",
+        "priority processing"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "All Prices VAT Inclusive",
+      "question": "Are the prices inclusive of VAT?",
+      "responses": [
+        "Yes, all prices quoted by Meydan Free Zone are in AED and inclusive of VAT where applicable. What you see is what you pay — no hidden taxes on top.",
+        "All prices are quoted in AED and include VAT where applicable. So the amounts I've shared are the final amounts — no additional tax surprises.",
+        "Everything is VAT inclusive where applicable. All pricing is in AED. The price you're quoted is the price you pay. Straightforward, no hidden charges."
+      ],
+      "keywords": [
+        "VAT inclusive",
+        "tax included",
+        "prices include VAT",
+        "additional tax",
+        "hidden charges",
+        "final price",
+        "VAT on top"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Innovation and Knowledge Fees",
+      "question": "What are the Innovation and Knowledge fees?",
+      "responses": [
+        "Innovation Fee and Knowledge Fee are each AED 10, charged once per invoice. They're standard government-mandated fees that appear on your invoices. Very small amounts — just AED 20 total per invoice.",
+        "These are small government fees — AED 10 each (Innovation Fee + Knowledge Fee = AED 20 total), charged once per invoice. They're standard across Dubai free zones.",
+        "They're AED 10 each per invoice — Innovation Fee and Knowledge Fee. So AED 20 combined. Standard government-mandated charges that show up on every invoice. Nothing major."
+      ],
+      "keywords": [
+        "innovation fee",
+        "knowledge fee",
+        "10 AED fee",
+        "government fee invoice",
+        "innovation knowledge fee",
+        "small fees",
+        "invoice fees"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "NOC to Lease Outside Free Zone",
+      "question": "Can I lease an office outside the free zone?",
+      "responses": [
+        "Yes! You'll need a NOC (No Objection Certificate) to lease a facility outside the Meydan Free Zone, which costs AED 2,500. This allows your free zone company to rent office or warehouse space on the mainland or in other areas.",
+        "You can! Meydan issues a NOC for leasing facilities outside the free zone at AED 2,500. This is needed if you want to rent a warehouse, shop, or office elsewhere in Dubai while keeping your Meydan Free Zone license.",
+        "Absolutely. The NOC to Lease Facility Outside the Free Zone is AED 2,500. Many companies use this to get additional workspace or storage on the mainland while maintaining their free zone company structure."
+      ],
+      "keywords": [
+        "lease outside free zone",
+        "NOC lease",
+        "office outside",
+        "2500 NOC",
+        "lease mainland",
+        "rent outside",
+        "external office",
+        "warehouse lease",
+        "lease NOC"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Corporate Letters and Resolutions",
+      "question": "How much do corporate letters and resolutions cost?",
+      "responses": [
+        "Corporate letter is AED 250, employee letter is also AED 250, and a resolution is AED 350. Certified true copy is AED 350. These are standard administrative documents you might need for banks, embassies, or other official purposes.",
+        "Corporate letters are AED 250 each, employee letters AED 250, board resolutions AED 350, and certified true copies AED 350. Pretty standard pricing for the admin paperwork that comes with running a business.",
+        "Here's the admin document pricing: Corporate letter — AED 250, employee letter — AED 250, resolution — AED 350, certified true copy — AED 350. You'll typically need these for bank account openings, visa applications, or legal matters."
+      ],
+      "keywords": [
+        "corporate letter",
+        "resolution cost",
+        "letter cost",
+        "certified copy",
+        "250 letter",
+        "350 resolution",
+        "company letter",
+        "board resolution",
+        "employee letter",
+        "salary certificate"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
     }
   ]
 }
