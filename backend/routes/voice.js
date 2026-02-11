@@ -93,6 +93,33 @@ function logVoice(callId, action, details) {
 }
 
 // ============================================
+// SPOKEN DIGIT EXTRACTION
+// ============================================
+function extractDigits(input) {
+    if (!input) return input;
+    const text = String(input).toLowerCase().trim();
+
+    // If already 6 digits, return as-is
+    const digitsOnly = text.replace(/[^\d]/g, '');
+    if (digitsOnly.length === 6) return digitsOnly;
+
+    // Convert spoken words to digits
+    const wordMap = {
+        'zero': '0', 'oh': '0', 'one': '1', 'two': '2', 'three': '3',
+        'four': '4', 'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
+    };
+    const words = text.replace(/[,.\-]/g, ' ').split(/\s+/);
+    let digits = '';
+    for (const word of words) {
+        if (wordMap[word]) digits += wordMap[word];
+        else if (/^\d$/.test(word)) digits += word;
+    }
+    if (digits.length === 6) return digits;
+
+    return input; // Return original if can't extract
+}
+
+// ============================================
 // KNOWLEDGE BASE SEARCH (uses knowledgeService unified search)
 // ============================================
 
@@ -342,16 +369,18 @@ function executeFunction(funcName, params, callId) {
 
     // Verify OTP
     if (name.includes('verifyotp') || name.includes('verifysms') || name.includes('smscode')) {
-        console.log('🔐 Verify OTP:', params.code);
+        const cleanCode = extractDigits(params.code);
+        console.log('🔐 Verify OTP:', params.code, '→ cleaned:', cleanCode);
         if (!callData) return 'ERROR: System error - no call data found.';
-        return verifySmsCode(callData, params.code);
+        return verifySmsCode(callData, cleanCode);
     }
 
     // Verify TOTP (Google Auth)
     if (name.includes('verifytotp') || name.includes('verifygoogle') || name.includes('googleauth')) {
-        console.log('🔐 Verify Google Auth:', params.code);
+        const cleanCode = extractDigits(params.code);
+        console.log('🔐 Verify Google Auth:', params.code, '→ cleaned:', cleanCode);
         if (!callData) return 'ERROR: System error - no call data found.';
-        return verifyGoogleAuth(callData, params.code);
+        return verifyGoogleAuth(callData, cleanCode);
     }
 
     // Knowledge Base Search (async - returns promise)
@@ -473,20 +502,78 @@ function verifyGoogleAuth(callData, code) {
     callData.googleAttempts = (callData.googleAttempts || 0) + 1;
     if (callData.googleAttempts > 3) return { verified: false, message: "Too many attempts.", blocked: true };
 
-    const user = db.userAccounts.getById(callData.userId);
+    // Try to find user and their TOTP secret from multiple sources
+    let user = null;
+    let secret = null;
+
+    // Source 1: Look up by userId in callData
+    if (callData.userId) {
+        user = db.userAccounts.getById(callData.userId);
+        secret = user?.google_auth_secret || user?.totp_secret;
+    }
+
+    // Source 2: Look up by phone number
+    if (!secret && callData.phone) {
+        let cleanPhone = callData.phone.replace(/[^\d+]/g, '');
+        if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+
+        if (!user) {
+            user = db.userAccounts.getBy('phone', cleanPhone);
+            secret = user?.google_auth_secret || user?.totp_secret;
+        }
+
+        // Source 3: Check global.phoneStore (set during call initiation)
+        if (!secret && global.phoneStore) {
+            const storedData = global.phoneStore.get(cleanPhone);
+            if (storedData?.totpSecret) {
+                secret = storedData.totpSecret;
+                console.log('🔑 Found TOTP secret in phoneStore for Google Auth');
+            }
+        }
+    }
+
+    // Source 4: Check global.phoneStore by callId
+    if (!secret && callData.callId && global.phoneStore) {
+        const storedData = global.phoneStore.get(callData.callId);
+        if (storedData?.totpSecret) {
+            secret = storedData.totpSecret;
+            console.log('🔑 Found TOTP secret in phoneStore by callId');
+        }
+    }
 
     let isValid = false;
-    if (totpService && user?.google_auth_secret) {
-        isValid = totpService.verifyCode(user.google_auth_secret, entered);
+    if (totpService && secret) {
+        isValid = totpService.verifyCode(secret, entered);
+        console.log(`🔐 Google Auth verify: code=${entered}, hasSecret=true, valid=${isValid}`);
+    } else {
+        console.log(`⚠️ Google Auth verify: no secret found (userId=${callData.userId}, phone=${callData.phone})`);
     }
-    if (!isValid && entered === '123456') isValid = true; // Test code
+
+    // Dev fallback: accept "123456" only when no real secret exists
+    if (!isValid && !secret && entered === '123456' && process.env.NODE_ENV !== 'production') {
+        isValid = true;
+        console.log('⚠️ Using test code 123456 (dev mode, no secret)');
+    }
 
     if (isValid) {
         callData.googleVerified = true;
+
+        // Also mark in global.verifiedSessions for cross-route access
+        if (callData.phone && global.verifiedSessions) {
+            let cleanPhone = callData.phone.replace(/[^\d+]/g, '');
+            if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+            global.verifiedSessions.set(cleanPhone, {
+                verified: true,
+                method: 'totp',
+                timestamp: Date.now(),
+                userId: user?.id || callData.userId
+            });
+        }
+
         return { verified: true, message: "You're verified! How can I help you today?" };
     }
 
-    return { verified: false, message: `That code doesn't match. ${3 - callData.googleAttempts} tries left.` };
+    return { verified: false, message: `That code doesn't match. ${3 - callData.googleAttempts} tries left. Please check your Google Authenticator app.` };
 }
 
 function getAccountInfo(callData) {

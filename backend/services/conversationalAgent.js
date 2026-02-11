@@ -5,6 +5,9 @@ const Anthropic = require('@anthropic-ai/sdk');
 const knowledgeService = require('./knowledgeService');
 const db = require('../database');
 
+let totpService = null;
+try { totpService = require('./totpService'); } catch (e) { }
+
 const anthropic = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -53,6 +56,16 @@ class ConversationalAgent {
         // Handle DTMF input (keypad)
         if (inputType === 'dtmf') {
             return this.handleDTMF(callId, userInput);
+        }
+
+        // Handle spoken verification codes — extract digits from speech
+        // e.g., "one two three four five six", "1 2 3 4 5 6", "my code is 483921"
+        if (state.waitingForDTMF || state.dtmfType === 'sms' || state.dtmfType === 'google') {
+            const spokenDigits = this.extractSpokenDigits(userInput);
+            if (spokenDigits && spokenDigits.length === 6) {
+                console.log(`🎤 Extracted spoken code: ${spokenDigits} from "${userInput}"`);
+                return this.handleDTMF(callId, spokenDigits);
+            }
         }
 
         // Add user message to history
@@ -316,21 +329,56 @@ IMPORTANT: Always be listening. After each response, you'll hear what the user s
         }
 
         if (state.dtmfType === 'google') {
-            // For testing, accept "123456"
-            if (digits === '123456') {
+            // Look up user's TOTP secret and verify the real code
+            let user = null;
+            if (userData.user_id) user = db.userAccounts.getById(userData.user_id);
+            if (!user && userData.userId) user = db.userAccounts.getById(userData.userId);
+            if (!user && userData.email) user = db.userAccounts.getBy('email', userData.email.toLowerCase());
+            if (!user && userData.phone) user = db.userAccounts.getBy('phone', userData.phone);
+            const secret = user?.google_auth_secret || user?.totp_secret;
+            let isValid = false;
+
+            if (totpService && secret && digits.length === 6) {
+                isValid = totpService.verifyCode(secret, digits);
+                console.log(`🔐 TOTP verify: code=${digits}, secret=${secret ? 'yes' : 'no'}, valid=${isValid}`);
+            }
+
+            // Fallback: check global.verifiedSessions (set by outbound/verify-totp)
+            if (!isValid && userData.phone && global.verifiedSessions) {
+                let cleanPhone = userData.phone.replace(/[^\d+]/g, '');
+                if (!cleanPhone.startsWith('+')) cleanPhone = '+' + cleanPhone;
+                const session = global.verifiedSessions.get(cleanPhone);
+                if (session?.verified && (Date.now() - session.timestamp) < 30 * 60 * 1000) {
+                    isValid = true;
+                    console.log('✅ User already verified via global session');
+                }
+            }
+
+            // Dev fallback: accept "123456" only when no real secret exists
+            if (!isValid && !secret && digits === '123456') {
+                isValid = true;
+                console.log('⚠️ Using test code 123456 (no secret configured)');
+            }
+
+            if (isValid) {
                 state.googleVerified = true;
                 state.waitingForDTMF = false;
                 db.voiceCalls.update(callId, { google_auth_verified: true, status: 'fully_verified' });
-
-                const user = db.userAccounts.getById(userData.user_id);
 
                 return {
                     text: `Verified! Here's your account information. Your account number is ${user?.account_number || 'ACC-12345678'}. Your balance is ${user?.balance || '$1,234.56'}. Your account status is ${user?.status || 'Active'}. Is there anything else you'd like to know?`,
                     action: 'listen'
                 };
             } else {
+                state.googleAttempts = (state.googleAttempts || 0) + 1;
+                if (state.googleAttempts >= 3) {
+                    return {
+                        text: "Too many incorrect attempts. Please try again later or contact support.",
+                        action: 'listen'
+                    };
+                }
                 return {
-                    text: "That code is incorrect. Please try again. For testing, use 1 2 3 4 5 6.",
+                    text: `That code is incorrect. Please check your Google Authenticator app and try again. You have ${3 - state.googleAttempts} attempts left.`,
                     action: 'gather_dtmf',
                     data: { dtmfType: 'google', numDigits: 6 }
                 };
@@ -338,6 +386,55 @@ IMPORTANT: Always be listening. After each response, you'll hear what the user s
         }
 
         return { text: "I didn't understand that input.", action: 'listen' };
+    }
+
+    // Extract 6-digit code from spoken input
+    // Handles: "one two three four five six", "123456", "my code is 4 8 3 9 2 1",
+    // "it's one two three, four five six", "the code is 483921"
+    extractSpokenDigits(input) {
+        if (!input) return null;
+
+        const text = input.toLowerCase().trim();
+
+        // Word-to-digit mapping
+        const wordMap = {
+            'zero': '0', 'oh': '0', 'o': '0',
+            'one': '1', 'won': '1',
+            'two': '2', 'to': '2', 'too': '2',
+            'three': '3', 'tree': '3',
+            'four': '4', 'for': '4', 'fore': '4',
+            'five': '5',
+            'six': '6', 'sic': '6',
+            'seven': '7',
+            'eight': '8', 'ate': '8',
+            'nine': '9', 'niner': '9'
+        };
+
+        // Method 1: Direct digit string (e.g., "483921" or "4 8 3 9 2 1")
+        const digitsOnly = text.replace(/[^\d]/g, '');
+        if (digitsOnly.length === 6) {
+            return digitsOnly;
+        }
+
+        // Method 2: Convert spoken words to digits
+        const words = text.replace(/[,.\-]/g, ' ').split(/\s+/);
+        let digits = '';
+        for (const word of words) {
+            if (wordMap[word]) {
+                digits += wordMap[word];
+            } else if (/^\d$/.test(word)) {
+                digits += word;
+            }
+        }
+
+        if (digits.length === 6) {
+            return digits;
+        }
+
+        // Method 3: Mixed (e.g., "one 2 three 4 five 6")
+        // Already handled by Method 2 above
+
+        return null;
     }
 
     // Helper: Check if response is negative
