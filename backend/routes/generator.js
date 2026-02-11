@@ -9,7 +9,7 @@ let anthropic = null;
 if (process.env.ANTHROPIC_API_KEY) {
     try {
         const Anthropic = require('@anthropic-ai/sdk');
-        anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 10 * 60 * 1000 });
         console.log('✅ Generator: Anthropic ready');
     } catch (e) {
         console.log('⚠️ Generator: Anthropic not available');
@@ -457,7 +457,7 @@ Return the COMPLETE modified code in format:
         console.log(`🤖 Calling Claude API... ${!isNewDesign && isTargetedEdit ? '(Targeted Edit Mode)' : ''}`);
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
-            max_tokens: 24000, // Increased for complete websites with design system + CSS/JS
+            max_tokens: 16000,
             temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7, // Lower temp for targeted edits = more precise
             system: systemPrompt,
             messages: conversationMessages
