@@ -21,6 +21,8 @@ import {
     Download
 } from 'lucide-react';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('knowledge');
     const [stats, setStats] = useState(null);
@@ -32,7 +34,7 @@ const AdminDashboard = () => {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/admin/stats');
+            const response = await fetch(`${API_URL}/api/admin/stats`);
             const data = await response.json();
             if (data.success) {
                 setStats(data.stats);
@@ -133,7 +135,7 @@ const KnowledgeBaseTab = ({ onUpdate }) => {
 
     const fetchDocuments = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/knowledge/documents');
+            const response = await fetch(`${API_URL}/api/knowledge/documents`);
             const data = await response.json();
             if (data.success) {
                 setDocuments(data.documents);
@@ -149,7 +151,7 @@ const KnowledgeBaseTab = ({ onUpdate }) => {
         if (!window.confirm('Are you sure you want to delete this document?')) return;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/knowledge/documents/${documentId}`, {
+            const response = await fetch(`${API_URL}/api/knowledge/documents/${documentId}`, {
                 method: 'DELETE'
             });
             const data = await response.json();
@@ -168,7 +170,7 @@ const KnowledgeBaseTab = ({ onUpdate }) => {
         setIsSearching(true);
         try {
             const response = await fetch(
-                `http://localhost:3001/api/knowledge/search?query=${encodeURIComponent(searchQuery)}&limit=10`
+                `${API_URL}/api/knowledge/search?query=${encodeURIComponent(searchQuery)}&limit=10`
             );
             const data = await response.json();
             if (data.success) {
@@ -362,7 +364,7 @@ const UploadModal = ({ onClose, onSuccess }) => {
         formData.append('file', file);
 
         try {
-            const response = await fetch('http://localhost:3001/api/knowledge/upload', {
+            const response = await fetch(`${API_URL}/api/knowledge/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -480,7 +482,7 @@ const AddTextModal = ({ onClose, onSuccess }) => {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:3001/api/knowledge/add-text', {
+            const response = await fetch(`${API_URL}/api/knowledge/add-text`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title: title || 'Manual Entry', content })
@@ -582,7 +584,7 @@ const CustomersTab = () => {
 
     const fetchCustomers = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/admin/customers');
+            const response = await fetch(`${API_URL}/api/admin/customers`);
             const data = await response.json();
             if (data.success) {
                 setCustomers(data.customers);
@@ -682,7 +684,7 @@ const CustomerDetailModal = ({ customer, onClose }) => {
 
     const fetchConversations = async () => {
         try {
-            const response = await fetch(`http://localhost:3001/api/chat/customer/${customer.id}/conversations`);
+            const response = await fetch(`${API_URL}/api/chat/customer/${customer.id}/conversations`);
             const data = await response.json();
             if (data.success) {
                 setConversations(data.conversations);
@@ -767,7 +769,7 @@ const ConversationsTab = () => {
 
     const fetchConversations = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/admin/conversations');
+            const response = await fetch(`${API_URL}/api/admin/conversations`);
             const data = await response.json();
             if (data.success) {
                 setConversations(data.conversations);
@@ -855,7 +857,7 @@ const ConversationDetailModal = ({ conversation, onClose }) => {
 
     const fetchMessages = async () => {
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/conversations/${conversation.id}`);
+            const response = await fetch(`${API_URL}/api/admin/conversations/${conversation.id}`);
             const data = await response.json();
             if (data.success) {
                 setMessages(data.messages);

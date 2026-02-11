@@ -5,7 +5,24 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
 const webScraperService = require('../services/webScraperService');
+
+// Configure multer for file uploads (store in memory for text extraction)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    fileFilter: (_req, file, cb) => {
+        const allowed = ['.pdf', '.txt', '.md', '.doc', '.docx'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowed.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`File type ${ext} not supported. Allowed: ${allowed.join(', ')}`));
+        }
+    }
+});
 
 // Get Anthropic API client
 const Anthropic = require('@anthropic-ai/sdk');
@@ -555,7 +572,309 @@ router.delete('/intents/delete-all', async (_req, res) => {
     }
 });
 
+/**
+ * Extract text from uploaded file buffer
+ */
+async function extractTextFromFile(buffer, filename) {
+    const ext = path.extname(filename).toLowerCase();
+
+    if (ext === '.txt' || ext === '.md') {
+        return buffer.toString('utf-8');
+    }
+
+    if (ext === '.pdf') {
+        const pdfParse = require('pdf-parse');
+        const data = await pdfParse(buffer);
+        return data.text;
+    }
+
+    if (ext === '.doc' || ext === '.docx') {
+        // Basic text extraction - read as UTF-8 (works for .docx XML content)
+        const raw = buffer.toString('utf-8');
+        // Strip XML tags if present
+        return raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    throw new Error(`Unsupported file type: ${ext}`);
+}
+
+/**
+ * Generate intents from text content using AI, save to KB, and reload services
+ * Shared by both upload and add-text routes
+ */
+async function processContentAndGenerateIntents(title, content, source) {
+    if (!anthropic) {
+        throw new Error('AI service not available. Please configure ANTHROPIC_API_KEY');
+    }
+
+    // Step 1: Build scrapedData structure that webScraperService.generateIntents() expects
+    const scrapedData = {
+        url: source || 'document-upload',
+        pages: [{
+            url: source || 'document-upload',
+            title: title,
+            content: content.substring(0, 20000), // Limit content length
+            headings: [],
+            isFAQ: false,
+            faqPairs: [],
+            scrapedAt: new Date().toISOString()
+        }],
+        totalPages: 1
+    };
+
+    // Step 2: Generate intents using AI (reuse existing webScraperService logic)
+    const intentsResult = await webScraperService.generateIntents(scrapedData, anthropic);
+
+    if (!intentsResult.success || !intentsResult.intents.length) {
+        console.log('⚠️ No intents generated from content');
+    }
+
+    // Step 3: Format intents for storage (same format as scrape-website route)
+    const newIntents = (intentsResult.intents || []).map(intent => {
+        let responses;
+        if (intent.responses && Array.isArray(intent.responses)) {
+            responses = intent.responses;
+        } else if (intent.answer) {
+            responses = [intent.answer];
+        } else {
+            responses = ['No response available'];
+        }
+
+        return {
+            name: intent.name || intent.question || 'Untitled Intent',
+            keywords: intent.keywords || [],
+            responses: responses,
+            response: responses[0],
+            question: intent.question,
+            source: source || 'document-upload',
+            sourceTitle: title
+        };
+    });
+
+    // Step 4: Add to in-memory intents
+    intentsData.push(...newIntents);
+
+    // Step 5: Save to meydan_intents.json
+    const intentsPath = path.join(__dirname, '..', 'config', 'meydan_intents.json');
+    const configDir = path.join(__dirname, '..', 'config');
+    if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+    }
+
+    const currentIntents = fs.existsSync(intentsPath)
+        ? JSON.parse(fs.readFileSync(intentsPath, 'utf-8'))
+        : { intents: [] };
+
+    currentIntents.intents.push(...newIntents);
+    fs.writeFileSync(intentsPath, JSON.stringify(currentIntents, null, 2), 'utf-8');
+    console.log(`✅ Saved ${currentIntents.intents.length} total intents`);
+
+    // Step 6: Index in TF-IDF via knowledgeService
+    if (knowledgeService) {
+        const docId = uuidv4();
+        knowledgeService.addDocument(docId, title, title, 'text', content.length, content);
+        console.log(`✅ Document indexed in TF-IDF: ${title}`);
+    }
+
+    // Step 7: Reload ALL services
+    await reloadAllIntents(intentsData);
+
+    return {
+        intentsGenerated: newIntents.length,
+        totalIntents: intentsData.length,
+        intents: newIntents
+    };
+}
+
+/**
+ * Upload document file → extract text → generate AI intents
+ * POST /api/knowledge/upload
+ */
+router.post('/upload', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No file uploaded' });
+        }
+
+        const { originalname, buffer, size } = req.file;
+        console.log(`📤 File uploaded: ${originalname} (${(size / 1024).toFixed(1)} KB)`);
+
+        // Extract text from file
+        const text = await extractTextFromFile(buffer, originalname);
+
+        if (!text || text.trim().length < 50) {
+            return res.status(400).json({
+                success: false,
+                error: 'Could not extract enough text from file. Minimum 50 characters required.'
+            });
+        }
+
+        console.log(`📝 Extracted ${text.length} characters from ${originalname}`);
+
+        // Store document in documentsData for the GET /documents endpoint
+        const docEntry = {
+            id: uuidv4(),
+            title: originalname,
+            filename: originalname,
+            content: text.substring(0, 5000),
+            category: 'uploaded',
+            size: size,
+            uploadedAt: new Date().toISOString()
+        };
+        documentsData.push(docEntry);
+
+        // Generate AI intents from extracted text
+        const result = await processContentAndGenerateIntents(
+            originalname,
+            text,
+            `upload://${originalname}`
+        );
+
+        res.json({
+            success: true,
+            message: `File processed: ${result.intentsGenerated} intents generated`,
+            document: {
+                id: docEntry.id,
+                filename: originalname,
+                size: size,
+                textLength: text.length
+            },
+            stats: {
+                intentsGenerated: result.intentsGenerated,
+                totalIntents: result.totalIntents
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Upload error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to process uploaded file'
+        });
+    }
+});
+
+/**
+ * Add manual text content → generate AI intents
+ * POST /api/knowledge/add-text
+ */
+router.post('/add-text', async (req, res) => {
+    try {
+        const { title, content } = req.body;
+
+        if (!content || content.trim().length < 20) {
+            return res.status(400).json({
+                success: false,
+                error: 'Content is required (minimum 20 characters)'
+            });
+        }
+
+        const docTitle = title || 'Manual Entry';
+        console.log(`📝 Adding text: "${docTitle}" (${content.length} chars)`);
+
+        // Store in documentsData
+        const docEntry = {
+            id: uuidv4(),
+            title: docTitle,
+            content: content.substring(0, 5000),
+            category: 'manual',
+            uploadedAt: new Date().toISOString()
+        };
+        documentsData.push(docEntry);
+
+        // Generate AI intents
+        const result = await processContentAndGenerateIntents(
+            docTitle,
+            content,
+            `manual://${docTitle}`
+        );
+
+        res.json({
+            success: true,
+            message: `Text processed: ${result.intentsGenerated} intents generated`,
+            document: {
+                id: docEntry.id,
+                title: docTitle,
+                textLength: content.length
+            },
+            stats: {
+                intentsGenerated: result.intentsGenerated,
+                totalIntents: result.totalIntents
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Add text error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to process text content'
+        });
+    }
+});
+
+/**
+ * Add document (from KnowledgeBase component)
+ * POST /api/knowledge/documents
+ */
+router.post('/documents', async (req, res) => {
+    try {
+        const { title, content, category } = req.body;
+
+        if (!title || !content) {
+            return res.status(400).json({ success: false, error: 'Title and content are required' });
+        }
+
+        console.log(`📝 Adding document: "${title}" (${content.length} chars)`);
+
+        const docEntry = {
+            id: uuidv4(),
+            title: title,
+            content: content.substring(0, 5000),
+            category: category || 'general',
+            uploadedAt: new Date().toISOString()
+        };
+        documentsData.push(docEntry);
+
+        // Generate AI intents
+        const result = await processContentAndGenerateIntents(title, content, `document://${title}`);
+
+        res.json({
+            success: true,
+            message: `Document added: ${result.intentsGenerated} intents generated`,
+            document: docEntry,
+            stats: {
+                intentsGenerated: result.intentsGenerated,
+                totalIntents: result.totalIntents
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Add document error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to add document'
+        });
+    }
+});
+
+/**
+ * Delete document
+ * DELETE /api/knowledge/documents/:id
+ */
+router.delete('/documents/:id', (req, res) => {
+    const { id } = req.params;
+    const index = documentsData.findIndex(d => d.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({ success: false, error: 'Document not found' });
+    }
+
+    const deleted = documentsData.splice(index, 1)[0];
+    console.log(`🗑️ Deleted document: ${deleted.title}`);
+
+    res.json({ success: true, message: 'Document deleted' });
+});
+
 loadData();
 
-// 🔴 THIS IS THE CRITICAL LINE THAT WAS BROKEN
 module.exports = router;
