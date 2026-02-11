@@ -100,6 +100,9 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
                     path: getElementPath(el),
                     outerHTML: el.outerHTML,
                     textContent: el.textContent?.substring(0, 100) || '',
+                    src: el.src || el.getAttribute('src') || null,
+                    alt: el.alt || el.getAttribute('alt') || null,
+                    href: el.href || el.getAttribute('href') || null,
                     rect: el.getBoundingClientRect()
                 };
 

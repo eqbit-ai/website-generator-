@@ -117,18 +117,52 @@ const WebsiteGenerator = () => {
 
             if (result.success) {
                 // Check if it's a manual replace scenario
-                if (result.manualReplace) {
-                    // Show the edited element to user and offer to copy
-                    const userChoice = window.confirm(
-                        `Element edited but couldn't auto-replace.\n\n` +
-                        `The edited element has been copied to clipboard.\n` +
-                        `You can switch to Code view and paste it manually.\n\n` +
-                        `Click OK to copy, Cancel to dismiss.`
-                    );
-                    if (userChoice && result.editedElement) {
-                        navigator.clipboard.writeText(result.editedElement);
+                if (result.manualReplace && result.editedElement) {
+                    // Try smart client-side replacement
+                    let replaced = false;
+                    let updatedHtml = html;
+
+                    // Try matching by src for images
+                    const srcMatch = selectedElement.outerHTML.match(/src\s*=\s*["']([^"']+)["']/);
+                    if (srcMatch && srcMatch[1]) {
+                        const srcId = srcMatch[1].split('/').pop().split('?')[0];
+                        if (srcId.length > 5) {
+                            const escapedSrc = srcId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            const tag = selectedElement.tagName;
+                            const srcRegex = new RegExp(`<${tag}[^>]*src\\s*=\\s*["'][^"']*${escapedSrc}[^"']*["'][^>]*/?>`, 'i');
+                            if (srcRegex.test(updatedHtml)) {
+                                updatedHtml = updatedHtml.replace(srcRegex, result.editedElement);
+                                replaced = true;
+                            }
+                        }
                     }
-                } else {
+
+                    // Try matching by alt text for images
+                    if (!replaced) {
+                        const altMatch = selectedElement.outerHTML.match(/alt\s*=\s*["']([^"']+)["']/);
+                        if (altMatch && altMatch[1] && altMatch[1].length > 3) {
+                            const escapedAlt = altMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            const tag = selectedElement.tagName;
+                            const altRegex = new RegExp(`<${tag}[^>]*alt\\s*=\\s*["']${escapedAlt}["'][^>]*/?>`, 'i');
+                            if (altRegex.test(updatedHtml)) {
+                                updatedHtml = updatedHtml.replace(altRegex, result.editedElement);
+                                replaced = true;
+                            }
+                        }
+                    }
+
+                    if (replaced) {
+                        setHtml(updatedHtml);
+                        if (result.editedCss) {
+                            setCss(css + '\n\n/* Element Edit */\n' + result.editedCss);
+                        }
+                        console.log('✅ Element replaced via client-side fallback');
+                    } else {
+                        // Last resort: copy to clipboard
+                        navigator.clipboard.writeText(result.editedElement).catch(() => {});
+                        setError('Could not auto-replace element. The edited HTML has been copied to your clipboard — switch to Code view to paste it.');
+                    }
+                } else if (!result.manualReplace) {
                     setHtml(result.website.html);
                     setCss(result.website.css);
                     if (result.website.js) setJs(result.website.js);

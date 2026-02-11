@@ -773,6 +773,24 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             console.log('🔧 Fixed escaped HTML entities in current HTML');
         }
 
+        // Helper: list of void elements (self-closing, no closing tag)
+        const voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
+
+        // Extract tag name and attributes from the element
+        const openingTagMatch = elementHtml.match(/^<(\w+)([^>]*)>/);
+        const tagName = openingTagMatch ? openingTagMatch[1].toLowerCase() : '';
+        const attributes = openingTagMatch ? openingTagMatch[2] : '';
+        const isVoidElement = voidElements.includes(tagName);
+
+        // Pre-extract useful attributes for matching
+        const srcMatch = attributes.match(/src\s*=\s*["']([^"']+)["']/);
+        const hrefMatch = attributes.match(/href\s*=\s*["']([^"']+)["']/);
+        const idMatch = attributes.match(/id\s*=\s*["']([^"']+)["']/);
+        const classMatch = attributes.match(/class\s*=\s*["']([^"']+)["']/);
+        const altMatch = attributes.match(/alt\s*=\s*["']([^"']+)["']/);
+
+        console.log(`🔍 Element matching: tag=${tagName}, id=${idMatch?.[1]}, class=${classMatch?.[1]}, src=${srcMatch ? 'yes' : 'no'}, void=${isVoidElement}`);
+
         // Method 1: Try exact match first
         if (currentHtml.includes(elementHtml)) {
             updatedHtml = currentHtml.replace(elementHtml, newElementHtml);
@@ -780,67 +798,133 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             console.log('✅ Element replaced via exact match');
         }
 
-        // Method 2: Try matching by opening tag (class/id based)
-        if (!matchFound) {
-            // Extract the opening tag from the original element
-            const openingTagMatch = elementHtml.match(/^<(\w+)([^>]*)>/);
-            if (openingTagMatch) {
-                const tagName = openingTagMatch[1];
-                const attributes = openingTagMatch[2];
+        // Method 2: Match by src attribute (for img, video, audio, source, iframe)
+        if (!matchFound && srcMatch) {
+            // Extract a unique portion of the src URL for matching
+            const srcUrl = srcMatch[1];
+            // Use the last segment of the URL path as identifier (e.g., photo-1234567)
+            const srcIdentifier = srcUrl.split('/').pop().split('?')[0];
+            const escapedSrc = srcIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-                // Check if this is a void/self-closing element (no closing tag)
-                const voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
-                const isVoidElement = voidElements.includes(tagName.toLowerCase());
-
-                // Extract class and id for matching
-                const classMatch = attributes.match(/class\s*=\s*["']([^"']+)["']/);
-                const idMatch = attributes.match(/id\s*=\s*["']([^"']+)["']/);
-
-                let searchPattern = null;
-
-                if (idMatch) {
-                    // Match by ID (most specific)
-                    const escapedId = idMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    if (isVoidElement) {
-                        // Void elements: match just the self-closing tag
-                        searchPattern = new RegExp(`<${tagName}[^>]*id\\s*=\\s*["']${escapedId}["'][^>]*/?>`, 'i');
-                    } else {
-                        searchPattern = new RegExp(`<${tagName}[^>]*id\\s*=\\s*["']${escapedId}["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
-                    }
-                } else if (classMatch) {
-                    // Match by class (get first class for specificity)
-                    const firstClass = classMatch[1].split(/\s+/)[0];
-                    const escapedClass = firstClass.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    if (isVoidElement) {
-                        // Void elements: match just the self-closing tag
-                        searchPattern = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${escapedClass}[^"']*["'][^>]*/?>`, 'i');
-                    } else {
-                        searchPattern = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${escapedClass}[^"']*["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
-                    }
+            if (escapedSrc.length > 5) {
+                let srcPattern;
+                if (isVoidElement) {
+                    srcPattern = new RegExp(`<${tagName}[^>]*src\\s*=\\s*["'][^"']*${escapedSrc}[^"']*["'][^>]*/?>`, 'i');
+                } else {
+                    srcPattern = new RegExp(`<${tagName}[^>]*src\\s*=\\s*["'][^"']*${escapedSrc}[^"']*["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
                 }
 
-                if (searchPattern && searchPattern.test(currentHtml)) {
-                    // Log what we're matching and replacing
-                    const matchResult = currentHtml.match(searchPattern);
-                    if (matchResult) {
-                        console.log('🔍 Matched element (first 200 chars):', matchResult[0].substring(0, 200));
-                        console.log('🔄 Replacing with (first 200 chars):', newElementHtml.substring(0, 200));
+                const srcResult = currentHtml.match(srcPattern);
+                if (srcResult) {
+                    console.log('🔍 Matched by src:', srcResult[0].substring(0, 150));
+                    updatedHtml = currentHtml.replace(srcPattern, newElementHtml);
+                    if (updatedHtml !== currentHtml) {
+                        matchFound = true;
+                        console.log('✅ Element replaced via src attribute match');
                     }
+                }
+            }
 
-                    updatedHtml = currentHtml.replace(searchPattern, newElementHtml);
-                    matchFound = true;
-                    console.log('✅ Element replaced via tag/class/id match');
+            // Fallback: try full src URL match
+            if (!matchFound) {
+                const fullEscapedSrc = srcUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                let fullSrcPattern;
+                if (isVoidElement) {
+                    fullSrcPattern = new RegExp(`<${tagName}[^>]*src\\s*=\\s*["']${fullEscapedSrc}["'][^>]*/?>`, 'i');
+                } else {
+                    fullSrcPattern = new RegExp(`<${tagName}[^>]*src\\s*=\\s*["']${fullEscapedSrc}["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
+                }
 
-                    // Verify the replacement happened
-                    if (updatedHtml === currentHtml) {
-                        console.log('⚠️ WARNING: HTML unchanged after replacement!');
-                        matchFound = false;
+                const fullSrcResult = currentHtml.match(fullSrcPattern);
+                if (fullSrcResult) {
+                    updatedHtml = currentHtml.replace(fullSrcPattern, newElementHtml);
+                    if (updatedHtml !== currentHtml) {
+                        matchFound = true;
+                        console.log('✅ Element replaced via full src URL match');
                     }
                 }
             }
         }
 
-        // Method 3: Try flexible whitespace matching
+        // Method 3: Match by id (most specific)
+        if (!matchFound && idMatch) {
+            const escapedId = idMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let searchPattern;
+            if (isVoidElement) {
+                searchPattern = new RegExp(`<${tagName}[^>]*id\\s*=\\s*["']${escapedId}["'][^>]*/?>`, 'i');
+            } else {
+                searchPattern = new RegExp(`<${tagName}[^>]*id\\s*=\\s*["']${escapedId}["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
+            }
+
+            if (searchPattern.test(currentHtml)) {
+                const matchResult = currentHtml.match(searchPattern);
+                console.log('🔍 Matched by id:', matchResult[0].substring(0, 200));
+                updatedHtml = currentHtml.replace(searchPattern, newElementHtml);
+                if (updatedHtml !== currentHtml) {
+                    matchFound = true;
+                    console.log('✅ Element replaced via id match');
+                }
+            }
+        }
+
+        // Method 4: Match by class
+        if (!matchFound && classMatch) {
+            const firstClass = classMatch[1].split(/\s+/)[0];
+            const escapedClass = firstClass.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let searchPattern;
+            if (isVoidElement) {
+                searchPattern = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${escapedClass}[^"']*["'][^>]*/?>`, 'i');
+            } else {
+                searchPattern = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${escapedClass}[^"']*["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
+            }
+
+            if (searchPattern.test(currentHtml)) {
+                const matchResult = currentHtml.match(searchPattern);
+                console.log('🔍 Matched by class:', matchResult[0].substring(0, 200));
+                updatedHtml = currentHtml.replace(searchPattern, newElementHtml);
+                if (updatedHtml !== currentHtml) {
+                    matchFound = true;
+                    console.log('✅ Element replaced via class match');
+                }
+            }
+        }
+
+        // Method 5: Match by alt text (for images without class/id/unique-src)
+        if (!matchFound && altMatch && tagName === 'img') {
+            const escapedAlt = altMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const altPattern = new RegExp(`<img[^>]*alt\\s*=\\s*["']${escapedAlt}["'][^>]*/?>`, 'i');
+
+            const altResult = currentHtml.match(altPattern);
+            if (altResult) {
+                updatedHtml = currentHtml.replace(altPattern, newElementHtml);
+                if (updatedHtml !== currentHtml) {
+                    matchFound = true;
+                    console.log('✅ Element replaced via alt text match');
+                }
+            }
+        }
+
+        // Method 6: Match by href (for links)
+        if (!matchFound && hrefMatch) {
+            const escapedHref = hrefMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let hrefPattern;
+            if (isVoidElement) {
+                hrefPattern = new RegExp(`<${tagName}[^>]*href\\s*=\\s*["']${escapedHref}["'][^>]*/?>`, 'i');
+            } else {
+                hrefPattern = new RegExp(`<${tagName}[^>]*href\\s*=\\s*["']${escapedHref}["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'i');
+            }
+
+            const hrefResult = currentHtml.match(hrefPattern);
+            if (hrefResult) {
+                updatedHtml = currentHtml.replace(hrefPattern, newElementHtml);
+                if (updatedHtml !== currentHtml) {
+                    matchFound = true;
+                    console.log('✅ Element replaced via href match');
+                }
+            }
+        }
+
+        // Method 7: Try flexible whitespace matching
         if (!matchFound) {
             const escapedOriginal = elementHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const flexibleRegex = new RegExp(escapedOriginal.replace(/\s+/g, '\\s*'), 'i');
@@ -851,33 +935,71 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
         }
 
-        // Method 4: Try matching just by the element's text content (for simple elements)
+        // Method 8: Match by text content (for elements with unique text)
+        if (!matchFound && !isVoidElement && elementHtml) {
+            // Extract text content from the element
+            const textContent = elementHtml.replace(/<[^>]*>/g, '').trim();
+            if (textContent.length > 10 && textContent.length < 200) {
+                const escapedText = textContent.substring(0, 80).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const textPattern = new RegExp(`<${tagName}[^>]*>[\\s\\S]*?${escapedText}[\\s\\S]*?<\\/${tagName}>`, 'i');
+                const textMatches = currentHtml.match(new RegExp(textPattern.source, 'gi'));
+
+                if (textMatches && textMatches.length === 1) {
+                    updatedHtml = currentHtml.replace(textPattern, newElementHtml);
+                    if (updatedHtml !== currentHtml) {
+                        matchFound = true;
+                        console.log('✅ Element replaced via text content match');
+                    }
+                }
+            }
+        }
+
+        // Method 9: Path-based class match (from elementPath)
         if (!matchFound && elementPath) {
-            // For elements with unique identifiers in the path, try to find similar structure
             const pathParts = elementPath.split('.');
             if (pathParts.length > 1) {
                 const className = pathParts[pathParts.length - 1];
-                const tagName = pathParts[0].split('#')[0];
+                const pathTagName = pathParts[0].split('#')[0];
 
-                // Check if this is a void/self-closing element
-                const voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
-                const isVoidElement = voidElements.includes(tagName.toLowerCase());
-
-                // Find elements with this class
                 let classRegex;
-                if (isVoidElement) {
-                    // Void elements: match just the self-closing tag
-                    classRegex = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${className}[^"']*["'][^>]*/?>`, 'gi');
+                if (voidElements.includes(pathTagName.toLowerCase())) {
+                    classRegex = new RegExp(`<${pathTagName}[^>]*class\\s*=\\s*["'][^"']*${className}[^"']*["'][^>]*/?>`, 'gi');
                 } else {
-                    classRegex = new RegExp(`<${tagName}[^>]*class\\s*=\\s*["'][^"']*${className}[^"']*["'][^>]*>[\\s\\S]*?<\\/${tagName}>`, 'gi');
+                    classRegex = new RegExp(`<${pathTagName}[^>]*class\\s*=\\s*["'][^"']*${className}[^"']*["'][^>]*>[\\s\\S]*?<\\/${pathTagName}>`, 'gi');
                 }
                 const matches = currentHtml.match(classRegex);
 
                 if (matches && matches.length === 1) {
-                    // Only one match, safe to replace
                     updatedHtml = currentHtml.replace(matches[0], newElementHtml);
                     matchFound = true;
                     console.log('✅ Element replaced via path-based class match');
+                }
+            }
+        }
+
+        // Method 10: For void elements with no identifiers, match by tag + position context
+        if (!matchFound && isVoidElement) {
+            // Find ALL instances of this tag in the source
+            const allTagPattern = new RegExp(`<${tagName}[^>]*/?>`, 'gi');
+            const allMatches = [];
+            let match;
+            while ((match = allTagPattern.exec(currentHtml)) !== null) {
+                allMatches.push({ html: match[0], index: match.index });
+            }
+
+            if (allMatches.length === 1) {
+                // Only one instance of this tag - safe to replace
+                updatedHtml = currentHtml.replace(allMatches[0].html, newElementHtml);
+                matchFound = true;
+                console.log('✅ Element replaced via single-instance void element match');
+            } else if (allMatches.length > 1 && srcMatch) {
+                // Multiple instances but we have a src - try partial src matching
+                const srcDomain = srcMatch[1].split('/').slice(0, 3).join('/');
+                const bestMatch = allMatches.find(m => m.html.includes(srcDomain));
+                if (bestMatch) {
+                    updatedHtml = currentHtml.substring(0, bestMatch.index) + newElementHtml + currentHtml.substring(bestMatch.index + bestMatch.html.length);
+                    matchFound = true;
+                    console.log('✅ Element replaced via partial src domain match');
                 }
             }
         }
