@@ -13,9 +13,54 @@ const anthropic = process.env.ANTHROPIC_API_KEY
     ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
     : null;
 
+// Knowledge service for reloading intents globally
+let knowledgeService = null;
+try { knowledgeService = require('../services/knowledgeService'); } catch (e) { }
+
 // In-memory storage (AS BEFORE)
 let intentsData = [];
 let documentsData = [];
+
+/**
+ * Reload intents across ALL services after scraping or intent changes
+ */
+async function reloadAllIntents(newIntents) {
+    console.log(`🔄 Reloading intents across all services (${newIntents.length} intents)...`);
+
+    // 1. Update knowledge service (includes embedding regeneration)
+    if (knowledgeService) {
+        try {
+            await knowledgeService.reloadIntents(newIntents);
+            console.log('  ✅ KnowledgeService reloaded');
+        } catch (e) {
+            console.log('  ⚠️ KnowledgeService reload failed:', e.message);
+        }
+    }
+
+    // 2. Reload chat intents
+    try {
+        const chatModule = require('./chat');
+        if (chatModule.loadIntents) {
+            chatModule.loadIntents();
+            console.log('  ✅ Chat intents reloaded');
+        }
+    } catch (e) {
+        console.log('  ⚠️ Chat intents reload failed:', e.message);
+    }
+
+    // 3. Reload voice intents
+    try {
+        const voiceModule = require('./voice');
+        if (voiceModule.reloadVoiceIntents) {
+            voiceModule.reloadVoiceIntents();
+            console.log('  ✅ Voice intents reloaded');
+        }
+    } catch (e) {
+        console.log('  ⚠️ Voice intents reload failed:', e.message);
+    }
+
+    console.log('🔄 All services reloaded');
+}
 
 // ===============================
 // LOAD DATA (NO SIDE EFFECTS)
@@ -325,16 +370,8 @@ router.post('/scrape-website', async (req, res) => {
         fs.writeFileSync(intentsPath, JSON.stringify(currentIntents, null, 2), 'utf-8');
         console.log(`✅ Saved ${currentIntents.intents.length} total intents to ${intentsPath}`);
 
-        // CRITICAL: Reload chat intents so chatbot knows about new data
-        try {
-            const chatModule = require('./chat');
-            if (chatModule.loadIntents) {
-                chatModule.loadIntents();
-                console.log('🔄 Chat intents reloaded after scraping');
-            }
-        } catch (e) {
-            console.warn('⚠️ Could not reload chat intents:', e.message);
-        }
+        // CRITICAL: Reload ALL services so chatbot, voice agent, and vector search know about new data
+        await reloadAllIntents(intentsData);
 
         res.json({
             success: true,
@@ -381,7 +418,7 @@ router.get('/scrape-status', (_req, res) => {
  * Delete an intent
  * DELETE /api/knowledge/intents/:index
  */
-router.delete('/intents/:index', (req, res) => {
+router.delete('/intents/:index', async (req, res) => {
     try {
         const index = parseInt(req.params.index);
 
@@ -402,16 +439,8 @@ router.delete('/intents/:index', (req, res) => {
             console.log(`💾 Updated ${intentsPath} with ${intentsData.length} intents`);
         }
 
-        // Reload chat intents
-        try {
-            const chatModule = require('./chat');
-            if (chatModule.loadIntents) {
-                chatModule.loadIntents();
-                console.log('🔄 Chat intents reloaded after deletion');
-            }
-        } catch (e) {
-            console.warn('⚠️ Could not reload chat intents:', e.message);
-        }
+        // Reload ALL services
+        await reloadAllIntents(intentsData);
 
         console.log(`🗑️ Deleted intent: ${deletedIntent.name || deletedIntent.question || 'Unnamed'}`);
 
@@ -436,7 +465,7 @@ router.delete('/intents/:index', (req, res) => {
  * POST /api/knowledge/intents/bulk-delete
  * Body: { indices: [0, 2, 5, ...] }
  */
-router.post('/intents/bulk-delete', (req, res) => {
+router.post('/intents/bulk-delete', async (req, res) => {
     try {
         const { indices } = req.body;
 
@@ -467,16 +496,8 @@ router.post('/intents/bulk-delete', (req, res) => {
             console.log(`💾 Updated ${intentsPath} with ${intentsData.length} intents`);
         }
 
-        // Reload chat intents
-        try {
-            const chatModule = require('./chat');
-            if (chatModule.loadIntents) {
-                chatModule.loadIntents();
-                console.log('🔄 Chat intents reloaded after bulk deletion');
-            }
-        } catch (e) {
-            console.warn('⚠️ Could not reload chat intents:', e.message);
-        }
+        // Reload ALL services (knowledge, chat, voice, embeddings)
+        await reloadAllIntents(intentsData);
 
         console.log(`🗑️ Bulk deleted ${deletedIntents.length} intents`);
 
@@ -500,7 +521,7 @@ router.post('/intents/bulk-delete', (req, res) => {
  * Delete all intents
  * DELETE /api/knowledge/intents/delete-all
  */
-router.delete('/intents/delete-all', (_req, res) => {
+router.delete('/intents/delete-all', async (_req, res) => {
     try {
         const deletedCount = intentsData.length;
 
@@ -514,16 +535,8 @@ router.delete('/intents/delete-all', (_req, res) => {
             console.log(`💾 Cleared all intents in ${intentsPath}`);
         }
 
-        // Reload chat intents
-        try {
-            const chatModule = require('./chat');
-            if (chatModule.loadIntents) {
-                chatModule.loadIntents();
-                console.log('🔄 Chat intents reloaded after delete all');
-            }
-        } catch (e) {
-            console.warn('⚠️ Could not reload chat intents:', e.message);
-        }
+        // Reload ALL services (knowledge, chat, voice, embeddings)
+        await reloadAllIntents(intentsData);
 
         console.log(`🗑️ Deleted all ${deletedCount} intents`);
 

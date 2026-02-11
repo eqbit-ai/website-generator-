@@ -93,7 +93,7 @@ const VoiceAgent = ({ isOpen, onClose }) => {
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    placeholder="test@test.com
+                                    placeholder="test@test.com"
                                     required
                                 />
                             </div>

@@ -11,7 +11,7 @@ const anthropic = new Anthropic({
 
 class ChatbotService {
     constructor() {
-        const SYSTEM_PROMPT = `You are a helpful and friendly customer support assistant for [Company Name]. 
+        this.systemPrompt = `You are a helpful and friendly customer support assistant for [Company Name].
 
 ## YOUR PERSONALITY
 - Warm, helpful, and conversational
@@ -180,19 +180,51 @@ If someone asks about calling or the phone agent:
                 }
             }
 
-            // Search knowledge base
-            const relevantChunks = knowledgeService.searchChunks(userMessage, 3);
-
-            // Build context from knowledge base
+            // Search knowledge base using unified search (keyword + vector + TF-IDF)
             let knowledgeContext = '';
             let hasRelevantInfo = false;
+            let sourcesUsed = [];
 
-            if (relevantChunks.length > 0 && relevantChunks[0].score > 0.5) {
-                hasRelevantInfo = true;
-                knowledgeContext = '\n\n[KNOWLEDGE BASE CONTEXT - ONLY use this information to answer]:\n';
-                relevantChunks.forEach((chunk, index) => {
-                    knowledgeContext += `\nSource ${index + 1}: ${chunk.content}\n`;
+            try {
+                // Try unified search first (best quality)
+                const searchResult = await knowledgeService.unifiedSearch(userMessage, {
+                    vectorThreshold: 0.4,
+                    keywordFallback: true
                 });
+
+                if (searchResult.found && searchResult.response) {
+                    hasRelevantInfo = true;
+                    knowledgeContext = `\n\n[KNOWLEDGE BASE CONTEXT - ONLY use this information to answer]:\nTopic: ${searchResult.intentName}\nAnswer: ${searchResult.response}\n`;
+                    sourcesUsed.push(searchResult.intentName);
+                }
+
+                // If unified search didn't find anything, try top matches for RAG
+                if (!hasRelevantInfo) {
+                    const topMatches = await knowledgeService.getTopMatches(userMessage, 3);
+                    if (topMatches.length > 0 && topMatches[0].score > 0.3) {
+                        hasRelevantInfo = true;
+                        knowledgeContext = '\n\n[KNOWLEDGE BASE CONTEXT - ONLY use this information to answer]:\n';
+                        topMatches.forEach((match, index) => {
+                            knowledgeContext += `\nSource ${index + 1} (${match.intentName}): ${match.response}\n`;
+                            sourcesUsed.push(match.intentName);
+                        });
+                    }
+                }
+
+                // Fall back to basic chunk search
+                if (!hasRelevantInfo) {
+                    const relevantChunks = knowledgeService.searchChunks(userMessage, 3);
+                    if (relevantChunks.length > 0 && relevantChunks[0].score > 0.3) {
+                        hasRelevantInfo = true;
+                        knowledgeContext = '\n\n[KNOWLEDGE BASE CONTEXT - ONLY use this information to answer]:\n';
+                        relevantChunks.forEach((chunk, index) => {
+                            knowledgeContext += `\nSource ${index + 1}: ${chunk.content}\n`;
+                            sourcesUsed.push(chunk.source || 'document');
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error('KB search error in chatbotService:', e.message);
             }
 
             // If no relevant context found, return "don't have info" response
@@ -276,7 +308,7 @@ CRITICAL REMINDER: You can ONLY answer from the [KNOWLEDGE BASE CONTEXT] provide
             return {
                 success: true,
                 message: assistantMessage,
-                sourcesUsed: relevantChunks.map(c => c.source)
+                sourcesUsed: sourcesUsed
             };
 
         } catch (error) {

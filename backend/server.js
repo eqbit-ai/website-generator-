@@ -162,14 +162,22 @@ try {
     console.log('⚠️ Generator routes not available:', e.message);
 }
 
-// Deploy routes (Website deployment and domain search)
+// Deploy routes (Website deployment)
 try {
     const deployRoutes = require('./routes/deploy');
     app.use('/api/deploy', deployRoutes);
-    app.use('/api/domains', deployRoutes); // Domains search is also in deploy.js
-    console.log('✅ Deploy & Domains routes loaded');
+    console.log('✅ Deploy routes loaded');
 } catch (e) {
     console.log('⚠️ Deploy routes not available:', e.message);
+}
+
+// Domain routes (GoDaddy search, purchase, DNS, Vercel linking)
+try {
+    const domainRoutes = require('./routes/domains');
+    app.use('/api/domains', domainRoutes);
+    console.log('✅ Domain routes loaded');
+} catch (e) {
+    console.log('⚠️ Domain routes not available:', e.message);
 }
 
 // ============================================

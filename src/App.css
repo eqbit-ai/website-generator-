@@ -838,6 +838,224 @@ body {
 }
 
 /* ============================================
+   CONTACT FORM (Domain Purchase)
+   ============================================ */
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.contact-field label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.contact-field .modal-input {
+  padding: 0.75rem 0.875rem;
+  font-size: 0.9375rem;
+}
+
+.purchase-summary {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.purchase-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.purchase-price {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.contact-actions .action-button {
+  flex: 0 0 auto;
+}
+
+.contact-actions .deploy-button {
+  flex: 1;
+}
+
+/* ============================================
+   PURCHASE PROGRESS (Step 3)
+   ============================================ */
+
+.purchase-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.purchase-step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  position: relative;
+}
+
+.purchase-step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.purchase-step.active .purchase-step-icon {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.purchase-step.done .purchase-step-icon {
+  border-color: var(--success);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.purchase-step.error .purchase-step-icon {
+  border-color: var(--error);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.step-icon.done {
+  color: var(--success);
+}
+
+.step-icon.error {
+  color: var(--error);
+}
+
+.step-icon.pending {
+  color: var(--text-muted);
+}
+
+.purchase-step-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.purchase-step-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.purchase-step.pending .purchase-step-label {
+  color: var(--text-muted);
+}
+
+.purchase-step-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.purchase-step-status.success {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+
+.purchase-step-status.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+.purchase-step-line {
+  position: absolute;
+  left: 19px;
+  top: 52px;
+  bottom: -12px;
+  width: 2px;
+  background: var(--border);
+  transition: background 0.3s ease;
+}
+
+.purchase-step-line.done {
+  background: var(--success);
+}
+
+.purchase-success {
+  text-align: center;
+}
+
+.dns-propagation-note {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.error-icon {
+  color: var(--error) !important;
+}
+
+/* Purchase step entrance animation */
+@keyframes stepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.purchase-step {
+  animation: stepFadeIn 0.4s ease forwards;
+}
+
+.purchase-step:nth-child(1) { animation-delay: 0s; }
+.purchase-step:nth-child(2) { animation-delay: 0.15s; }
+.purchase-step:nth-child(3) { animation-delay: 0.3s; }
+
+/* Deploy modal wider for contact form */
+.deploy-modal {
+  max-width: 520px;
+}
+
+/* ============================================
    FLOATING ACTION BUTTONS (FAB)
    ============================================ */
 

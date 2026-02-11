@@ -63,10 +63,30 @@ class ConversationalAgent {
 
         // Search knowledge base if user is asking a question
         let knowledgeContext = '';
-        if (state.smsVerified && userInput.length > 10) {
-            const results = knowledgeService.searchChunks(userInput, 2);
-            if (results.length > 0 && results[0].score > 0.3) {
-                knowledgeContext = `\n\nKNOWLEDGE BASE INFO:\n${results.map(r => r.content).join('\n')}`;
+        if (state.smsVerified && userInput.length > 3) {
+            try {
+                // Use unified search (keyword + vector + TF-IDF)
+                const searchResult = await knowledgeService.unifiedSearch(userInput, {
+                    vectorThreshold: 0.4,
+                    keywordFallback: true
+                });
+
+                if (searchResult.found && searchResult.response) {
+                    knowledgeContext = `\n\nKNOWLEDGE BASE INFO:\nTopic: ${searchResult.intentName}\n${searchResult.response}`;
+                } else {
+                    // Fall back to getting top matches for context
+                    const topMatches = await knowledgeService.getTopMatches(userInput, 2);
+                    if (topMatches.length > 0 && topMatches[0].score > 0.3) {
+                        knowledgeContext = `\n\nKNOWLEDGE BASE INFO:\n${topMatches.map(m => `Topic: ${m.intentName}\n${m.response}`).join('\n\n')}`;
+                    }
+                }
+            } catch (e) {
+                console.log('⚠️ ConversationalAgent KB search error:', e.message);
+                // Fallback to basic search
+                const results = knowledgeService.searchChunks(userInput, 2);
+                if (results.length > 0 && results[0].score > 0.3) {
+                    knowledgeContext = `\n\nKNOWLEDGE BASE INFO:\n${results.map(r => r.content).join('\n')}`;
+                }
             }
         }
 

@@ -89,9 +89,91 @@ export const editElement = async (sessionId, elementHtml, elementPath, prompt, c
     }
 };
 
+// Search domains via GoDaddy
+export const searchDomains = async (query) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/domains/search?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Domain search failed');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+// Purchase domain + configure DNS + link to Vercel
+export const purchaseDomain = async (domain, contactInfo, projectId) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/domains/purchase`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain, contactInfo, projectId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Domain purchase failed');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+// Check domain status
+export const getDomainStatus = async (domain) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/domains/status?domain=${encodeURIComponent(domain)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Status check failed');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
+// Retry DNS/Vercel linking
+export const linkDomain = async (domain, projectId) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/domains/link`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain, projectId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Domain linking failed');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
 export default {
     generateWebsite,
     getSession,
     clearSession,
-    editElement
+    editElement,
+    searchDomains,
+    purchaseDomain,
+    getDomainStatus,
+    linkDomain
 };

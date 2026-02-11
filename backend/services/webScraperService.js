@@ -370,12 +370,14 @@ async function generateIntents(scrapedData, anthropic) {
                         `${idx + 1}. Q: ${pair.question}\n   A: ${pair.answer}`
                     ).join('\n\n');
 
-                    const prompt = `You are converting FAQ Q&A pairs into conversational chatbot responses.
+                    const prompt = `You are converting FAQ Q&A pairs into conversational chatbot responses with EXCELLENT keyword coverage.
 
 FAQ Content:
 ${faqText}
 
-For EACH question above, create 3 SHORT response variations (max 2 sentences each).
+For EACH question above, create:
+- 3 SHORT response variations (max 2 sentences each)
+- 8-12 keywords/phrases that users might type when asking this question
 
 CRITICAL RULES:
 1. Each variation must be DIFFERENT (different wording, not just prefixes)
@@ -383,7 +385,11 @@ CRITICAL RULES:
 3. Break long answers into key points
 4. Use conversational, natural language
 5. Responses must be based ONLY on the answer provided (no hallucination)
-6. Extract 3-5 SPECIFIC keywords from the Q&A (not generic words)
+6. Keywords MUST include:
+   a. The original question itself (cleaned up)
+   b. 3-4 short rephrasings of the question (how users might actually ask it)
+   c. 3-5 specific topic keywords/phrases from the Q&A
+   d. Common abbreviations or alternate terms
 
 Return EXACT JSON format:
 {
@@ -395,7 +401,7 @@ Return EXACT JSON format:
         "Short variation 2 (1-2 sentences, completely different wording)",
         "Short variation 3 (1-2 sentences, another angle)"
       ],
-      "keywords": ["specific1", "specific2", "specific3"]
+      "keywords": ["original question cleaned", "rephrasing 1", "rephrasing 2", "topic keyword 1", "topic keyword 2", ...]
     }
   ]
 }
@@ -403,17 +409,16 @@ Return EXACT JSON format:
 EXAMPLES:
 
 Q: How many shareholders are allowed?
-A: A maximum of 50 shareholders are allowed on a license.A maximum of 50 shareholders are allowed on a license.
+A: A maximum of 50 shareholders are allowed on a license.
+
+Good keywords: ["how many shareholders are allowed", "shareholders allowed", "maximum shareholders", "number of shareholders", "shareholder limit", "50 shareholders", "shareholders on license", "how many shareholders can I have"]
 
 Good variations:
 1. "You can have up to 50 shareholders on your license."
 2. "The maximum is 50 shareholders per license."
 3. "Meydan Free Zone allows a maximum of 50 shareholders."
 
-Bad variations (DON'T DO THIS):
-1. "A maximum of 50 shareholders are allowed on a license." (too repetitive of original)
-2. "According to Meydan Free Zone, a maximum of 50 shareholders..." (same answer with prefix)
-3. "Here's what you need to know: A maximum of 50 shareholders..." (same answer with prefix)
+Bad keywords (DON'T DO THIS): ["shareholders", "allowed", "maximum"] (too generic, too few)
 
 Return ONLY the JSON, no explanation.`;
 
@@ -432,11 +437,25 @@ Return ONLY the JSON, no explanation.`;
                             const parsed = JSON.parse(jsonMatch[0]);
                             if (parsed.intents && Array.isArray(parsed.intents)) {
                                 for (const intent of parsed.intents) {
+                                    // Ensure question is always included as a keyword
+                                    const keywords = intent.keywords || [];
+                                    const cleanQuestion = intent.question.replace(/[?!.,]/g, '').trim().toLowerCase();
+                                    if (!keywords.some(k => k.toLowerCase() === cleanQuestion)) {
+                                        keywords.unshift(cleanQuestion);
+                                    }
+                                    // Also add a shorter version if question is long
+                                    if (cleanQuestion.split(' ').length > 5) {
+                                        const shortVersion = cleanQuestion.split(' ').slice(0, 5).join(' ');
+                                        if (!keywords.some(k => k.toLowerCase() === shortVersion)) {
+                                            keywords.push(shortVersion);
+                                        }
+                                    }
+
                                     allIntents.push({
                                         name: intent.question.substring(0, 60) + (intent.question.length > 60 ? '...' : ''),
                                         question: intent.question,
                                         responses: intent.responses || [intent.question],
-                                        keywords: intent.keywords || [],
+                                        keywords: keywords,
                                         source: page.url,
                                         sourceTitle: page.title
                                     });
@@ -463,7 +482,7 @@ Return ONLY the JSON, no explanation.`;
             for (let i = 0; i < chunks.length; i++) {
                 const chunk = chunks[i];
 
-                const prompt = `Analyze this website content and generate 3-4 intents (questions users might ask) with multiple short answer variations.
+                const prompt = `Analyze this website content and generate 3-4 intents (questions users might ask) with multiple short answer variations and COMPREHENSIVE keyword coverage.
 
 Website: ${page.title}
 URL: ${page.url}
@@ -482,7 +501,7 @@ Generate intents in this EXACT JSON format:
         "Short answer variation 2 (2-3 sentences, different phrasing)",
         "Short answer variation 3 (2-3 sentences, another angle)"
       ],
-      "keywords": ["specific", "relevant", "keyword"]
+      "keywords": ["the full question", "rephrasing 1", "rephrasing 2", "topic keyword 1", "topic keyword 2", ...]
     }
   ]
 }
@@ -494,8 +513,12 @@ Requirements:
 4. Make each response variation sound human and conversational, not robotic
 5. Vary the phrasing and angle of each response while keeping the core information
 6. Responses MUST be based ONLY on the provided content (no hallucination)
-7. Keywords must be HIGHLY SPECIFIC and RELEVANT (e.g., "VARA", "virtual assets", "license cost")
-8. Avoid generic keywords like "company", "business", "services"
+7. Keywords (8-12 per intent) MUST include:
+   a. The full question itself (e.g., "what is VARA regulation")
+   b. 3-4 ways users might rephrase the same question (e.g., "tell me about VARA", "VARA rules")
+   c. 3-5 specific topic keywords/phrases (e.g., "VARA", "virtual assets license", "crypto regulation")
+   d. Common abbreviations or alternate terms
+8. Avoid single generic keywords like "company", "business", "services" — use specific multi-word phrases
 9. Make questions natural and conversational
 10. Cover different aspects of the content
 
@@ -516,11 +539,28 @@ Return ONLY the JSON, no explanation.`;
                     if (jsonMatch) {
                         const parsed = JSON.parse(jsonMatch[0]);
                         if (parsed.intents && Array.isArray(parsed.intents)) {
-                            allIntents.push(...parsed.intents.map(intent => ({
-                                ...intent,
-                                source: page.url,
-                                sourceTitle: page.title
-                            })));
+                            allIntents.push(...parsed.intents.map(intent => {
+                                // Ensure question is always included as a keyword
+                                const keywords = intent.keywords || [];
+                                if (intent.question) {
+                                    const cleanQuestion = intent.question.replace(/[?!.,]/g, '').trim().toLowerCase();
+                                    if (!keywords.some(k => k.toLowerCase() === cleanQuestion)) {
+                                        keywords.unshift(cleanQuestion);
+                                    }
+                                    if (cleanQuestion.split(' ').length > 5) {
+                                        const shortVersion = cleanQuestion.split(' ').slice(0, 5).join(' ');
+                                        if (!keywords.some(k => k.toLowerCase() === shortVersion)) {
+                                            keywords.push(shortVersion);
+                                        }
+                                    }
+                                }
+                                return {
+                                    ...intent,
+                                    keywords,
+                                    source: page.url,
+                                    sourceTitle: page.title
+                                };
+                            }));
                             console.log(`  ✅ Generated ${parsed.intents.length} intents (Total: ${allIntents.length})`);
                         }
                     }

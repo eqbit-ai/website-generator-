@@ -82,11 +82,13 @@ ${js || ''}
                 );
 
                 const vercelUrl = `https://${deployment.data.url}`;
-                console.log(`✅ Deployed to Vercel: ${vercelUrl}`);
+                const projectId = deployment.data.projectId || null;
+                console.log(`✅ Deployed to Vercel: ${vercelUrl} (project: ${projectId})`);
 
                 return res.json({
                     success: true,
                     deploymentId: deployment.data.id,
+                    projectId,
                     url: vercelUrl,
                     message: 'Website deployed successfully to Vercel!'
                 });
@@ -163,50 +165,6 @@ router.get('/', (req, res) => {
         count: allDeployments.length,
         deployments: allDeployments
     });
-});
-
-/**
- * Search domains (directs to Namecheap)
- * GET /api/domains/search
- */
-router.get('/search', async (req, res) => {
-    try {
-        let query = req.query.query || '';
-
-        if (!query) {
-            return res.status(400).json({
-                success: false,
-                error: 'Search query required'
-            });
-        }
-
-        // Clean the query - remove any existing TLD
-        query = query.toLowerCase()
-            .replace(/\.(com|net|org|io|co|dev|app|xyz)$/i, '')
-            .replace(/[^a-z0-9-]/g, '')
-            .substring(0, 63);
-
-        console.log(`🔍 Domain search for: ${query}`);
-
-        // Mock domain search results - in frontend, clicking Buy redirects to Namecheap
-        const tlds = ['.com', '.net', '.org', '.io', '.co'];
-        const domains = tlds.map(tld => ({
-            name: `${query}${tld}`,
-            available: Math.random() > 0.5, // Random availability
-            price: tld === '.com' ? 12.99 : tld === '.io' ? 39.99 : 19.99
-        }));
-
-        res.json({
-            success: true,
-            domains
-        });
-    } catch (error) {
-        console.error('❌ Domain search error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Domain search failed'
-        });
-    }
 });
 
 module.exports = router;

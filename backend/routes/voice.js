@@ -93,11 +93,11 @@ function logVoice(callId, action, details) {
 }
 
 // ============================================
-// KNOWLEDGE BASE SEARCH
+// KNOWLEDGE BASE SEARCH (uses knowledgeService unified search)
 // ============================================
 
-function searchKnowledgeBase(query) {
-    console.log('\n🔍 KB Search:', query);
+async function searchKnowledgeBase(query) {
+    console.log('\n🔍 Voice KB Search:', query);
 
     if (!query || query.length < 2) {
         return {
@@ -107,70 +107,60 @@ function searchKnowledgeBase(query) {
     }
 
     try {
-        // 1. Check intents first (fast keyword matching)
+        // 1. Use knowledgeService unified search (keyword + vector + TF-IDF)
+        if (knowledgeService) {
+            const result = await knowledgeService.unifiedSearch(query, {
+                vectorThreshold: 0.4,
+                keywordFallback: true
+            });
+
+            if (result.found && result.response) {
+                console.log(`✅ Voice KB match: "${result.intentName}" (${result.source}, score: ${result.score.toFixed(3)})`);
+                return {
+                    found: true,
+                    answer: result.response
+                };
+            }
+
+            // 2. Try RAG-style: get top matches for AI to use
+            const topMatches = await knowledgeService.getTopMatches(query, 3);
+            if (topMatches.length > 0 && topMatches[0].score > 0.3) {
+                console.log(`✅ Voice KB top match: "${topMatches[0].intentName}" (score: ${topMatches[0].score.toFixed(3)})`);
+                return {
+                    found: true,
+                    answer: topMatches[0].response
+                };
+            }
+        }
+
+        // 3. Direct intent keyword search as fallback (uses voice.js local intentsData)
         if (intentsData.length > 0) {
-            const q = query.toLowerCase();
+            const q = query.toLowerCase().trim().replace(/\s+/g, ' ');
             for (const intent of intentsData) {
-                if (!intent || !intent.response || !intent.keywords) continue;
+                const hasResponse = (intent.responses && intent.responses.length > 0) || intent.response;
+                if (!intent || !hasResponse || !intent.keywords) continue;
 
                 for (const keyword of intent.keywords) {
-                    if (q.includes(keyword.toLowerCase())) {
-                        console.log(`✅ Found intent: ${intent.name}`);
-                        return {
-                            found: true,
-                            answer: intent.response
-                        };
+                    const kw = keyword.toLowerCase();
+                    if (kw.includes(q) || q.includes(kw)) {
+                        const answer = intent.responses
+                            ? intent.responses[Math.floor(Math.random() * intent.responses.length)]
+                            : intent.response;
+                        console.log(`✅ Voice direct intent match: ${intent.name} (matched: "${keyword}")`);
+                        return { found: true, answer };
                     }
                 }
             }
         }
 
-        // 2. Try knowledgeService methods
-        if (knowledgeService) {
-            if (typeof knowledgeService.findBestResponse === 'function') {
-                const result = knowledgeService.findBestResponse(query);
-                if (result.found && result.response) {
-                    console.log('✅ KB found answer via findBestResponse');
-                    return {
-                        found: true,
-                        answer: result.response
-                    };
-                }
-            }
-
-            if (typeof knowledgeService.searchChunks === 'function') {
-                const results = knowledgeService.searchChunks(query, 3);
-                if (results?.length > 0 && results[0].score > 0.05) {
-                    console.log(`✅ KB found answer via searchChunks (score: ${results[0].score})`);
-                    return {
-                        found: true,
-                        answer: results[0].content
-                    };
-                }
-            }
-
-            // Try search() method (TF-IDF)
-            if (typeof knowledgeService.search === 'function') {
-                const results = knowledgeService.search(query, 1);
-                if (results?.length > 0 && results[0].score > 0.05) {
-                    console.log(`✅ KB found answer via search (score: ${results[0].score})`);
-                    return {
-                        found: true,
-                        answer: results[0].content
-                    };
-                }
-            }
-        }
-
-        // 3. No match found
-        console.log('❌ No KB match found');
+        console.log('❌ No Voice KB match found');
         return {
             found: false,
             answer: "I don't have specific information about that. Would you like me to connect you with our team?"
         };
 
     } catch (error) {
-        console.log('❌ KB error:', error.message);
+        console.log('❌ Voice KB error:', error.message);
         return {
             found: false,
             answer: "I'm having trouble looking that up. Would you like me to connect you with someone?"
@@ -178,11 +168,37 @@ function searchKnowledgeBase(query) {
     }
 }
 
+/**
+ * Reload intents data (called after scraping)
+ */
+function reloadVoiceIntents() {
+    try {
+        const possiblePaths = [
+            path.join(__dirname, '..', 'config', 'meydan_intents.json'),
+            path.join(process.cwd(), 'backend', 'config', 'meydan_intents.json'),
+            path.join(process.cwd(), 'config', 'meydan_intents.json')
+        ];
+
+        for (const p of possiblePaths) {
+            if (fs.existsSync(p)) {
+                const data = JSON.parse(fs.readFileSync(p, 'utf-8'));
+                intentsData = data.intents || [];
+                console.log(`🔄 Voice: Reloaded ${intentsData.length} intents from ${p}`);
+                return true;
+            }
+        }
+        return false;
+    } catch (e) {
+        console.log('⚠️ Voice: Could not reload intents:', e.message);
+        return false;
+    }
+}
+
 // ============================================
 // VAPI FUNCTION HANDLER
 // ============================================
 
-router.post('/vapi/function', (req, res) => {
+router.post('/vapi/function', async (req, res) => {
     req.setTimeout(30000);
     res.setTimeout(30000);
 
@@ -225,7 +241,8 @@ router.post('/vapi/function', (req, res) => {
                 return res.status(200).json({ results: [] });
             }
 
-            const results = toolCalls.map(tc => {
+            // Handle async function results (e.g., KB search uses vector embeddings)
+            const results = await Promise.all(toolCalls.map(async (tc) => {
                 const toolCallId = tc.id;
                 const funcName = tc.function?.name || tc.name;
                 let params = {};
@@ -241,11 +258,11 @@ router.post('/vapi/function', (req, res) => {
                 console.log('🔧 Function:', funcName, 'Params:', JSON.stringify(params).substring(0, 100));
                 logVoice(callId, funcName, params);
 
-                const result = executeFunction(funcName, params, callId);
+                const result = await Promise.resolve(executeFunction(funcName, params, callId));
                 console.log('✅ Result:', JSON.stringify(result).substring(0, 150));
 
                 return { toolCallId, result: JSON.stringify(result) };
-            });
+            }));
 
             return res.status(200).json({ results });
         }
@@ -256,7 +273,7 @@ router.post('/vapi/function', (req, res) => {
             const callId = body.message?.call?.assistantOverrides?.variableValues?.callId;
             const toolCallId = body.message?.functionCall?.id || 'call_1';
 
-            const result = executeFunction(funcName, params, callId);
+            const result = await Promise.resolve(executeFunction(funcName, params, callId));
             return res.status(200).json({ results: [{ toolCallId, result: JSON.stringify(result) }] });
         }
 
@@ -337,9 +354,10 @@ function executeFunction(funcName, params, callId) {
         return verifyGoogleAuth(callData, params.code);
     }
 
-    // Knowledge Base Search
+    // Knowledge Base Search (async - returns promise)
     if (name.includes('search') || name.includes('knowledge') || name.includes('faq') || name.includes('query')) {
         const query = params.query || params.question || params.text || '';
+        // searchKnowledgeBase is async now, caller handles the promise
         return searchKnowledgeBase(query);
     }
 
@@ -859,3 +877,4 @@ router.post('/verify-2fa-setup', async (req, res) => {
 });
 
 module.exports = router;
+module.exports.reloadVoiceIntents = reloadVoiceIntents;
