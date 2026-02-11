@@ -1,496 +1,873 @@
 {
   "intents": [
     {
-      "name": "Do I need to be physically present to open a compa",
-      "category": "general",
-      "response": "Physical presence is not required to set up a company.",
+      "name": "Physical Presence for Company Setup",
+      "category": "company_management",
+      "question": "Do I need to be physically present to open a company?",
+      "responses": [
+        "No, physical presence is not required to set up a company at Meydan Free Zone. You can complete the entire incorporation process remotely — from submitting documents to getting your license. Many of our clients set up their companies from abroad without ever stepping foot in Dubai.",
+        "Good news — you don't need to be in Dubai to open your company. The whole process at Meydan Free Zone can be done remotely. Document submission, KYC, approvals — all handled online through our portal. You only need to be in the UAE later if you're applying for a residence visa and need to complete medical and Emirates ID procedures.",
+        "Physical presence isn't required for company incorporation at Meydan Free Zone. Everything from license application to document signing can be done remotely. The only time you'd need to be in the UAE is for residence visa processing — specifically for the medical test and Emirates ID biometrics."
+      ],
       "keywords": [
-        "do i need to be physically present to open a company",
-        "do i have to be in dubai to open a company",
-        "can i open a company remotely",
-        "is physical presence required"
-      ]
+        "physical presence",
+        "need to be present",
+        "open company remotely",
+        "remote setup",
+        "be in dubai",
+        "incorporate remotely",
+        "physically present",
+        "setup from abroad",
+        "online company setup"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Are there any paid-up share capital requirements",
-      "category": "general",
-      "response": "No paid-up share capital is required.",
+      "name": "Share Capital Requirements",
+      "category": "company_management",
+      "question": "Are there any paid-up share capital requirements?",
+      "responses": [
+        "No paid-up share capital is required at Meydan Free Zone. There's also no minimum or maximum share capital requirement — you decide what makes sense for your business. The only rule is that share allocation and total share capital must be whole numbers, not fractions. So 45% or 46% is fine, but 45.5% wouldn't work.",
+        "There are zero paid-up share capital requirements. You're free to set your share capital at whatever amount suits your business. Just keep in mind the shares must be whole numbers — no fractions allowed. For example, a 50/50 split works, but 33.33% wouldn't.",
+        "Meydan Free Zone doesn't require any paid-up share capital. There's no minimum and no maximum either. Set it at whatever level makes sense for your business needs. One thing to note: share allocation must be whole numbers, not fractions."
+      ],
       "keywords": [
-        "are there any paid-up share capital requirements",
-        "do i need paid-up capital",
-        "is paid-up share capital mandatory"
-      ]
+        "share capital",
+        "paid-up capital",
+        "capital requirements",
+        "minimum capital",
+        "maximum capital",
+        "share capital fraction",
+        "capital needed",
+        "initial capital",
+        "required capital"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Do shareholders need NOC to incorporate a company",
-      "category": "general",
-      "response": "NOC is not required to incorporate a company.",
+      "name": "NOC for Shareholders",
+      "category": "company_management",
+      "question": "Do shareholders need NOC to incorporate a company?",
+      "responses": [
+        "No, neither individual nor corporate shareholders need a No Objection Certificate (NOC) to incorporate a company at Meydan Free Zone. You can go ahead and set up your company without any NOC requirements from current employers or other entities.",
+        "NOC is not required. Whether you're an individual or a corporate shareholder, you can incorporate a company at Meydan Free Zone without any No Objection Certificate. This makes the process much simpler compared to some other jurisdictions.",
+        "You don't need a NOC to incorporate at Meydan Free Zone — this applies to both individual and corporate shareholders. No approval needed from your current employer or any other entity to get started."
+      ],
       "keywords": [
-        "do shareholders need noc to incorporate a company",
-        "is noc required to open a company",
-        "do individual or corporate shareholders require noc"
-      ]
+        "noc shareholder",
+        "no objection certificate",
+        "noc required",
+        "noc incorporate",
+        "noc company setup",
+        "shareholder noc",
+        "need noc",
+        "employer noc"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can I apply for a zero visa license",
-      "category": "general",
-      "response": "Yes, you can get a license with a zero-visa at Meydan Free Zone.",
+      "name": "Zero Visa License",
+      "category": "company_management",
+      "question": "Can I apply for a zero visa license?",
+      "responses": [
+        "Yes, absolutely! You can get a license with zero visa allocation at Meydan Free Zone. This is popular with businesses that don't need employee visas — maybe you're running things remotely or already have residency through another company. You still get the full license benefits without the visa overhead.",
+        "Yes, zero-visa licenses are available at Meydan Free Zone. It's a great option if you don't need to sponsor any employees or yourself on a visa. You get the full company setup — license, documents, everything — just without the visa allocation.",
+        "You can definitely get a zero-visa license. Many clients choose this option when they already have residency elsewhere or plan to run the business remotely. You'll receive the complete license package without any visa quota attached."
+      ],
       "keywords": [
-        "can i apply for a zero visa license",
-        "is a 0 visa license allowed",
-        "can i get a license without visas"
-      ]
+        "zero visa",
+        "0 visa",
+        "no visa license",
+        "license without visa",
+        "zero visa license",
+        "no visa allocation",
+        "license only",
+        "visa free license"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can I combine commercial, professional, and tradin",
-      "category": "general",
-      "response": "Yes, the combination of activities is permitted.",
+      "name": "Combining Business Activities",
+      "category": "company_management",
+      "question": "Can I combine commercial, professional, and trading activities?",
+      "responses": [
+        "Yes, you can combine commercial, professional, and trading activities on the same license at Meydan Free Zone. You get 3 groups of activities free of cost during incorporation. If you need more, additional activities cost AED 1,000 each. Approvals are only required for regulated activities.",
+        "Absolutely — Meydan Free Zone allows you to mix commercial, professional, and trading activities on one license. The first 3 activity groups are included free. Need more? Each additional activity is AED 1,000. Only regulated activities need special approval.",
+        "Yes, the combination of activities is permitted. You can include commercial, professional, and trading activities all on the same license. Three activity groups come free with incorporation; extras are AED 1,000 per activity. The only restriction is regulated activities which need separate approval."
+      ],
       "keywords": [
-        "can i combine commercial professional and trading activities",
-        "can i combine multiple activities on one license",
-        "can i mix activities on the same license"
-      ]
+        "combine activities",
+        "mix activities",
+        "commercial professional trading",
+        "multiple activities",
+        "activity combination",
+        "same license activities",
+        "3 activities free",
+        "additional activities",
+        "activity groups"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What documents will I receive after company incorp",
-      "category": "general",
-      "response": "Business License, Certificate of Formation, Share Register, Memorandum of Association, Lease Agreement.",
+      "name": "Documents After Incorporation",
+      "category": "company_management",
+      "question": "What documents do I receive after company incorporation?",
+      "responses": [
+        "After incorporation at Meydan Free Zone, you receive five key documents: 1) Business License, 2) Certificate of Formation, 3) Share Register, 4) Memorandum of Association (MOA), and 5) Lease Agreement. These are your essential company documents for opening bank accounts, entering contracts, and proving your business is legally established.",
+        "Upon incorporation, you'll receive: Business License, Certificate of Formation, Share Register, Memorandum of Association, and Lease Agreement. That's your complete company documentation package — everything you need to start operating, open bank accounts, and deal with government entities.",
+        "You get five documents after incorporation: your Business License, Certificate of Formation, Share Register, Memorandum of Association (MOA), and Lease Agreement. Note that you can't provide your own MOA, but you can request additions, removals, or edits to clauses in the Meydan MOA — subject to legal approval."
+      ],
       "keywords": [
-        "what documents will i receive after company incorporation",
-        "what documents do i get after company setup",
-        "what papers are issued after incorporation"
-      ]
+        "documents after incorporation",
+        "company documents",
+        "what documents",
+        "incorporation documents",
+        "business license document",
+        "certificate of formation",
+        "share register",
+        "memorandum of association",
+        "moa",
+        "lease agreement"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "How many shareholders are allowed",
-      "category": "general",
-      "response": "A maximum of 100 shareholders are permitted. If more than 6 shareholders, AED 2000 is charged for each additional shareholder.",
+      "name": "Shareholders Limit and Fees",
+      "category": "company_management",
+      "question": "How many shareholders are allowed on a license?",
+      "responses": [
+        "A maximum of 100 shareholders are permitted on the license. The first 6 shareholders are included in standard licensing fees. Beyond that, each additional shareholder costs AED 2,000. So for example, if you have 10 shareholders, you'd pay an extra AED 8,000 (4 additional × AED 2,000). There's no minimum or maximum age requirement for shareholders.",
+        "You can have up to 100 shareholders on your license. The first 6 are covered in your standard fees. Each additional shareholder from the 7th onward costs AED 2,000. Quick math: 10 shareholders = AED 8,000 extra (4 × AED 2,000). And there's no age restriction — no minimum, no maximum.",
+        "The maximum is 100 shareholders per license. Standard licensing fees cover up to 6 shareholders. Beyond that, it's AED 2,000 per additional shareholder. No age restrictions apply — shareholders can be any age. Also, you can be a partner/shareholder in multiple companies simultaneously."
+      ],
       "keywords": [
-        "how many shareholders are allowed",
-        "maximum shareholders on a license"
-      ]
+        "shareholders limit",
+        "how many shareholders",
+        "maximum shareholders",
+        "100 shareholders",
+        "additional shareholder cost",
+        "2000 shareholder",
+        "shareholder fees",
+        "number of shareholders",
+        "shareholder age"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "How many directors are allowed",
-      "category": "general",
-      "response": "A maximum of 4 directors are permitted.",
+      "name": "Directors and Managers Limit",
+      "category": "company_management",
+      "question": "How many directors and managers are allowed?",
+      "responses": [
+        "You can have a maximum of 4 directors and 1 manager on the license. Directors oversee the company's strategic direction while the manager handles day-to-day operations. These limits are per company, not per shareholder.",
+        "The limits are: up to 4 directors and 1 manager per license. Directors are responsible for governance and strategic decisions, while the single manager handles operational management. Both are registered on your company documents.",
+        "Maximum 4 directors and 1 manager are permitted on each license. That's a straightforward setup — four directors for governance and one manager for operations."
+      ],
       "keywords": [
-        "how many directors are allowed",
-        "director limit per license"
-      ]
+        "directors limit",
+        "managers limit",
+        "how many directors",
+        "how many managers",
+        "maximum directors",
+        "4 directors",
+        "1 manager",
+        "number of directors"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "How many managers are allowed",
-      "category": "general",
-      "response": "A maximum of 1 manager is permitted.",
+      "name": "Free Activities and Additional Cost",
+      "category": "company_management",
+      "question": "How many activities are free and what do extras cost?",
+      "responses": [
+        "You can incorporate your company with 3 groups of activities at no additional charge. If you need more activities beyond those 3 groups, each additional activity costs AED 1,000. Approvals are only required for regulated activities — standard activities can be added without any special permission.",
+        "Three activity groups come free with your license. Want more? Each additional activity is AED 1,000. No approvals needed for standard activities — only regulated ones require special permission. This gives you plenty of flexibility to diversify your business offerings.",
+        "You get 3 activity groups free during incorporation. Extra activities are AED 1,000 each. Only regulated activities need approval; everything else is straightforward. Most clients find 3 groups more than enough to cover their business needs."
+      ],
       "keywords": [
-        "how many managers are allowed",
-        "manager limit per company"
-      ]
+        "free activities",
+        "activity cost",
+        "1000 activity",
+        "additional activity",
+        "how many activities free",
+        "activity groups",
+        "add activity",
+        "extra activities",
+        "regulated activities"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "How many activities are included free of cost",
-      "category": "general",
-      "response": "You can incorporate the company with 3 groups of activities without any additional charge.",
+      "name": "Multi-Year License Discount",
+      "category": "company_management",
+      "question": "Is there a discount for multi-year license applications?",
+      "responses": [
+        "Yes! There's a standard 15% discount on multi-year license applications of 2 or more years — this applies to both the license and visa allocations. Plus, multi-year license holders get a free amendment. For example, a 2-year license comes with 1 free amendment. The maximum license validity is 10 years.",
+        "Multi-year licenses get a 15% discount — available for 2-year terms and above, covering both the license and visa allocations. Bonus: you also get a free amendment with multi-year licenses. So a 2-year license includes 1 free amendment. You can go up to 10 years maximum validity.",
+        "Absolutely — book 2 or more years and you get 15% off the license and visa allocation fees. Multi-year licenses also come with a free amendment included. License validity can be set up to a maximum of 10 years, which maximizes your savings with that 15% discount."
+      ],
       "keywords": [
-        "how many activities are included free of cost",
-        "free activity groups"
-      ]
+        "multi year discount",
+        "multi-year license",
+        "15 percent discount",
+        "discount license",
+        "2 year license",
+        "long term license",
+        "multi year savings",
+        "license discount",
+        "bulk year discount"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What is the cost of adding additional activities",
-      "category": "general",
-      "response": "The cost of additional activities is AED 1000 per activity. Approvals are required only for regulated activities.",
+      "name": "Multiple Company Ownership",
+      "category": "company_management",
+      "question": "Can I be a partner in more than one company?",
+      "responses": [
+        "Yes, you can be a partner or shareholder in multiple companies at Meydan Free Zone. There's no restriction on how many companies you can be involved in. Many entrepreneurs hold stakes in several businesses simultaneously.",
+        "Absolutely — there's no limit on how many companies you can be a partner or shareholder in. You're free to diversify your business interests across multiple companies at Meydan Free Zone.",
+        "Yes, you can hold shares in multiple companies. Meydan Free Zone doesn't restrict the number of companies you can be a partner or shareholder in. Great for serial entrepreneurs or investors managing a portfolio of businesses."
+      ],
       "keywords": [
-        "what is the cost of adding additional activities",
-        "additional activity fee"
-      ]
+        "multiple companies",
+        "partner more than one",
+        "shareholder multiple",
+        "more than one company",
+        "several companies",
+        "hold shares multiple",
+        "be partner in two",
+        "own multiple companies"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Is there a discount for multi-year license applica",
-      "category": "general",
-      "response": "For multi-year license applications, 2 or more years, there is a standard discount of 15%.",
+      "name": "Post Application Steps",
+      "category": "company_management",
+      "question": "What happens after submitting the license application?",
+      "responses": [
+        "After you submit your license application on the Meydan portal, all shareholders, the manager, and directors receive an email to complete three tasks: 1) KYC (Know Your Customer) verification, 2) Accept or Reject the application, and 3) Complete the compliance form if applicable. Only once everyone completes their tasks will our team receive the application to review and proceed.",
+        "Once the application is submitted, it's over to your team. Shareholders, manager, and directors each get an email with three tasks: KYC verification, Accept/Reject the application, and fill out the compliance form if needed. Our team can only start processing once all parties have completed their tasks. So make sure everyone responds promptly!",
+        "The next step after submission is email verification for all stakeholders. Shareholders, manager, and directors receive emails to: complete KYC, accept or reject the application, and submit the compliance form (if applicable). The application only moves to our review team once all tasks are completed by all parties."
+      ],
       "keywords": [
-        "is there a discount for multi-year license applications",
-        "multi year license discount"
-      ]
+        "after submission",
+        "next step application",
+        "after license application",
+        "kyc verification",
+        "portal application",
+        "application process",
+        "what happens after",
+        "license approval process",
+        "accept reject application"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can I be a partner in more than one company",
-      "category": "general",
-      "response": "Yes, you can be a partner or shareholder in multiple companies.",
+      "name": "License Validity Period",
+      "category": "company_management",
+      "question": "What is the maximum license validity?",
+      "responses": [
+        "The maximum license validity at Meydan Free Zone is 10 years. You choose the validity period during incorporation — it can be 1 year, 2 years, or up to 10 years. Longer terms get a 15% discount on license and visa allocation fees for 2+ years.",
+        "You can set your license validity for up to 10 years. The period is chosen during incorporation. Going for 2 years or more? You'll get a 15% discount on both the license and visa allocation costs.",
+        "Maximum license validity is 10 years — you pick the duration during setup. One year is standard, but multi-year options (2-10 years) come with a 15% discount. It's entirely up to you based on your business planning horizon."
+      ],
       "keywords": [
-        "can i be a partner in more than one company",
-        "can i own multiple companies"
-      ]
+        "license validity",
+        "maximum validity",
+        "10 year license",
+        "license duration",
+        "license period",
+        "how long license valid",
+        "license years",
+        "license expiry period"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What is the next step after submitting the license",
-      "category": "general",
-      "response": "Shareholders, managers, and directors receive an email for KYC, acceptance, and compliance. Once completed, the application is reviewed.",
+      "name": "License Grace Period and Penalties",
+      "category": "company_management",
+      "question": "What is the grace period after license expires and what are the penalties?",
+      "responses": [
+        "You get a 30-day grace period from the license expiry date to renew. If you don't renew within that grace period, there's a one-time penalty of AED 500. Important distinction: if you're cancelling the license after it's expired and the grace period has passed, you don't pay the license penalty — but you will still need to pay any immigration card fines if you have one.",
+        "The grace period is 30 days after license expiry. Miss that window and you're looking at an AED 500 penalty (one-time fee). Note: this is separate from immigration card penalties. If you're cancelling your license post-expiry, the license penalty is waived, but immigration card fines still apply.",
+        "30 days grace period after your license expires. If you haven't renewed by then, it's AED 500 as a one-time penalty. Here's a useful tip: if you're planning to cancel your license after expiry, the license penalty doesn't apply — however, any outstanding immigration card fines (AED 250/month) will still need to be settled."
+      ],
       "keywords": [
-        "what is the next step after submitting the license application",
-        "what happens after applying for a license"
-      ]
+        "grace period license",
+        "license penalty",
+        "500 penalty",
+        "license expired",
+        "renew after expiry",
+        "late renewal",
+        "30 day grace",
+        "license fine",
+        "renewal deadline"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What is the maximum license validity",
-      "category": "general",
-      "response": "The maximum license validity is 10 years.",
+      "name": "Immigration Card Grace Period and Penalties",
+      "category": "company_management",
+      "question": "Is there a grace period for the immigration card?",
+      "responses": [
+        "No, there is no grace period for the immigration card — unlike the license which gives you 30 days. If your immigration card expires, the penalty kicks in immediately at AED 250 per month from the expiry date. The immigration card has the same validity as your business license, so they typically need to be renewed together.",
+        "Unfortunately, no grace period for the immigration card. The penalty of AED 250 per month starts right from the expiry date. This is different from the license which gives a 30-day grace. Both the immigration card and visa allocation share the same validity as your business license, so renew them all together.",
+        "There's no grace period for the immigration card. Once it expires, you're charged AED 250 per month as a penalty. Make sure to renew it alongside your business license since they share the same validity period. Visa allocations also need annual renewal along with your license and immigration card."
+      ],
       "keywords": [
-        "what is the maximum license validity",
-        "license validity period"
-      ]
+        "immigration card grace",
+        "immigration card penalty",
+        "250 month penalty",
+        "immigration card expired",
+        "no grace immigration",
+        "immigration card fine",
+        "immigration card renewal",
+        "immigration card validity"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Will a multi-year license company get a free amend",
-      "category": "general",
-      "response": "Yes, if the company holds a multi-year license, they will get a free amendment.",
+      "name": "Share Allocation Rules",
+      "category": "company_management",
+      "question": "Can share allocation be a fraction?",
+      "responses": [
+        "No, share allocation and total share capital cannot be fractions — they must be whole numbers. For example, 45.50% is not allowed; it must be either 45% or 46%. This applies to all share distributions among shareholders. Also, there's no minimum or maximum share capital requirement.",
+        "Share allocation must be in whole numbers only, no fractions allowed. So 50/50 works, 70/30 works, but 33.33% doesn't. Same rule for total share capital — whole numbers only. On the plus side, there's no minimum or maximum share capital limit.",
+        "Fractions are not permitted in share allocation or total share capital. Everything must be whole numbers — so 45.5% is a no-go, you'd need to round to 45% or 46%. Keep this in mind when distributing shares among multiple shareholders."
+      ],
       "keywords": [
-        "will a multi-year license company get a free amendment",
-        "free amendment with multi year license"
-      ]
+        "share fraction",
+        "share allocation fraction",
+        "whole number shares",
+        "share percentage",
+        "capital fraction",
+        "share distribution",
+        "split shares",
+        "share allocation rules"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Is there a grace period after the license expires",
-      "category": "general",
-      "response": "A 30-day grace period is provided from the license expiry date.",
+      "name": "Company License Address",
+      "category": "company_management",
+      "question": "What address appears on the company license?",
+      "responses": [
+        "The address on your license will be: Meydan Grandstand, Next to Meydan Hotel, 6th Floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E. You can request to change the address, but it must remain within the Meydan Free Zone area only.",
+        "Your company license will show: Meydan Grandstand, Next to Meydan Hotel, 6th Floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E. If you need a different address, it can be changed but only to another location within the Meydan Free Zone area.",
+        "The standard address is Meydan Grandstand, Next to Meydan Hotel, 6th Floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E. Clients can change this address through an amendment, but the new address must be within the Meydan Free Zone area."
+      ],
       "keywords": [
-        "is there a grace period after the license expires",
-        "license renewal grace period"
-      ]
+        "company address",
+        "license address",
+        "meydan address",
+        "address on license",
+        "business address",
+        "registered address",
+        "meydan grandstand address",
+        "nad al sheba",
+        "change address"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Is there a penalty if the license is not renewed o",
-      "category": "general",
-      "response": "Yes, the penalty fee is AED 500. This is a one-time fee.",
+      "name": "Audit Financial Statement Timing",
+      "category": "company_management",
+      "question": "When do I need to submit the Audit Financial Statement?",
+      "responses": [
+        "The Audit Financial Statement Declaration report is required at the time of license renewal. So you need to have it ready before your renewal date. An audited financial report costs AED 3,000 and takes about 14 business days to prepare, so plan accordingly.",
+        "You submit the Audit Financial Statement Declaration at license renewal time. Make sure to prepare this in advance — the audit report takes about 14 business days and costs AED 3,000. It's a prerequisite for getting your renewal processed.",
+        "The Audit Financial Statement is due at license renewal. Don't leave it to the last minute — the financial audit takes 14 days to complete at AED 3,000. Get it sorted well before your renewal date to avoid delays."
+      ],
       "keywords": [
-        "is there a penalty if the license is not renewed on time",
-        "license late renewal penalty"
-      ]
+        "audit statement",
+        "financial statement timing",
+        "when audit",
+        "audit renewal",
+        "financial declaration",
+        "audit submission",
+        "when submit audit",
+        "audit report deadline"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Is there a grace period after the immigration card",
-      "category": "general",
-      "response": "No, there is no grace period provided when the immigration card expires.",
+      "name": "LLC to Branch Conversion",
+      "category": "company_management",
+      "question": "Can I convert LLC to Branch or vice versa?",
+      "responses": [
+        "No, it's not possible to convert an LLC to a Branch or a Branch to an LLC at Meydan Free Zone. If you need a different company structure, you'd need to set up a new entity. The company also can't provide its own MOA, but you can request additions, removals, or edits to clauses in the Meydan MOA — subject to legal approval.",
+        "Converting between LLC and Branch structures isn't possible — you can't go from LLC to Branch or Branch to LLC. If you need a different structure, you'll have to incorporate a new company. On a related note, the MOA is provided by Meydan, though you can request modifications subject to legal review.",
+        "Unfortunately, no. You cannot convert an LLC to a Branch or a Branch to an LLC. These are fundamentally different entity types. If your business needs change, you'd need to set up a new company with the desired structure."
+      ],
       "keywords": [
-        "is there a grace period after the immigration card expires"
-      ]
+        "convert llc branch",
+        "llc to branch",
+        "branch to llc",
+        "change company type",
+        "convert entity",
+        "company conversion",
+        "switch llc",
+        "change structure"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Is there a penalty if the immigration card expires",
-      "category": "general",
-      "response": "Yes, the penalty fee is AED 250 per month from the immigration card expiry date.",
+      "name": "Shop Outside Free Zone",
+      "category": "company_management",
+      "question": "Can I have a shop outside Meydan Free Zone?",
+      "responses": [
+        "No, you cannot have a shop outside the Meydan Free Zone area. Your business premises must be within Meydan Free Zone. However, if you need mainland operations, you can apply for a DET (Department of Economy and Tourism) permit — but note that DET permits are not available with General Trading activity. Your company must hold one of the 44 approved mainland activities.",
+        "Shops must be within the Meydan Free Zone area only. If you need a physical presence on the mainland, you'll need a DET permit, which allows certain free zone companies to operate in mainland Dubai. Just note: General Trading activity is not eligible for DET permits — you'd need one of the 44 specific mainland activities.",
+        "No, your shop must be within the Meydan Free Zone area. For mainland operations, there's the DET permit option, but it requires specific activities (not General Trading). DET permits cover 44 approved mainland activities."
+      ],
       "keywords": [
-        "is there a penalty if the immigration card expires"
-      ]
+        "shop outside",
+        "premises outside",
+        "shop mainland",
+        "store outside free zone",
+        "business outside meydan",
+        "det permit",
+        "mainland shop",
+        "physical shop"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can share allocation or total share capital be fra",
-      "category": "general",
-      "response": "No, share allocation and the total share capital cannot be a fraction.",
+      "name": "Chamber of Commerce Certificate",
+      "category": "company_management",
+      "question": "Will I get a Chamber of Commerce certificate?",
+      "responses": [
+        "No, a Chamber of Commerce certificate is not automatically issued when you register with Meydan Free Zone. However, Meydan can assist you in registering with Dubai Chambers — that service costs AED 825 (service fee) plus AED 2,200 (authority fee). You'll get portal credentials and a company registration number.",
+        "A Chamber of Commerce certificate isn't included with your Meydan FZ registration. But we can help you register with Dubai Chambers for a service fee of AED 825 plus AED 2,200 authority fee. You'll receive a username, password for the portal, and your company registration number.",
+        "It's not automatically issued, but Meydan Free Zone can assist you in getting registered with the Chamber of Commerce. The registration costs AED 825 as a service fee plus AED 2,200 as the authority fee. We handle the whole process and provide you with portal access."
+      ],
       "keywords": [
-        "can share allocation or total share capital be fractional",
-        "can shares be in decimals"
-      ]
+        "chamber of commerce",
+        "chamber certificate",
+        "dubai chambers",
+        "chamber registration",
+        "commerce certificate",
+        "chamber of commerce cost",
+        "do i get chamber",
+        "chamber membership"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What address will be mentioned in the company lice",
-      "category": "general",
-      "response": "Meydan Grandstand, Next to Meydan Hotel, 6th Floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E.",
+      "name": "Property Ownership Under Company",
+      "category": "company_management",
+      "question": "Can I hold property under my Meydan Free Zone company?",
+      "responses": [
+        "Yes, you can hold property under your Meydan Free Zone company. This is a great advantage for investors looking to acquire real estate through their business entity in Dubai.",
+        "Absolutely — your Meydan Free Zone company can hold property. Many clients use their company structure for property investments in Dubai.",
+        "Yes, property ownership under your Meydan Free Zone company is permitted. It's a popular option for investors looking to structure their real estate holdings through a corporate entity."
+      ],
       "keywords": [
-        "what address will be mentioned in the company license",
-        "office address on license"
-      ]
+        "property company",
+        "hold property",
+        "real estate company",
+        "buy property company",
+        "property ownership",
+        "company property dubai",
+        "property under company"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "When is the Audit Financial Statement Declaration ",
-      "category": "general",
-      "response": "At the time of license renewal.",
+      "name": "Visa Allocations Available",
+      "category": "company_management",
+      "question": "How many visa allocations does a company get?",
+      "responses": [
+        "Each company gets 6 visa allocations. The visa allocation is the visa quota in immigration and must be obtained before applying for any employment or investor/partner visa. Both the immigration card and visa allocation have the same validity as the business license and need to be renewed annually along with it.",
+        "You get 6 visa allocations per company. These represent your immigration visa quota and must be secured before processing any employment or investor visas. The visa allocation validity matches your business license, so they renew together.",
+        "6 visa allocations come with your company. This is your immigration quota — required before you can apply for employment or investor/partner visas. Important: visa allocations share the same validity as your license and need annual renewal, even if you obtained them mid-year."
+      ],
       "keywords": [
-        "when is the audit financial statement declaration required",
-        "audit declaration timing"
-      ]
+        "visa allocations",
+        "how many visas",
+        "6 visa",
+        "visa quota",
+        "number of visas",
+        "visa limit",
+        "company visa allocation",
+        "visa slots"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can the client convert LLC to Branch or Branch to ",
-      "category": "general",
-      "response": "No, it is not possible.",
+      "name": "Immigration Card Explained",
+      "category": "company_management",
+      "question": "What is an immigration card?",
+      "responses": [
+        "The immigration card is what registers your company details in the immigration system. It's mandatory — you must have it before applying for any employment or investor/partner visas. The immigration card has the same validity as your business license and needs to be renewed alongside it. If it expires, there's a penalty of AED 250 per month with no grace period.",
+        "An immigration card registers your company in the UAE immigration system. It's a mandatory step that comes before any visa processing — whether employment or investor visas. Its validity matches your business license, and there's no grace period if it expires (AED 250/month penalty).",
+        "The immigration card is your company's registration in the immigration system. Think of it as the gateway to visa processing — without it, you can't apply for any employment or investor/partner visas. It shares the same validity as your business license and must be renewed at the same time. No grace period on expiry — penalties start immediately at AED 250/month."
+      ],
       "keywords": [
-        "can the client convert llc to branch or branch to llc"
-      ]
+        "immigration card",
+        "what is immigration card",
+        "immigration card purpose",
+        "immigration registration",
+        "company immigration",
+        "mandatory immigration card",
+        "immigration card vs visa",
+        "immigration card validity"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can I have a shop outside the Meydan Free Zone",
-      "category": "general",
-      "response": "No, you need to have a shop within the Meydan Free Zone area.",
+      "name": "Company Name Change Timeline",
+      "category": "company_management",
+      "question": "How long does a company name change take?",
+      "responses": [
+        "A company name change takes 14 days for the publication period. After the name is changed, you must also apply for an immigration card amendment. There are no extra fees if you select 'Renewal with Amendment' during license renewal — unless you're adding a 4th activity group.",
+        "The publication period for a company name change amendment is 14 days. Keep in mind you'll need to do an immigration card amendment afterwards too, since it must reflect the new company name. If you're combining the name change with your license renewal, there's no extra fee.",
+        "Expect 14 days for a company name change — that's the publication timeline. Important follow-up: you'll need an immigration card amendment to update the name in the immigration system as well. If you do it as a 'Renewal with Amendment', no extra fees apply."
+      ],
       "keywords": [
-        "can i have a shop outside the meydan free zone"
-      ]
+        "name change",
+        "company name change",
+        "change company name",
+        "name change timeline",
+        "14 days name",
+        "rename company",
+        "name amendment",
+        "how long name change"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can the client change the address in the business ",
-      "category": "general",
-      "response": "Yes, the address can be changed, but it must be in the Meydan Free Zone area only.",
+      "name": "Company MOA Rules",
+      "category": "company_management",
+      "question": "Can a company provide its own MOA?",
+      "responses": [
+        "No, companies can't provide their own Memorandum of Association. Meydan Free Zone provides the standard MOA. However, if you want to add, remove, or edit specific clauses, you can request changes — these will be subject to legal approval. So you have flexibility, just within Meydan's framework.",
+        "You can't bring your own MOA — Meydan Free Zone uses its standard Memorandum of Association. But you're not stuck with it as-is. You can request modifications to add, remove, or edit clauses, subject to legal review and approval.",
+        "The MOA is provided by Meydan Free Zone — companies cannot submit their own. That said, you can request customizations: adding new clauses, removing existing ones, or editing the language. All changes go through legal approval before being applied."
+      ],
       "keywords": [
-        "can the client change the address in the business license"
-      ]
+        "moa",
+        "memorandum of association",
+        "own moa",
+        "custom moa",
+        "change moa",
+        "modify moa",
+        "moa clauses",
+        "company moa"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Will I receive a Chamber of Commerce certificate",
-      "category": "general",
-      "response": "No, a Chamber of Commerce certificate will not be issued.",
+      "name": "Renewal with Amendment Fees",
+      "category": "company_management",
+      "question": "Are there extra fees for renewal with amendment?",
+      "responses": [
+        "No extra fees when you select 'Renewal with Amendment' during license renewal — unless you're adding a 4th activity group (which costs AED 1,000 per additional activity). Multi-year license holders also get one free amendment included. So most amendments during renewal are essentially free.",
+        "Renewal with Amendment doesn't cost extra unless you're adding a 4th activity group. Multi-year license holders get a free amendment built in. It's the most cost-effective way to make changes — bundle them with your renewal.",
+        "No extra charges for renewal with amendment. The only exception is if you're adding additional activity groups beyond the initial 3 free ones (AED 1,000 each). If you have a multi-year license, you get one amendment free anyway."
+      ],
       "keywords": [
-        "will i receive a chamber of commerce certificate"
-      ]
+        "renewal amendment fees",
+        "renewal with amendment",
+        "amendment cost",
+        "free amendment",
+        "renewal and change",
+        "amendment during renewal",
+        "change at renewal",
+        "amendment extra fees"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can I hold property under my Meydan Free Zone comp",
-      "category": "general",
-      "response": "Yes, you can hold property under your company.",
+      "name": "Corporate and Employee Letters Validity",
+      "category": "company_management",
+      "question": "How long are corporate and employee letters valid?",
+      "responses": [
+        "Corporate and employee letters from Meydan Free Zone are valid for 30 days from the date of issuance. Board resolutions have a shorter validity of 15 days during application submission on the portal. So make sure to time your document requests accordingly.",
+        "The validity is 30 days for both corporate and employee letters. Board resolutions are valid for 15 days during portal application submissions. Plan your timing carefully — don't request letters too far in advance of when you need them.",
+        "Corporate letters and employee letters are valid for 30 days. Board resolutions have a 15-day validity window for portal submissions. A corporate letter costs AED 250, employee letter AED 250, and a resolution is AED 350."
+      ],
       "keywords": [
-        "can i hold property under my meydan free zone company"
-      ]
+        "letter validity",
+        "corporate letter validity",
+        "employee letter validity",
+        "30 days letter",
+        "board resolution validity",
+        "15 days resolution",
+        "how long letter valid",
+        "letter expiry"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "How many visa allocations are available to the com",
-      "category": "general",
-      "response": "6 visa allocations.",
+      "name": "Visa Allocation Renewal Rules",
+      "category": "company_management",
+      "question": "Do visa allocations need annual renewal?",
+      "responses": [
+        "Yes, visa allocations must be renewed annually along with your business license and immigration card — even if you obtained the visa allocation mid-year. The visa allocation validity matches the license expiry date, not the date it was issued. So it all renews together.",
+        "Visa allocations renew every year alongside your license. Even if you got your allocation halfway through the year, it still expires with your license. The immigration card, visa allocation, and business license all share the same validity period and should be renewed together.",
+        "Annual renewal is required. The visa allocation validity is tied to your license expiry date — not when you first got it. So even if you availed it mid-year, it expires with your license. Renew your license, immigration card, and visa allocation all at once."
+      ],
       "keywords": [
-        "how many visa allocations are available to the company"
-      ]
+        "visa allocation renewal",
+        "renew visa allocation",
+        "annual visa renewal",
+        "visa allocation expiry",
+        "visa allocation validity",
+        "mid year visa",
+        "visa allocation and license",
+        "when renew allocation"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can I get a DET permit with general trading activi",
-      "category": "general",
-      "response": "No, it is not possible.",
+      "name": "Immigration Card Amendment After Name Change",
+      "category": "company_management",
+      "question": "Do I need an immigration card amendment after a name change?",
+      "responses": [
+        "Yes, the company must apply for an immigration card amendment once the company name is changed. This ensures your immigration records match your updated license. The name change process itself takes 14 days for publication.",
+        "Absolutely — an immigration card amendment is required after changing your company name. Your immigration records need to reflect the new name to avoid any issues with visa processing or other immigration-related services.",
+        "Yes, it's mandatory. After the company name change (14-day publication period), you need to apply for an immigration card amendment to update the name in the immigration system. Don't skip this step — mismatched records can cause problems."
+      ],
       "keywords": [
-        "can i get a det permit with general trading activity"
-      ]
+        "immigration amendment name change",
+        "update immigration card",
+        "name change immigration",
+        "immigration card amendment",
+        "amend immigration card",
+        "new name immigration"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What is an immigration card",
-      "category": "general",
-      "response": "The immigration card is mandatory before applying for employment or investor visas.",
+      "name": "Residence Visa and UAE Presence",
+      "category": "employee_management",
+      "question": "Do I need to be in the UAE to process a residence visa?",
+      "responses": [
+        "You have the option to start the entry visa process from outside the UAE. However, once the E-visa is issued, you need to be physically inside the UAE to complete the medical fitness test and Emirates ID biometrics. The entry permit is valid for 60 days from issuance, so you have a comfortable window to enter the country.",
+        "The initial part can be done remotely — you can apply for the entry visa while outside the country. But once it's issued, you need to enter the UAE within 60 days to complete the medical test and Emirates ID procedures. Those steps require physical presence.",
+        "You don't need to be in the UAE to start — the entry visa can be processed while you're abroad. After the E-visa is issued (valid 60 days), you'll need to enter the UAE to complete the medical and Emirates ID steps. Change of status is also valid for 60 days from issuance."
+      ],
       "keywords": [
-        "what is an immigration card"
-      ]
+        "residence visa uae presence",
+        "need to be in uae",
+        "visa processing location",
+        "entry visa outside",
+        "be in dubai for visa",
+        "visa from abroad",
+        "process visa remotely",
+        "when enter uae"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What is visa allocation",
-      "category": "general",
-      "response": "Visa allocation is the visa quota in immigration and is mandatory before applying for visas.",
+      "name": "Entry Visa and Change of Status Validity",
+      "category": "employee_management",
+      "question": "How long is the entry visa and change of status valid?",
+      "responses": [
+        "Both the entry permit and change of status are valid for 60 days from the date of issuance. That gives you a comfortable window to enter the UAE and complete the medical test and Emirates ID procedures. Visa stamping is no longer mandatory — the electronic version suffices as residency proof.",
+        "The entry visa is valid for 60 days from issuance, and change of status is also 60 days. Fun fact: physical visa stamping in your passport is no longer required under new UAE regulations. The electronic version serves as valid residency proof.",
+        "60 days for both. Your entry permit gives you 60 days to enter the UAE, and change of status is similarly valid for 60 days. Also good to know: visa stamping is optional now — the UAE has moved to electronic residency proof."
+      ],
       "keywords": [
-        "what is visa allocation"
-      ]
+        "entry visa validity",
+        "60 days visa",
+        "change of status validity",
+        "how long entry visa",
+        "e-visa validity",
+        "visa stamping",
+        "electronic visa",
+        "entry permit duration"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Do immigration card and visa allocation have diffe",
-      "category": "general",
-      "response": "Immigration card and visa allocation have the same validity as the business license.",
+      "name": "Passport Submission for Visa",
+      "category": "employee_management",
+      "question": "Do I need to submit my original passport for a visa?",
+      "responses": [
+        "No, visa stamping is no longer mandatory as per the new UAE regulations. The electronic version of your visa suffices as residency proof. You don't need to hand over your original passport for the process.",
+        "Nope — under new UAE regulations, physical visa stamping isn't required anymore. Your electronic visa serves as valid residency proof. So your original passport stays safely with you throughout the process.",
+        "You no longer need to submit your original passport. The UAE has moved away from mandatory visa stamping — the electronic version is now accepted as proof of residency. This makes the whole process much more convenient."
+      ],
       "keywords": [
-        "do immigration card and visa allocation have different validity"
-      ]
+        "original passport",
+        "submit passport",
+        "passport visa",
+        "visa stamping passport",
+        "passport required",
+        "hand over passport",
+        "passport submission",
+        "electronic visa stamp"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "How long does a company name change amendment take",
-      "category": "general",
-      "response": "Publication time is 14 days.",
+      "name": "Residence Visa Before Biometrics",
+      "category": "employee_management",
+      "question": "Can I get my residence visa before completing biometrics?",
+      "responses": [
+        "Yes, you can submit the Residence Visa application through the portal and fill out and sign the Emirates ID declaration form to proceed with visa issuance before biometrics. Once the visa is issued, you have 60 days to complete the biometrics.",
+        "You can get the residence visa issued before biometrics by signing the Emirates ID declaration form. This speeds up the process significantly. Just remember — you must complete biometrics within 60 days of the visa issuance.",
+        "Yes! Submit your visa application through the portal and sign the Emirates ID declaration form. Your residence visa can then be issued before completing biometrics. You'll have a 60-day window to get the biometrics done after visa issuance."
+      ],
       "keywords": [
-        "how long does a company name change amendment take"
-      ]
+        "visa before biometrics",
+        "biometrics timeline",
+        "60 days biometrics",
+        "skip biometrics first",
+        "residence visa biometrics",
+        "eid declaration form",
+        "biometrics deadline",
+        "visa without biometrics"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "Can a company provide its own MOA",
-      "category": "general",
-      "response": "No, the company cannot provide its own MOA.",
+      "name": "Investor Visa Age and Requirements",
+      "category": "employee_management",
+      "question": "What are the age requirements for an investor/partner visa?",
+      "responses": [
+        "The minimum age for an investor/partner visa is 18 years, with no maximum age limit. You must have AED 50,000 share capital in the company to qualify. Before applying, make sure you have your immigration card and visa allocation in place.",
+        "You need to be at least 18 years old for an investor/partner visa — there's no upper age limit. The key requirement is AED 50,000 in share capital in the company. Also ensure your immigration card and visa allocation are set up before applying.",
+        "Minimum 18 years, no maximum age. The main financial requirement is AED 50,000 share capital in the company. Age isn't the barrier here — just meet the capital requirement and have your immigration card and visa allocation ready."
+      ],
       "keywords": [
-        "can a company provide its own moa"
-      ]
+        "investor visa age",
+        "partner visa age",
+        "minimum age investor",
+        "maximum age investor",
+        "50000 share capital",
+        "investor visa requirements",
+        "partner visa requirements",
+        "age limit investor visa"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What are the fees for renewal with amendment",
-      "category": "general",
-      "response": "There are no extra fees unless a fourth activity group is added.",
+      "name": "Employee Visa Age Requirements",
+      "category": "employee_management",
+      "question": "What are the age requirements for an employee visa?",
+      "responses": [
+        "The minimum age for an employee visa is 18 years and the maximum is 60 years. Within that range, any employee can be sponsored under your company's visa allocation. Make sure your immigration card and visa allocation are in place before applying.",
+        "Employee visas require the applicant to be between 18 and 60 years old. That's the age window for employment visa eligibility at Meydan Free Zone. The immigration card and visa allocation must be active before processing.",
+        "Age range for employee visas: 18 to 60 years. Below 18 or above 60 doesn't qualify for an employment visa. Your company needs an active immigration card and visa allocation before you can submit the application."
+      ],
       "keywords": [
-        "what are the fees for renewal with amendment"
-      ]
+        "employee visa age",
+        "minimum age employee",
+        "maximum age employee",
+        "18 60 employee visa",
+        "age limit employee",
+        "employee visa requirements",
+        "staff visa age",
+        "worker visa age"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What is the validity of corporate and employee let",
-      "category": "general",
-      "response": "The validity is 30 days.",
+      "name": "Meydan Office Hours and Location",
+      "category": "general_info",
+      "question": "What are Meydan's office hours and where is the office?",
+      "responses": [
+        "Meydan Free Zone operates 24/7 — we're always available. The office is located at Meydan Grandstand, 6th Floor, next to Meydan Hotel, Meydan Road, Nad Al Sheba 1, Dubai, UAE. The share desk office is at the same location. Our portal is accessible around the clock for application submissions and tracking.",
+        "We're open 24/7! The office is at Meydan Grandstand, 6th Floor, next to Meydan Hotel, Meydan Road, Nad Al Sheba 1, Dubai, UAE. Whether you need in-person service or online support, we're available round the clock.",
+        "Meydan Free Zone is operational 24 hours a day, 7 days a week. You can visit us at Meydan Grandstand, 6th Floor, Meydan Road, next to Meydan Hotel, Nad Al Sheba 1, Dubai, UAE. The share desk office is in the same building."
+      ],
       "keywords": [
-        "what is the validity of corporate and employee letters"
-      ]
+        "office hours",
+        "office timing",
+        "office location",
+        "meydan address",
+        "where is meydan",
+        "24/7",
+        "meydan grandstand",
+        "nad al sheba",
+        "office open",
+        "working hours",
+        "meydan office"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "What should be the validity of a board resolution",
-      "category": "general",
-      "response": "The board resolution must be valid for 15 days.",
+      "name": "Using Meydan PO Box and Mail",
+      "category": "general_info",
+      "question": "Can I use Meydan's PO Box or receive packages at the office?",
+      "responses": [
+        "You cannot use Meydan's PO Box number — you'll need to apply for your own through Meydan Plus (costs AED 1,700). As for deliveries, Meydan Free Zone will not receive any goods or packages on your behalf unless you're registered for the Mail Management service (AED 750). With Mail Management, you get a shared PO Box and email notifications when mail arrives.",
+        "Meydan's own PO Box isn't available for client use. But you can get your own PO Box through Meydan Plus for AED 1,700. Similarly, the office won't accept deliveries for you unless you've signed up for Mail Management at AED 750. That gives you a shared PO Box and email alerts when you've got mail.",
+        "No to both by default. You can't use Meydan's PO Box — apply for your own at AED 1,700. And packages won't be accepted at the office unless you have the Mail Management service (AED 750), which includes a shared PO Box and email notifications for incoming mail."
+      ],
       "keywords": [
-        "what should be the validity of a board resolution"
-      ]
+        "meydan po box",
+        "use meydan po box",
+        "receive packages",
+        "delivery meydan",
+        "mail meydan office",
+        "packages meydan",
+        "goods delivery",
+        "meydan mail service"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
-      "name": "If license is cancelled after expiry, is penalty a",
-      "category": "general",
-      "response": "No penalty applies for the license, but immigration card fines must be paid if applicable.",
+      "name": "DET Permit Eligibility",
+      "category": "company_management",
+      "question": "Can I get a DET permit with General Trading activity?",
+      "responses": [
+        "No, you cannot get a DET (Department of Economy and Tourism) permit with General Trading activity. Your company must hold one of the 44 specific mainland activities approved for DET permits. A DET permit allows free zone companies to operate on the mainland, but the activity restriction is strict.",
+        "DET permits are not available for General Trading activity. You need one of the 44 approved mainland activities to qualify. If you want mainland operations, check if your current activities align with the DET-eligible list, or consider adding an eligible activity to your license.",
+        "No — General Trading doesn't qualify for a DET permit. The company must have one of the 44 designated mainland activities. DET permits let free zone companies operate in mainland Dubai, but the activity eligibility is specific."
+      ],
       "keywords": [
-        "if license is cancelled after expiry is penalty applicable"
-      ]
-    },
-    {
-      "name": "Do visa allocations need to be renewed annually",
-      "category": "general",
-      "response": "Yes, visa allocation must be renewed annually along with the license and immigration card.",
-      "keywords": [
-        "do visa allocations need to be renewed annually"
-      ]
-    },
-    {
-      "name": "Is immigration card amendment required after compa",
-      "category": "general",
-      "response": "Yes, the company must apply for an immigration card amendment.",
-      "keywords": [
-        "is immigration card amendment required after company name change"
-      ]
-    },
-    {
-      "name": "Is there a minimum or maximum age for shareholders",
-      "category": "general",
-      "response": "There is no minimum and no maximum age.",
-      "keywords": [
-        "is there a minimum or maximum age for shareholders"
-      ]
-    },
-    {
-      "name": "Is there a minimum or maximum share capital",
-      "category": "general",
-      "response": "There is no minimum and no maximum share capital requirement.",
-      "keywords": [
-        "is there a minimum or maximum share capital"
-      ]
-    },
-    {
-      "name": "Do I need to be inside the UAE to process the Resi",
-      "category": "general",
-      "response": "Entry visa can be processed outside the country, but applicant must be inside UAE after e-visa issuance.",
-      "keywords": [
-        "do i need to be inside the uae to process the residence visa"
-      ]
-    },
-    {
-      "name": "How long is the Entry Visa valid",
-      "category": "general",
-      "response": "The entry permit is valid for 60 days.",
-      "keywords": [
-        "how long is the entry visa valid"
-      ]
-    },
-    {
-      "name": "How long is change of status valid",
-      "category": "general",
-      "response": "Change of status is valid for 60 days.",
-      "keywords": [
-        "how long is change of status valid"
-      ]
-    },
-    {
-      "name": "Do we need to submit original passport during visa",
-      "category": "general",
-      "response": "Visa stamping is no longer mandatory.",
-      "keywords": [
-        "do we need to submit original passport during visa application"
-      ]
-    },
-    {
-      "name": "Can residence visa be processed before biometrics",
-      "category": "general",
-      "response": "Yes, by signing the Emirates ID declaration form.",
-      "keywords": [
-        "can residence visa be processed before biometrics"
-      ]
-    },
-    {
-      "name": "How much time to complete biometrics",
-      "category": "general",
-      "response": "The client has 60 days to complete biometrics.",
-      "keywords": [
-        "how much time to complete biometrics"
-      ]
-    },
-    {
-      "name": "Minimum age for investor or partner visa",
-      "category": "general",
-      "response": "The minimum age is 18 years with AED 50,000 share capital.",
-      "keywords": [
-        "minimum age for investor or partner visa"
-      ]
-    },
-    {
-      "name": "Maximum age for investor or partner visa",
-      "category": "general",
-      "response": "There is no age limitation.",
-      "keywords": [
-        "maximum age for investor or partner visa"
-      ]
-    },
-    {
-      "name": "Minimum age for employee visa",
-      "category": "general",
-      "response": "The minimum age is 18 years.",
-      "keywords": [
-        "minimum age for employee visa"
-      ]
-    },
-    {
-      "name": "Maximum age for employee visa",
-      "category": "general",
-      "response": "The maximum age is 60 years.",
-      "keywords": [
-        "maximum age for employee visa"
-      ]
-    },
-    {
-      "name": "What are Meydan office timings",
-      "category": "general",
-      "response": "We are operating 24/7.",
-      "keywords": [
-        "what are meydan office timings"
-      ]
-    },
-    {
-      "name": "Where is Meydan Free Zone office located",
-      "category": "general",
-      "response": "Meydan Grandstand, 6th Floor, Meydan Road, Nad Al Sheba 1, Dubai, UAE.",
-      "keywords": [
-        "where is meydan free zone office located"
-      ]
-    },
-    {
-      "name": "Can client use Meydan PO Box",
-      "category": "general",
-      "response": "It is not allowed; clients may apply for their own PO Box via Meydan Plus.",
-      "keywords": [
-        "can client use meydan po box"
-      ]
-    },
-    {
-      "name": "Can Meydan receive goods or packages for clients",
-      "category": "general",
-      "response": "Deliveries are not accepted unless mail management services are registered.",
-      "keywords": [
-        "can meydan receive goods or packages for clients"
-      ]
-    },
-    {
-      "name": "Where is the Meydan share desk office",
-      "category": "general",
-      "response": "Meydan Grandstand, 6th Floor, Meydan Road, Nad Al Sheba, Dubai, U.A.E.",
-      "keywords": [
-        "where is the meydan share desk office"
-      ]
+        "det permit",
+        "general trading det",
+        "mainland permit",
+        "det eligibility",
+        "44 mainland activities",
+        "det general trading",
+        "operate mainland",
+        "det allowed activities"
+      ],
+      "source": "FAQ_sheet.pdf",
+      "sourceTitle": "Meydan FZ FAQ Sheet"
     },
     {
       "name": "License Package Cost",
