@@ -146,9 +146,6 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Preview</title>
   <style>
-    /* Prevent FOUC (Flash of Unstyled Content) */
-    body { visibility: hidden; }
-    body.loaded { visibility: visible; }
     ${css || ''}
     ${editModeStyles}
   </style>
@@ -156,10 +153,6 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
 <body>
   ${html || '<p style="padding: 20px; color: #666; font-family: sans-serif;">Enter a prompt to generate your website...</p>'}
   <script>
-    // Show body only after CSS is parsed
-    document.addEventListener('DOMContentLoaded', function() {
-      document.body.classList.add('loaded');
-    });
     ${js || ''}
   <\/script>
   ${selectionScript}

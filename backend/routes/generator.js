@@ -138,19 +138,26 @@ function getSession(sessionId) {
 
 // Check if user wants a new design
 function wantsNewDesign(prompt) {
-    const newDesignKeywords = [
-        'new design',
-        'start over',
-        'create new',
-        'make new',
-        'different design',
-        'another design',
-        'fresh design',
-        'from scratch'
-    ];
+    const p = prompt.toLowerCase().trim();
 
-    const p = prompt.toLowerCase();
-    return newDesignKeywords.some(keyword => p.includes(keyword));
+    // Explicit new-design keywords
+    const explicitKeywords = [
+        'new design', 'start over', 'create new', 'make new',
+        'different design', 'another design', 'fresh design',
+        'from scratch', 'redesign', 'rebuild'
+    ];
+    if (explicitKeywords.some(keyword => p.includes(keyword))) return true;
+
+    // Patterns that describe a WHOLE website (not a small edit)
+    // e.g., "need a X website", "create a X website", "build a X landing page"
+    const fullWebsitePatterns = [
+        /(?:need|want|give|create|build|make|design|generate)\s+(?:a|an|me\s+a)\s+.*(?:website|site|page|portfolio|landing|homepage|blog)/i,
+        /(?:website|site|page|portfolio|landing|homepage|blog)\s+(?:for|about|with)\s+/i,
+        /(?:dark|light|modern|minimal|futuristic|elegant|professional|creative)\s+.*(?:website|site|page|portfolio|design)/i
+    ];
+    if (fullWebsitePatterns.some(pattern => pattern.test(p))) return true;
+
+    return false;
 }
 
 // Generate website
