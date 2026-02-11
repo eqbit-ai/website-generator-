@@ -2150,9 +2150,9 @@
       "category": "mcore",
       "question": "What's included in Business Card Premium?",
       "responses": [
-        "Business Card Premium includes everything in the Starter package plus a phone answering service. You get a custom logo with one revision, up to 5 email addresses for a year, a shared PO Box, social media accounts on LinkedIn, Instagram, and X, plus a UAE landline with personalized phone answering by a multilingual agent during business hours. Voicemails are forwarded to your email instantly.",
-        "The Premium package upgrades your Business Card Starter with a full phone answering service — a dedicated UAE landline number, multilingual agent answering during business hours, voicemail with instant email notifications. Plus you still get the custom logo, 5 email addresses, domain assistance, shared PO Box, and social media setup.",
-        "Think of Business Card Premium as Starter on steroids. Same custom logo, domain assistance, email addresses, PO Box, and social media setup — but with a professional phone answering service added. A multilingual agent handles your calls during business hours, forwards messages, and you get instant email notifications for everything."
+        "Business Card Premium costs AED 7,275 and includes everything in the Starter package (AED 3,500) plus a phone answering service (AED 3,775). You get a custom logo with one revision, up to 5 email addresses for a year, a shared PO Box, social media accounts on LinkedIn, Instagram, and X, plus a UAE landline with personalized phone answering by a multilingual agent during business hours. Voicemails are forwarded to your email instantly.",
+        "The Premium package is AED 7,275 — it upgrades your Business Card Starter with a full phone answering service. You get a dedicated UAE landline number, multilingual agent answering during business hours, voicemail with instant email notifications. Plus the custom logo, 5 email addresses, domain assistance, shared PO Box, and social media setup.",
+        "Business Card Premium runs AED 7,275 combining Starter (AED 3,500) plus Phone Answering (AED 3,775). Same custom logo, domain assistance, email addresses, PO Box, and social media setup — but with a professional phone answering service added. A multilingual agent handles your calls during business hours, forwards messages, and you get instant email notifications for everything."
       ],
       "keywords": [
         "business card premium",
@@ -2342,9 +2342,9 @@
       "category": "mresidency",
       "question": "What are the medical insurance categories and pricing?",
       "responses": [
-        "Medical insurance in Dubai is mandatory for all residents. There are 4 categories: Category A for employees earning above AED 4,000 — costs AED 1,680. Category B for employees earning below AED 4,000 — also AED 1,680. Category C for dependent children — AED 1,376. Category D for dependent spouses — AED 3,160. All categories are processed within 1 business day.",
-        "Here's the medical insurance breakdown by category: Cat A (employee salary >4,000) — AED 1,680, Cat B (employee salary <4,000) — AED 1,680, Cat C (dependent children) — AED 1,376, Cat D (dependent spouse) — AED 3,160. Each one processes in just 1 day. Remember, medical insurance is mandatory for all UAE residents — investors, employees, dependents, and domestic workers.",
-        "Medical insurance is mandatory for all Dubai residents and comes in 4 categories. Employees with salary above AED 4,000 (Cat A) or below AED 4,000 (Cat B) both cost AED 1,680. Dependent children (Cat C) are AED 1,376 and dependent spouses (Cat D) are AED 3,160. All policies are activated within 1 business day. We handle the application with the insurance provider and deliver your policy certificate."
+        "Medical insurance in Dubai is mandatory for all residents. There are 4 categories: Category A for investors and employees earning above AED 4,000 — costs AED 1,400. Category B for employees earning below AED 4,000 — AED 900. Category C for dependents (children/other) — AED 1,200. Category D for dependents (spouse) — AED 2,700. All categories are processed within 1 business day.",
+        "Here's the medical insurance breakdown by category: Cat A (investors & employees with salary >4,000) — AED 1,400, Cat B (employees with salary <4,000) — AED 900, Cat C (dependent children/other) — AED 1,200, Cat D (dependent spouse) — AED 2,700. Each one processes in just 1 day. Remember, medical insurance is mandatory for all UAE residents — investors, employees, dependents, and domestic workers.",
+        "Medical insurance is mandatory for all Dubai residents and comes in 4 categories. Investors and employees with salary above AED 4,000 (Cat A) cost AED 1,400. Employees below AED 4,000 (Cat B) are AED 900. Dependent children (Cat C) are AED 1,200 and dependent spouse (Cat D) is AED 2,700. All policies are activated within 1 business day. We handle the application with the insurance provider and deliver your policy certificate."
       ],
       "keywords": [
         "medical insurance category",
@@ -2352,9 +2352,10 @@
         "insurance category b",
         "insurance category c",
         "insurance category d",
-        "1680 insurance",
-        "1376 insurance",
-        "3160 insurance",
+        "1400 insurance",
+        "900 insurance",
+        "1200 insurance",
+        "2700 insurance",
         "employee insurance",
         "dependent insurance",
         "spouse insurance",
@@ -2439,9 +2440,9 @@
       "category": "mresidency",
       "question": "What is the Family and Friends Visa?",
       "responses": [
-        "The Family and Friends Visa is for inviting family or friends to visit you in the UAE without needing a sponsor. It comes as a single-entry or multi-entry visa for either 30 or 90 days. The application includes health insurance. You'll need a passport copy, marriage certificate if applicable, and proof of relationship.",
-        "Want to bring family or friends to visit? The Family and Friends Visa provides single-entry or multi-entry options for 30 or 90 days — and doesn't require a sponsor. Health insurance is included with the application. Documents needed are passport copy, marriage certificate (if applicable), and proof of relationship.",
-        "The Family and Friends Visa lets you invite your loved ones to the UAE for 30 or 90 days. Available as single-entry or multi-entry, no sponsor required. The package includes health insurance. Just submit a passport copy, marriage certificate if relevant, and documentation proving the relationship."
+        "The Family and Friends Visa costs AED 4,000 and lets you invite family or friends to visit the UAE without needing a sponsor. It comes as a single-entry or multi-entry visa for either 30 or 90 days. The application includes health insurance. You'll need a passport copy, marriage certificate if applicable, and proof of relationship.",
+        "Want to bring family or friends to visit? The Family and Friends Visa is AED 4,000 and provides single-entry or multi-entry options for 30 or 90 days — no sponsor required. Health insurance is included with the application. Documents needed are passport copy, marriage certificate (if applicable), and proof of relationship.",
+        "The Family and Friends Visa is AED 4,000, letting you invite your loved ones to the UAE for 30 or 90 days. Available as single-entry or multi-entry, no sponsor required. The package includes health insurance. Just submit a passport copy, marriage certificate if relevant, and documentation proving the relationship."
       ],
       "keywords": [
         "family visa",
