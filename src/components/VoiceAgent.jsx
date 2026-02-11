@@ -8,7 +8,7 @@ const VoiceAgent = ({ isOpen, onClose }) => {
     const [step, setStep] = useState('form'); // form, calling, success, error
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [callInfo, setCallInfo] = useState(null);
+    const [, setCallInfo] = useState(null);
 
     const [formData, setFormData] = useState({
         name: '',

@@ -45,8 +45,9 @@ const DeployModal = ({ isOpen, onClose, html, css, js }) => {
     const pollRef = useRef(null);
 
     useEffect(() => {
+        const ref = pollRef.current;
         return () => {
-            if (pollRef.current) clearInterval(pollRef.current);
+            if (ref) clearInterval(ref);
         };
     }, []);
 

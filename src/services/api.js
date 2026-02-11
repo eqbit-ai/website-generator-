@@ -167,7 +167,7 @@ export const linkDomain = async (domain, projectId) => {
     }
 };
 
-export default {
+const api = {
     generateWebsite,
     getSession,
     clearSession,
@@ -177,3 +177,5 @@ export default {
     getDomainStatus,
     linkDomain
 };
+
+export default api;

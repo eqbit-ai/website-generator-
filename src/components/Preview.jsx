@@ -120,7 +120,7 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
                 }
             });
         })();
-        <\/script>
+        ${'<'}/script>
         `;
     }, [editMode]);
 
@@ -154,7 +154,7 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
   ${html || '<p style="padding: 20px; color: #666; font-family: sans-serif;">Enter a prompt to generate your website...</p>'}
   <script>
     ${js || ''}
-  <\/script>
+  ${'<'}/script>
   ${selectionScript}
 </body>
 </html>`;

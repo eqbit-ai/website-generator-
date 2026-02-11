@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     FileText, X, MessageSquare, Phone, RefreshCw,
-    User, Bot, Clock, AlertCircle
+    User, Clock, AlertCircle
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
