@@ -20,80 +20,42 @@ if (process.env.ANTHROPIC_API_KEY) {
 const designSessions = new Map();
 
 // ============================================
-// DESIGN SYSTEM PROMPT — Mandatory specs for stunning, consistent websites
+// QUALITY GUIDELINES — Creative freedom with high quality standards
 // ============================================
-const DESIGN_SYSTEM_PROMPT = `
-DESIGN SYSTEM — MANDATORY SPECIFICATIONS (MUST INCLUDE ALL):
+const QUALITY_GUIDELINES = `
+QUALITY STANDARDS (follow these principles, but design creatively based on the user's prompt):
 
-1. COLOR SYSTEM (CSS Custom Properties):
-   Define a complete color palette using CSS custom properties in :root:
-   --color-primary-50 through --color-primary-900 (10 shades)
-   --color-secondary-50 through --color-secondary-900 (10 shades)
-   --color-accent (vibrant highlight color)
-   --color-neutral-50 through --color-neutral-900 (for text, backgrounds, borders)
-   --color-surface, --color-surface-elevated, --color-surface-overlay
-   --color-success, --color-warning, --color-error
-   Choose color harmony based on business type:
-   - Tech/SaaS: Cool blues, electric purples, cyan accents
-   - Health/Wellness: Warm greens, soft teals, earthy tones
-   - Creative/Design: Bold gradients, vibrant pinks, deep purples
-   - Finance/Professional: Navy, gold accents, slate grays
-   - Food/Restaurant: Warm oranges, rich reds, cream backgrounds
-   - Luxury/Fashion: Black, gold, ivory, minimal accent colors
+1. DESIGN BASED ON THE PROMPT:
+   - Read the user's prompt carefully — the colors, mood, style, and industry should ALL come from what they asked for
+   - "dark gradient futuristic" = dark backgrounds, neon accents, cyber fonts, glowing effects
+   - "minimal clean" = white space, simple typography, muted colors
+   - "warm cozy restaurant" = warm tones, food imagery, inviting feel
+   - YOU decide the exact colors, fonts, and mood — make it match the prompt perfectly
 
-2. TYPOGRAPHY (Google Fonts + Modular Scale):
-   Import 2 complementary Google Fonts (heading + body)
-   Define modular type scale:
-   --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem;
-   --text-lg: 1.125rem; --text-xl: 1.25rem; --text-2xl: 1.5rem;
-   --text-3xl: 1.875rem; --text-4xl: 2.25rem; --text-5xl: 3rem; --text-6xl: 3.75rem;
-   --leading-tight: 1.1; --leading-snug: 1.3; --leading-normal: 1.5; --leading-relaxed: 1.7;
-   --font-heading: 'Chosen Heading Font', sans-serif;
-   --font-body: 'Chosen Body Font', sans-serif;
-   Use fluid typography with clamp() for hero headings
+2. POLISH & QUALITY:
+   - Use CSS custom properties for colors and fonts (easy to maintain)
+   - Import Google Fonts that match the mood (2 fonts: heading + body)
+   - Every element must be fully styled — NO default browser styling visible
+   - Smooth transitions on hover states (buttons, cards, links)
+   - Scroll reveal animations using IntersectionObserver
+   - Hero section entrance animations
+   - Sticky navigation with backdrop-filter blur
+   - Responsive design (mobile hamburger menu, fluid typography, flexible grids)
 
-3. SPACING SYSTEM (Consistent Scale):
-   --space-xs: 0.25rem; --space-sm: 0.5rem; --space-md: 1rem;
-   --space-lg: 1.5rem; --space-xl: 2rem; --space-2xl: 3rem;
-   --space-3xl: 4rem; --space-4xl: 6rem; --space-5xl: 8rem;
-   --container-max: 1200px; --container-padding: 2rem;
-   --section-padding: var(--space-5xl) var(--container-padding);
-   --radius-sm: 0.375rem; --radius-md: 0.75rem; --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
-   --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-   --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
-   --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
-   --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,0.25);
+3. VISUAL IMPACT:
+   - Hero section should be attention-grabbing and full viewport height
+   - Use gradients, shadows, and depth to create visual hierarchy
+   - Images should have proper treatments (overlays, rounded corners, shadows)
+   - Buttons should feel clickable (hover lift effect, color change)
+   - Cards should have hover effects (lift, shadow increase)
+   - Use spacing consistently throughout
 
-4. ANIMATIONS (Exact CSS Patterns):
-   a) Scroll Reveal — Use IntersectionObserver:
-      .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
-      .reveal.visible { opacity: 1; transform: translateY(0); }
-      Staggered children: .reveal.visible .stagger-1 { transition-delay: 0.1s; } ... up to .stagger-6
-   b) Hero entrance: @keyframes fadeInUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
-      Apply to hero heading, subtext, CTA with increasing delays (0s, 0.2s, 0.4s)
-   c) Hover micro-interactions:
-      - Buttons: transform: translateY(-2px); box-shadow: var(--shadow-lg); (lift effect)
-      - Cards: transform: translateY(-4px); box-shadow: var(--shadow-xl); (lift effect)
-      - Links: background-size underline animation (grow from left)
-      - Images: transform: scale(1.03) with overflow:hidden container
-   d) Sticky nav: backdrop-filter: blur(12px); background: rgba(surface, 0.8);
-      Add box-shadow on scroll via JS: nav.scrolled { box-shadow: var(--shadow-md); }
-   e) Timing: Use ease-out for entrances, ease-in-out for hovers, 0.2s-0.3s duration for UI, 0.5s-0.8s for reveals
-
-5. IMAGE ART DIRECTION:
-   - Hero images: Apply gradient overlay (linear-gradient with semi-transparent color to transparent), ensure text readability
-   - Feature images: border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden;
-   - Gallery/grid images: CSS grid with gap, hover overlay with opacity transition (show caption/icon on hover)
-   - All images: object-fit: cover; width: 100%; loading="lazy"
-   - Decorative: Use CSS shapes, gradients, or blur blobs as accent decorations
-
-6. COMPONENT QUALITY STANDARDS:
-   - Buttons: background gradient, padding: 0.875rem 2rem, border-radius: var(--radius-full), font-weight: 600, letter-spacing: 0.025em, hover lift + glow shadow, transition: all 0.2s ease
-   - Cards: background: var(--color-surface-elevated), border-radius: var(--radius-lg), padding: var(--space-xl), box-shadow: var(--shadow-md), hover: translateY(-4px) + shadow-xl
-   - Form inputs: border: 2px solid var(--color-neutral-200), border-radius: var(--radius-md), padding: 0.875rem 1rem, focus: border-color: var(--color-primary-500) + glow ring (box-shadow: 0 0 0 3px rgba(primary, 0.15))
-   - Navigation: position: sticky; top: 0; backdrop-filter: blur(12px); z-index: 100; padding: 1rem var(--container-padding); transition: all 0.3s ease
-   - Sections: Alternate between surface colors for visual rhythm. Use container max-width with auto margins.
+4. TECHNICAL QUALITY:
+   - Semantic HTML5 (nav, header, main, section, footer)
+   - CSS Grid and Flexbox for layouts
+   - Mobile-first responsive breakpoints
+   - Accessible (alt text, ARIA labels, color contrast)
+   - All images: object-fit: cover, loading="lazy"
 `;
 
 
@@ -213,7 +175,7 @@ router.post('/generate', async (req, res) => {
 
             systemPrompt = `You are a senior UI/UX and front-end architect who creates stunning, premium websites with UNIQUE layouts.
 
-${DESIGN_SYSTEM_PROMPT}
+${QUALITY_GUIDELINES}
 
 LAYOUT SELECTION (CRITICAL):
 You have 8 predefined website layout patterns. Analyze the user's prompt and SELECT ONE layout that best fits:
@@ -413,16 +375,12 @@ Return in EXACT format:
 
 🚨 CRITICAL: This is a SMALL CHANGE request. DO NOT redesign the website!
 
-DESIGN SYSTEM AWARENESS:
-The existing code uses CSS custom properties (--color-*, --space-*, --text-*, --radius-*, --shadow-*).
-When making changes, USE the existing design tokens. Do not introduce hardcoded values that conflict with the design system.
-
 REQUIREMENTS:
 1. Make ONLY the specific change requested by the user
 2. Keep EVERYTHING else EXACTLY the same (layout, colors, fonts, spacing, animations, etc.)
 3. Do NOT regenerate or rewrite sections that weren't mentioned
 4. Return COMPLETE code (with your targeted changes applied)
-5. Maintain the exact same design aesthetic and design system tokens
+5. Maintain the exact same design aesthetic and existing CSS custom properties
 6. Return in EXACT format:
    <!-- HTML -->
    [complete HTML with targeted change]
@@ -435,8 +393,8 @@ REQUIREMENTS:
 
 EXAMPLES OF TARGETED EDITS:
 - "add image to hero" → Only change hero <img src="..."> URL, keep everything else
-- "change color to blue" → Only update --color-primary-* CSS variables, keep layout/content
-- "make heading bigger" → Only adjust font-size in CSS using design tokens, keep everything else
+- "change color to blue" → Only update color CSS variables, keep layout/content
+- "make heading bigger" → Only adjust font-size in CSS, keep everything else
 - "fix button alignment" → Only tweak button CSS, keep rest intact
 
 🚨 DO NOT:
@@ -448,8 +406,6 @@ EXAMPLES OF TARGETED EDITS:
 - Modify animations unless asked`;
             } else {
                 systemPrompt = `You are an expert front-end developer iterating on an existing design.
-
-${DESIGN_SYSTEM_PROMPT}
 
 CRITICAL REQUIREMENTS:
 1. Modify the existing code based on the user's request
@@ -466,18 +422,14 @@ CRITICAL REQUIREMENTS:
 
 4. NO markdown code blocks
 5. NO explanations outside the code
-6. PRESERVE all existing CSS custom properties and design tokens
-7. Any new elements MUST use the existing design system variables
+6. PRESERVE existing CSS custom properties and styles that aren't being changed
 
 WHEN MODIFYING:
-- If user says "new design" or "different design", create a completely new design with a full design system
-- For minor changes, preserve the overall design aesthetic and all design tokens
-- Ensure ALL elements remain fully styled using the design system (NO unstyled HTML)
 - Make requested changes cleanly and professionally
+- Ensure ALL elements remain fully styled (NO unstyled HTML)
 - Don't break existing functionality
 - Keep responsive behavior
-- Maintain animations (scroll reveals, hover micro-interactions, entrance animations)
-- If adding new elements, style them completely using the existing design system
+- Maintain animations and hover effects
 - Always maintain contact form and footer sections`;
             }
 
