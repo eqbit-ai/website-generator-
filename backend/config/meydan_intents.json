@@ -986,9 +986,9 @@
       "name": "Shareholder Limits and Extra Fees",
       "question": "How many shareholders can I have and is there an extra cost?",
       "responses": [
-        "You can have up to 50 shareholders on your license. The first 6 are included in your standard package at no extra cost. From the 7th shareholder onwards, it's AED 2,000 per additional shareholder. Most small businesses are well within the 6 included.",
-        "Up to 50 shareholders are allowed. The first 6 come at no additional charge — you only start paying AED 2,000 per shareholder from number 7 onwards. So for most companies, there's no extra shareholder cost at all.",
-        "Meydan allows a maximum of 50 shareholders per license. Six shareholders are included for free. After that, each additional shareholder is AED 2,000. If you're a small team, you're covered without any extra fees."
+        "You can have up to 100 shareholders on your license. The first 6 are included in your standard package at no extra cost. From the 7th shareholder onwards, it's AED 2,000 per additional shareholder. Most small businesses are well within the 6 included.",
+        "Up to 100 shareholders are allowed. The first 6 come at no additional charge — you only start paying AED 2,000 per shareholder from number 7 onwards. So for most companies, there's no extra shareholder cost at all.",
+        "Meydan allows a maximum of 100 shareholders per license. Six shareholders are included for free. After that, each additional shareholder is AED 2,000. If you're a small team, you're covered without any extra fees."
       ],
       "keywords": [
         "how many shareholders",
@@ -1000,7 +1000,7 @@
         "number of shareholders",
         "shareholder charges",
         "6 shareholders",
-        "50 shareholders"
+        "100 shareholders"
       ],
       "source": "price-list.pdf",
       "sourceTitle": "Meydan FZ Price List"
@@ -1055,9 +1055,9 @@
       "name": "Visa Allocation Cost",
       "question": "How much does a visa allocation cost?",
       "responses": [
-        "Visa allocation is AED 1,850 per allocation. But if you need bulk allocations, there are discounts — for 50 or more, it drops to AED 1,000 each, and for 500 or more, it's just AED 950 each. One visa allocation is already included in your license package.",
-        "Each visa allocation costs AED 1,850. Volume discounts kick in at 50+ allocations (AED 1,000 each) and 500+ allocations (AED 950 each). Remember, your license package already includes one allocation, so you're only paying for additional ones.",
-        "It's AED 1,850 per visa allocation. Good news is there are bulk rates — AED 1,000 per allocation when you get 50+, and AED 950 per allocation at 500+. Your initial license package comes with one allocation included."
+        "Visa allocation is AED 1,850 per allocation for both new and renewal. Bulk discounts available — 50+ allocations drop to AED 1,000 each, 500+ to AED 950 each. Amendment and cancellation are free (AED 0), but you can only be charged for the actual final visa allocation count and cannot downgrade from 1+ to 0. One allocation is included in your license package.",
+        "Each visa allocation costs AED 1,850 — same price for new and renewal. Volume discounts: AED 1,000 each at 50+ allocations, AED 950 each at 500+. Amendments and cancellations are free, though note you can't downgrade from 1+ allocations to 0. Your license package already includes one allocation.",
+        "It's AED 1,850 per visa allocation for new or renewal. Bulk rates: AED 1,000 at 50+, AED 950 at 500+. Good news — amendments and cancellations are AED 0. Just keep in mind you can only be charged for the actual final count, and you can't downgrade from having allocations to zero. One allocation comes included with your license."
       ],
       "keywords": [
         "visa allocation cost",
@@ -1124,9 +1124,9 @@
       "name": "Office Options and Pricing",
       "question": "What office options does Meydan Free Zone offer?",
       "responses": [
-        "We have several options depending on your needs. Co-working shared desk is AED 375 for 4 hours. Dedicated desk is AED 3,500 per month. Shared office is AED 15,000 per year. Dedicated office is AED 30,000 per year and includes phone answering, mail management, and 3 hours of meeting room. There's also a flexi desk included free with your license package.",
-        "Here's the full range: Flexi desk comes free with your license. Co-working shared desk is AED 375 for 4 hours if you need a drop-in space. Dedicated desk is AED 3,500/month for a permanent spot. Shared office is AED 15,000/year. And a dedicated private office is AED 30,000/year — that one includes phone answering, mail management, and meeting room access.",
-        "Meydan offers everything from a basic flexi desk (included free in your license) all the way to a dedicated private office at AED 30,000/year. In between, you've got shared co-working at AED 375 for 4 hours, dedicated desk at AED 3,500/month, and shared office at AED 15,000/year. The dedicated office comes with extra perks — dedicated phone answering, mail management, and 3 hours of meeting room."
+        "We have several options depending on your needs. Co-working shared desk is AED 375 for 4 hours. Dedicated desk is AED 3,500 per month. Shared office is AED 15,000 per year. Dedicated office is AED 30,000 per year and includes phone answering, mail management, and 3 hours of meeting room. Flexi desk is included free with your license. Renewal prices are the same as new. Facility amendments and cancellations are free (AED 0).",
+        "Here's the full range: Flexi desk comes free with your license. Co-working shared desk is AED 375 for 4 hours if you need a drop-in space. Dedicated desk is AED 3,500/month for a permanent spot. Shared office is AED 15,000/year. And a dedicated private office is AED 30,000/year — that one includes phone answering, mail management, and meeting room access. All renewal prices are the same as new. Amendments and cancellations of facilities are free.",
+        "Meydan offers everything from a basic flexi desk (included free in your license) all the way to a dedicated private office at AED 30,000/year. In between, you've got shared co-working at AED 375 for 4 hours, dedicated desk at AED 3,500/month, and shared office at AED 15,000/year. The dedicated office comes with extra perks — dedicated phone answering, mail management, and 3 hours of meeting room. Renewal pricing is the same for all facility types. Facility amendment and cancellation are both free of charge."
       ],
       "keywords": [
         "office options",
@@ -1151,9 +1151,9 @@
       "name": "Grandstand Business Center Offices",
       "question": "What about the Grandstand Business Center offices?",
       "responses": [
-        "The Grandstand Business Center has dedicated offices ranging from AED 35,000 to AED 210,000 per year, depending on the size and visa allocations. They come with 2 to 14 free visa allocations, 6 to 14 workstations, and free meeting room hours. We also have a dedicated desk option at AED 7,000/year and shared office at AED 20,000/year.",
-        "Grandstand offices are our premium option. Dedicated offices start at AED 35,000/year for a 2-desk office with 6 visa allocations, going up to AED 210,000/year for a 10-desk setup with 14 visa allocations. Each office includes free meeting hours. There's also a dedicated desk at AED 7,000/year or a shared office at AED 20,000/year if you want something smaller.",
-        "The Grandstand Business Center is our physical office space at Meydan Hotel. Prices range from AED 35,000 to AED 210,000 annually depending on the office size. The bigger offices come with more free visa allocations and workstations. For example, office 651 has 10 workstations, 14 visa allocations, and 10 free meeting hours per month at AED 210,000/year."
+        "The Grandstand Business Center has 24 dedicated offices ranging from AED 35,000 to AED 210,000 per year. They come with 6 to 14 free visa allocations, 2 to 10 workstations, and free meeting room hours per month. We also have a dedicated desk at AED 7,000/year and a shared office at AED 20,000/year (1 visa allocation, 1 desk, 1 meeting hour).",
+        "Grandstand offices are our premium option at Meydan Hotel. 24 dedicated offices available — starting at AED 35,000/year for a 2-desk office with 6 visa allocations, up to AED 210,000/year for a 10-desk setup with 14 visa allocations. Each office includes free meeting hours matching the number of desks. Also available: dedicated desk at AED 7,000/year or shared office at AED 20,000/year.",
+        "The Grandstand Business Center is our physical office space at Meydan Hotel. Here are all available offices: Office 651 — AED 210,000/yr (10 desks, 14 VAs, 23.23 sqm, 10 meeting hrs). Office 652 — AED 105,000/yr (6 desks, 10 VAs, 16.51 sqm, 6 hrs). Office 653 — AED 105,000/yr (5 desks, 13 VAs, 14.60 sqm, 5 hrs). Office 654 — AED 38,500/yr (2 desks, 6 VAs, 6.89 sqm, 2 hrs). Office 655 — AED 126,000/yr (6 desks, 9 VAs, 18 sqm, 6 hrs). Office 656 — AED 77,000/yr (4 desks, 7 VAs, 14.57 sqm, 4 hrs). Office 657 — AED 126,000/yr (6 desks, 9 VAs, 15.33 sqm, 6 hrs). Office 658 — AED 77,000/yr (4 desks, 7 VAs, 13.50 sqm, 4 hrs). Office 659 — AED 126,000/yr (6 desks, 9 VAs, 15.60 sqm, 6 hrs). Office 660 — AED 38,500/yr (2 desks, 6 VAs, 7.63 sqm, 2 hrs). Office 661 — AED 126,000/yr (6 desks, 9 VAs, 17.27 sqm, 6 hrs). Office 662 — AED 38,500/yr (2 desks, 6 VAs, 7.30 sqm, 2 hrs). Office 663 — AED 126,000/yr (6 desks, 9 VAs, 16.07 sqm, 6 hrs). Office 664 — AED 134,750/yr (7 desks, 11 VAs, 14.68 sqm, 7 hrs). Office 665 — AED 147,000/yr (7 desks, 10 VAs, 22.15 sqm, 7 hrs). Office 667 — AED 210,000/yr (10 desks, 14 VAs, 26.55 sqm, 10 hrs). Office 670 — AED 87,500/yr (5 desks, 9 VAs, 11.11 sqm, 5 hrs). Office 671 — AED 35,000/yr (2 desks, 6 VAs, 8.63 sqm, 2 hrs). Office 672 — AED 77,000/yr (4 desks, 7 VAs, 14.96 sqm, 4 hrs). Office 673 — AED 35,000/yr (2 desks, 6 VAs, 5.51 sqm, 2 hrs). Office 674 — AED 35,000/yr (2 desks, 6 VAs, 6.08 sqm, 2 hrs). Office 675 — AED 77,000/yr (4 desks, 7 VAs, 13.84 sqm, 4 hrs). Office 676 — AED 35,000/yr (2 desks, 6 VAs, 6.35 sqm). Office 677 — AED 173,250/yr (9 desks, 14 VAs, 22.10 sqm). Dedicated desk: AED 7,000/yr. Shared office: AED 20,000/yr (1 VA, 1 desk, 1 meeting hr)."
       ],
       "keywords": [
         "grandstand office",
@@ -1165,7 +1165,13 @@
         "grandstand business center",
         "premium office",
         "dedicated office grandstand",
-        "office 651"
+        "office 651",
+        "office 652",
+        "office 655",
+        "office 667",
+        "office 677",
+        "grandstand dedicated desk",
+        "grandstand shared office"
       ],
       "source": "price-list.pdf",
       "sourceTitle": "Meydan FZ Price List"
@@ -1634,9 +1640,9 @@
       "name": "NOC from Government Authorities",
       "question": "How much do NOCs from government authorities cost?",
       "responses": [
-        "NOC costs depend on the authority. Most are AED 825 — that covers RERA, DMCA, Culture Ministry, Dubai Sport Council, TDRA, MOCCA, KHDA, Dubai Police, and Dubai Municipality. DCAA and SIRA NOCs are AED 1,100. Department of Petroleum (DOPA) is AED 550. RTA NOC is also AED 1,100. Dubai Chamber registration is AED 825.",
-        "Here's the breakdown: AED 825 for NOCs from RERA, DMCA, Ministry of Culture & Youth, Dubai Sport Council, TDRA, MOCCA, KHDA, Dubai Police, Dubai Municipality, and Dubai Chamber. Higher at AED 1,100 for DCAA (aviation) and SIRA (security). DOPA is lower at AED 550. RTA is AED 1,100.",
-        "Most government authority NOCs through Meydan+ are AED 825 — this covers authorities like RERA, DMCA, KHDA, TDRA, Dubai Police, and several others. Aviation (DCAA) and security (SIRA) NOCs are AED 1,100. Petroleum (DOPA) is AED 550. All of these are NOCs required before your final license can be issued for certain activities."
+        "NOC costs depend on the authority. Most are AED 825 — that covers RERA, DMCA, Culture Ministry (MYC), Dubai Sport Council, TDRA, MOCCA, KHDA, Dubai Police, and Dubai Municipality. RTA, DCAA, and SIRA NOCs are AED 1,100 each. Department of Petroleum (DOPA) is the lowest at AED 550. Dubai Chamber registration is AED 825, and Chamber document attestation is AED 550.",
+        "Here's the breakdown: AED 825 for NOCs from RERA, DMCA, Ministry of Culture & Youth, Dubai Sport Council, TDRA, MOCCA, KHDA, Dubai Police, Dubai Municipality, and Dubai Chamber registration. AED 1,100 for RTA (includes opening company file), DCAA (aviation), and SIRA (security). DOPA (petroleum) is AED 550. Dubai Chamber document attestation is also AED 550.",
+        "Most government authority NOCs through Meydan+ are AED 825 — this covers RERA, DMCA, KHDA, TDRA, MYC, Dubai Sport Council, MOCCA, Dubai Police, Dubai Municipality, and Dubai Chamber. Three are higher at AED 1,100: RTA, DCAA (aviation), and SIRA (security). DOPA (petroleum affairs) is AED 550. All of these are NOCs required before your final license can be issued for certain regulated activities."
       ],
       "keywords": [
         "NOC cost",
@@ -2345,9 +2351,9 @@
       "category": "mresidency",
       "question": "What are the medical insurance categories and pricing?",
       "responses": [
-        "Medical insurance in Dubai is mandatory for all residents. There are 4 categories: Category A for investors and employees earning above AED 4,000 — costs AED 1,400. Category B for employees earning below AED 4,000 — AED 900. Category C for dependents (children/other) — AED 1,200. Category D for dependents (spouse) — AED 2,700. All categories are processed within 1 business day.",
-        "Here's the medical insurance breakdown by category: Cat A (investors & employees with salary >4,000) — AED 1,400, Cat B (employees with salary <4,000) — AED 900, Cat C (dependent children/other) — AED 1,200, Cat D (dependent spouse) — AED 2,700. Each one processes in just 1 day. Remember, medical insurance is mandatory for all UAE residents — investors, employees, dependents, and domestic workers.",
-        "Medical insurance is mandatory for all Dubai residents and comes in 4 categories. Investors and employees with salary above AED 4,000 (Cat A) cost AED 1,400. Employees below AED 4,000 (Cat B) are AED 900. Dependent children (Cat C) are AED 1,200 and dependent spouse (Cat D) is AED 2,700. All policies are activated within 1 business day. We handle the application with the insurance provider and deliver your policy certificate."
+        "Medical insurance in Dubai is mandatory for all residents. There are 4 categories: Category A for investors and employees earning above AED 4,000 — costs AED 1,400. Category B for employees earning below AED 4,000 — AED 900. Category C for dependents (children/other) — AED 1,200. Category D for dependents (housewife) — AED 2,700. All categories are processed within 1 business day.",
+        "Here's the medical insurance breakdown by category: Cat A (investors & employees with salary >4,000) — AED 1,400, Cat B (employees with salary <4,000) — AED 900, Cat C (dependent children/other) — AED 1,200, Cat D (dependent housewife) — AED 2,700. Each one processes in just 1 day. Remember, medical insurance is mandatory for all UAE residents — investors, employees, dependents, and domestic workers.",
+        "Medical insurance is mandatory for all Dubai residents and comes in 4 categories. Investors and employees with salary above AED 4,000 (Cat A) cost AED 1,400. Employees below AED 4,000 (Cat B) are AED 900. Dependent children/other (Cat C) are AED 1,200 and dependent housewife (Cat D) is AED 2,700. All policies are activated within 1 business day. We handle the application with the insurance provider and deliver your policy certificate."
       ],
       "keywords": [
         "medical insurance category",
@@ -2590,9 +2596,9 @@
       "category": "mpro",
       "question": "How much does each NOC authority cost?",
       "responses": [
-        "NOC fees vary by authority. Here's the breakdown: DMA (Dubai Maritime Authority) — AED 825, 3-4 days. RERA (Real Estate Regulatory Agency) — AED 825, 2-5 days. MOCACE (Ministry of Economy) — AED 825, 4-10 days. DOPA (Dubai Police) — AED 825, 3-5 days. DCAA (Dubai Civil Aviation) — AED 1,100. DSC (Dubai Sports Council) — AED 1,100-5,800. RTA (Roads and Transport) — AED 1,100, 10-15 days. SIRA (Security Industry) — AED 1,200. KHDA (Knowledge and Human Development) — AED 18,000, 20 days. UAEMC (UAE Ministry of Economy) — AED 25,000, 15-20 days.",
-        "Each NOC authority has different pricing and timelines. Budget options: DMA, RERA, MOCACE, DOPA at AED 825 each (3-10 days). Mid-range: DCAA and DSC at AED 1,100, RTA at AED 1,100 (10-15 days), SIRA at AED 1,200. Premium: KHDA at AED 18,000 (20 days) for training courses, and UAEMC at AED 25,000 (15-20 days). DSC can also be AED 5,800 depending on service type. Timeline varies by authority.",
-        "Here's the NOC pricing per authority: DMA — AED 825 (3-4 days), RERA — AED 825 (2-5 days), MOCACE — AED 825 (4-10 days), DOPA — AED 825 (3-5 days), DCAA — AED 1,100, DSC — AED 1,100 to AED 5,800, RTA — AED 1,100 (10-15 days), SIRA — AED 1,200, KHDA — AED 18,000 (20 days, for training), UAEMC — AED 25,000 (15-20 days). Prices may vary based on specific NOC type within each authority."
+        "NOC fees vary by authority. Here's the breakdown: RTA (Roads and Transport) — AED 1,100, includes opening company file in RTA. DCAA (Dubai Civil Aviation) — AED 1,100. SIRA (Security Industry) — AED 1,100. DMCA (Dubai Maritime City Authority) — AED 825. RERA (Real Estate Regulatory Agency) — AED 825. MYC (Ministry of Culture and Youth) — AED 825. Dubai Sport Council — AED 825. TDRA (Telecom & Digital Government) — AED 825. MOCCA (Ministry of Climate Change & Environment) — AED 825, for import/export of live animals, feed, and agriculture products. KHDA (Knowledge and Human Development) — AED 825. DOPA (Department of Petroleum Affairs) — AED 550. Dubai Police — AED 825, for trading chemicals products.",
+        "Each NOC authority has different pricing. At AED 1,100: RTA (Roads & Transport, includes opening company file), DCAA (Civil Aviation), and SIRA (Security Industry). At AED 825: DMCA (Maritime), RERA (Real Estate), MYC (Culture & Youth), Dubai Sport Council, TDRA (Telecom), MOCCA (Climate Change — for live animal/agriculture imports), KHDA (Knowledge & Human Development), Dubai Police (for chemicals trading), Dubai Municipality, and Dubai Chamber. DOPA (Petroleum Affairs) is the lowest at AED 550.",
+        "Here's the NOC pricing per authority: RTA — AED 1,100 (includes opening company file), DCAA — AED 1,100, SIRA — AED 1,100, DMCA — AED 825, RERA — AED 825, MYC — AED 825, Dubai Sport Council — AED 825, TDRA — AED 825, MOCCA — AED 825 (for import/export activities including live animals, feed, agriculture), KHDA — AED 825, Dubai Police — AED 825 (for chemicals trading), DOPA — AED 550. Dubai Municipality registration is AED 825, Dubai Chamber registration AED 825, and Chamber document attestation AED 550."
       ],
       "keywords": [
         "noc pricing",
@@ -2758,9 +2764,9 @@
       "category": "mpro",
       "question": "What are Corporate Secretarial services?",
       "responses": [
-        "Corporate Secretarial services cost AED 275 and are completed within 3 business days. Meydan Free Zone handles corporate governance, company administration, ensuring compliance with statutory and regulatory requirements, and implementing Board of Directors decisions. This covers all the essential corporate paperwork and compliance tasks.",
-        "For AED 275, our Corporate Secretarial service covers corporate governance, company administration, regulatory compliance, and implementing board decisions. Processing takes 3 business days. It ensures your company stays compliant with all statutory requirements without you having to manage the paperwork yourself.",
-        "Corporate Secretarial is AED 275, processed in 3 business days. It includes maintaining robust corporate governance, effective administration of your company, ensuring compliance with all statutory and regulatory requirements, and implementing decisions made by your Board of Directors. Essential for keeping your company in good standing."
+        "Corporate Secretarial services cost AED 275 per hour and are completed within 3 business days. Meydan Free Zone handles corporate governance, company administration, ensuring compliance with statutory and regulatory requirements, and implementing Board of Directors decisions. This covers all the essential corporate paperwork and compliance tasks.",
+        "For AED 275 per hour, our Corporate Secretarial service covers corporate governance, company administration, regulatory compliance, and implementing board decisions. Processing takes 3 business days. It ensures your company stays compliant with all statutory requirements without you having to manage the paperwork yourself.",
+        "Corporate Secretarial is AED 275 per hour, processed in 3 business days. It includes maintaining robust corporate governance, effective administration of your company, ensuring compliance with all statutory and regulatory requirements, and implementing decisions made by your Board of Directors. Essential for keeping your company in good standing."
       ],
       "keywords": [
         "corporate secretarial",
@@ -2775,6 +2781,159 @@
       ],
       "source": "meydan_services_defination_ppt.pdf",
       "sourceTitle": "Meydan Services Definition"
+    },
+    {
+      "name": "Formation Amendment Cost",
+      "category": "company_management",
+      "question": "How much does a formation amendment cost?",
+      "responses": [
+        "A formation amendment costs AED 2,000. If you're amending both formation and license at the same time, the fee is only charged once — AED 2,000 total, not AED 4,000. And if you do the amendment at the time of renewal, it's completely free (AED 0).",
+        "Formation amendment is AED 2,000. Good news though — if you combine it with a license amendment, you only pay once. Even better, amendments done at renewal time are free of charge.",
+        "It's AED 2,000 to amend your formation documents. But here's a tip: if you need both formation and license amended, the fee applies only once. And if you time it with your renewal, the amendment is free."
+      ],
+      "keywords": [
+        "formation amendment",
+        "amend formation",
+        "formation change",
+        "formation amendment cost",
+        "change formation",
+        "formation modification",
+        "2000 formation"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Residence Visa Amendment",
+      "category": "employee_services",
+      "question": "How much does a residence visa amendment cost?",
+      "responses": [
+        "A residence visa amendment costs AED 850. This covers changes to your residence visa details such as passport changes. If you need a company transfer instead, that's AED 2,000.",
+        "Residence visa amendment is AED 850. This is for changes like updating passport details on your visa. For transferring your visa between companies, the fee is AED 2,000.",
+        "It's AED 850 for a residence visa amendment. Common reasons include passport renewal or detail changes. Company-to-company visa transfers are priced separately at AED 2,000."
+      ],
+      "keywords": [
+        "residence visa amendment",
+        "amend residence visa",
+        "change residence visa",
+        "visa amendment cost",
+        "850 visa amendment",
+        "modify residence visa",
+        "update visa details"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Residence Visa Transfer",
+      "category": "employee_services",
+      "question": "How much does it cost to transfer a residence visa?",
+      "responses": [
+        "Residence visa transfer costs depend on the type. A passport transfer (updating visa to a new passport) is AED 850. A company transfer (moving the visa from one company to another) is AED 2,000.",
+        "There are two types of visa transfers. Passport transfer — when you get a new passport and need the visa updated — is AED 850. Company transfer — moving your visa sponsorship between companies — is AED 2,000.",
+        "Visa transfers are AED 850 for a passport transfer and AED 2,000 for a company transfer. The passport transfer is for when your passport changes, while the company transfer moves your visa sponsorship to a different company."
+      ],
+      "keywords": [
+        "visa transfer",
+        "transfer residence visa",
+        "passport transfer visa",
+        "company transfer visa",
+        "move visa",
+        "visa transfer cost",
+        "change sponsor",
+        "transfer sponsorship",
+        "850 transfer",
+        "2000 transfer"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Entry Visa Reapply and Cancel",
+      "category": "employee_services",
+      "question": "How much does it cost to reapply or cancel an entry visa?",
+      "responses": [
+        "Re-applying for an entry visa costs AED 2,000. Cancelling an entry visa is AED 1,000. Re-application is needed when the original entry permit has expired or was rejected and needs to be submitted again.",
+        "Entry visa re-application is AED 2,000, and cancellation is AED 1,000. If the initial entry permit expired before the person entered the UAE or needs to be resubmitted, the re-apply fee applies.",
+        "It's AED 2,000 to reapply for an entry visa and AED 1,000 to cancel one. The re-application fee covers submitting a fresh entry permit when the previous one couldn't be used."
+      ],
+      "keywords": [
+        "entry visa reapply",
+        "entry visa cancel",
+        "reapply entry visa",
+        "cancel entry visa",
+        "entry permit cancel",
+        "entry visa reapplication",
+        "2000 entry visa",
+        "1000 entry visa cancel",
+        "entry permit reapply"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Photo Printing Service",
+      "category": "meydan_plus",
+      "question": "Does Meydan offer photo printing?",
+      "responses": [
+        "Yes, Meydan+ offers a photo printing service for AED 50. This is useful for passport-size photos needed for visa applications, Emirates ID, and other official documents.",
+        "Photo printing is available through Meydan+ for AED 50. Great for when you need photos for visa processing, Emirates ID, or any other official paperwork.",
+        "Meydan+ can handle photo printing for AED 50. Convenient if you need official photos for immigration documents, visa applications, or Emirates ID."
+      ],
+      "keywords": [
+        "photo printing",
+        "print photos",
+        "passport photos",
+        "photo service",
+        "50 photo",
+        "photos for visa",
+        "photo meydan"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Bank Account Assistance Service",
+      "category": "meydan_plus",
+      "question": "Can Meydan help with opening a bank account?",
+      "responses": [
+        "Yes, Meydan+ offers bank account assistance for AED 1,500. They help facilitate the process of opening a corporate bank account in the UAE, which can otherwise be quite complex for new free zone companies.",
+        "Bank account assistance is AED 1,500 through Meydan+. They guide you through the entire process of setting up a corporate bank account — from choosing the right bank to submitting the application and documentation.",
+        "Meydan+ can assist with opening your business bank account for AED 1,500. They handle the coordination with banks and help prepare your application to improve your chances of approval."
+      ],
+      "keywords": [
+        "bank account",
+        "open bank account",
+        "corporate bank account",
+        "bank account assistance",
+        "1500 bank",
+        "business bank account",
+        "bank account help",
+        "banking setup"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
+    },
+    {
+      "name": "Governmental Fees",
+      "category": "meydan_plus",
+      "question": "Are there any governmental fees?",
+      "responses": [
+        "Some services involve variable governmental fees that are paid on behalf of the client. These are actual government charges that Meydan pays directly to the relevant authority on your behalf. The amount varies depending on the specific government service required.",
+        "Yes, certain services have additional governmental fees that vary depending on the authority and service type. Meydan+ handles the payment to government entities on your behalf. These are pass-through charges — the actual amount charged by the government.",
+        "Governmental fees are variable and depend on the specific service and authority involved. Meydan+ processes these payments on your behalf to the relevant government entity. The fees are at cost — no markup from Meydan."
+      ],
+      "keywords": [
+        "governmental fees",
+        "government charges",
+        "authority fees",
+        "government fee variable",
+        "fees on behalf",
+        "government charges meydan",
+        "pass through fees"
+      ],
+      "source": "price-list.pdf",
+      "sourceTitle": "Meydan FZ Price List"
     }
   ]
 }
