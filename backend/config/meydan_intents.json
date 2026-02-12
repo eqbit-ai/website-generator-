@@ -940,7 +940,7 @@
     },
     {
       "name": "License Amendment Cost",
-      "question": "How much does a license amendment cost?",
+      "question": "How much does a standalone license amendment cost in AED?",
       "responses": [
         "A license amendment is AED 2,000. But here's a tip — if you time your amendment with your license renewal, it's completely free. So if your renewal is coming up, it's worth waiting a bit to save that 2,000.",
         "It's AED 2,000 for a license amendment. However, if you do it at the same time as your license renewal, there's no charge at all. Same goes if you combine it with formation — AED 0 at renewal time.",
@@ -1194,7 +1194,7 @@
     },
     {
       "name": "Immigration Card Cost",
-      "question": "How much does an immigration card cost?",
+      "question": "What is the immigration card fee for new, renewal, amendment and cancellation?",
       "responses": [
         "A new immigration card is AED 2,000, renewal is AED 2,200, and amendment or cancellation is AED 2,000 each. It's also called an establishment card — basically your company's immigration identity. Watch out for late renewal — there's a AED 250 penalty per month after expiry.",
         "Immigration card — also known as establishment card — costs AED 2,000 new, AED 2,200 for renewal, and AED 2,000 for any amendments or cancellation. Make sure to renew on time because late fees are AED 250 per month after the expiry date.",
@@ -2194,7 +2194,7 @@
     {
       "name": "Corporate Tax Deregistration",
       "category": "maccounting",
-      "question": "How do I deregister from corporate tax?",
+      "question": "How much does corporate tax deregistration cost and what is the penalty for late deregistration?",
       "responses": [
         "Corporate tax deregistration costs AED 2,100 and includes your final CT return filing plus the actual deregistration with FTA. Very important — if you don't deregister within 3 months of liquidation or license cancellation, you'll face a fine of AED 10,000 charged to the partner or shareholder. So don't delay this one.",
         "The CT deregistration service is AED 2,100. It covers filing your final corporate tax return and completing the deregistration with the Federal Tax Authority. Heads up: there's a strict 3-month deadline after liquidation or license cancellation. Miss it and FTA will hit you with an AED 10,000 penalty against the partner/shareholder personally.",
@@ -2210,7 +2210,10 @@
         "2100 deregistration",
         "close tax account",
         "tax penalty 10000",
-        "deregister fta"
+        "deregister fta",
+        "stop corporate tax",
+        "remove tax registration",
+        "cancel fta registration"
       ],
       "source": "meydan_services_defination_ppt.pdf",
       "sourceTitle": "Meydan Services Definition"
@@ -2512,23 +2515,26 @@
     {
       "name": "Virtual Assistant Dedicated",
       "category": "massist",
-      "question": "What is the Dedicated Virtual Assistant service?",
+      "question": "How much does the full-time dedicated virtual assistant cost at AED 90,000?",
       "responses": [
-        "The Dedicated Virtual Assistant is the premium tier at AED 90,000. You get a full-time VA working 8 hours a day (9 AM to 5 PM), maxing at 40 hours per week. They handle email management, customer support, data entry, scheduling, and all your administrative needs. Essentially a full-time remote employee dedicated exclusively to your business. Activates within 5 business days.",
-        "For AED 90,000, the Dedicated VA service gives you a virtual assistant for 8 hours daily, Monday through Friday (9 AM - 5 PM). That's up to 40 hours per week of dedicated support — email management, customer service, admin tasks, data entry, and more. It's like having a full-time team member without the office overhead. Ready in 5 business days.",
-        "The Dedicated Virtual Assistant package costs AED 90,000 and provides 8 hours of daily support (9:00 AM to 5:00 PM, 40 hours/week max). Your dedicated VA manages customer support, email, data entry, scheduling, and any administrative tasks your business needs. This is the ultimate solution for businesses that need consistent, full-time remote support. Setup takes 5 business days."
+        "The Dedicated Virtual Assistant is the premium full-time tier at AED 90,000. You get a full-time VA working 8 hours a day (9 AM to 5 PM), maxing at 40 hours per week. They handle email management, customer support, data entry, scheduling, and all your administrative needs. Essentially a full-time remote employee dedicated exclusively to your business. Activates within 5 business days. This is different from VA Starter which is only 6 hours/week at AED 12,000.",
+        "For AED 90,000, the Dedicated VA service gives you a full-time virtual assistant for 8 hours daily, Monday through Friday (9 AM - 5 PM). That's up to 40 hours per week of dedicated support — email management, customer service, admin tasks, data entry, and more. It's like having a full-time team member without the office overhead. Ready in 5 business days. Compare this with VA Starter at AED 12,000 for only 6 hours per week.",
+        "The Dedicated Virtual Assistant package costs AED 90,000 and provides 8 hours of daily full-time support (9:00 AM to 5:00 PM, 40 hours/week max). Your dedicated VA manages customer support, email, data entry, scheduling, and any administrative tasks your business needs. This is the ultimate solution for businesses that need consistent, full-time remote support. Setup takes 5 business days. Much more comprehensive than the Starter tier."
       ],
       "keywords": [
         "dedicated virtual assistant",
         "va dedicated",
         "full time va",
         "90000 va",
+        "90000 assistant",
         "8 hours assistant",
         "dedicated assistant",
         "full time virtual assistant",
         "premium va",
         "40 hours assistant",
-        "dedicated remote support"
+        "dedicated remote support",
+        "full time remote employee",
+        "va 90000"
       ],
       "source": "meydan_services_defination_ppt.pdf",
       "sourceTitle": "Meydan Services Definition"
