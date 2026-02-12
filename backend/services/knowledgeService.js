@@ -224,28 +224,49 @@ class KnowledgeService {
             }
         }
 
-        // 3. Fall back to vector search (semantic matching)
+        // 3. Fall back to vector search (semantic matching) with keyword re-ranking
         if (embeddingService && embeddingService.initialized && this.intents.length > 0) {
             try {
-                const vectorResults = await embeddingService.search(query, this.intents, 3);
+                const vectorResults = await embeddingService.search(query, this.intents, 5);
 
-                if (vectorResults.length > 0) {
-                    const topResult = vectorResults[0];
+                if (vectorResults.length > 0 && vectorResults[0].score >= vectorThreshold) {
+                    // Re-rank top results using keyword overlap as a tiebreaker
+                    const qWords = query.toLowerCase().replace(/[?!.,]/g, '').split(/\s+/).filter(w => w.length > 2);
 
-                    if (topResult.score >= vectorThreshold) {
-                        const response = this.selectIntentResponse(topResult.intent);
-                        console.log(`✅ Vector match: "${topResult.intentName}" (score: ${topResult.score.toFixed(3)})`);
+                    const reranked = vectorResults
+                        .filter(r => r.score >= vectorThreshold * 0.85) // Keep close candidates
+                        .map(r => {
+                            // Count how many query words appear in this intent's keywords
+                            const keywords = (r.intent.keywords || []).map(k => k.toLowerCase());
+                            const intentQ = (r.intent.question || '').toLowerCase();
+                            const intentName = (r.intent.name || '').toLowerCase();
+                            const allText = keywords.join(' ') + ' ' + intentQ + ' ' + intentName;
 
-                        return {
-                            found: true,
-                            response: response,
-                            score: topResult.score,
-                            source: 'vector',
-                            intentName: topResult.intentName
-                        };
-                    } else {
-                        console.log(`⚠️ Vector score too low: ${topResult.score.toFixed(3)} < ${vectorThreshold}`);
-                    }
+                            let keywordBoost = 0;
+                            for (const qw of qWords) {
+                                if (allText.includes(qw)) keywordBoost += 0.02;
+                                // Extra boost for distinctive words (not common ones)
+                                const distinctive = ['deregist', 'cancel', 'dedicat', 'full-time', 'fulltime', '90000', 'amendment', 'immigration', 'starter', 'premium', 'renew', 'liquidat', 'golden', 'explor'];
+                                if (distinctive.some(d => qw.includes(d) && allText.includes(qw))) keywordBoost += 0.05;
+                            }
+
+                            return { ...r, adjustedScore: r.score + keywordBoost };
+                        })
+                        .sort((a, b) => b.adjustedScore - a.adjustedScore);
+
+                    const best = reranked[0];
+                    const response = this.selectIntentResponse(best.intent);
+                    console.log(`✅ Vector match: "${best.intentName}" (score: ${best.score.toFixed(3)}, adjusted: ${best.adjustedScore.toFixed(3)})`);
+
+                    return {
+                        found: true,
+                        response: response,
+                        score: best.score,
+                        source: 'vector',
+                        intentName: best.intentName
+                    };
+                } else if (vectorResults.length > 0) {
+                    console.log(`⚠️ Vector score too low: ${vectorResults[0].score.toFixed(3)} < ${vectorThreshold}`);
                 }
             } catch (error) {
                 console.error('❌ Vector search error:', error.message);
@@ -277,6 +298,10 @@ class KnowledgeService {
         const q = query.toLowerCase().trim();
         const qNormalized = q.replace(/[?!.,]/g, '').replace(/\s+/g, ' ').trim();
 
+        // Collect ALL matches and pick the best one (most specific)
+        let bestMatch = null;
+        let bestScore = 0;
+
         for (const intent of this.intents) {
             const hasResponse = (intent.responses && intent.responses.length > 0) || intent.response;
             if (!intent || !hasResponse || !intent.keywords) continue;
@@ -286,16 +311,19 @@ class KnowledgeService {
                 const kwNormalized = kw.replace(/[?!.,]/g, '').replace(/\s+/g, ' ').trim();
 
                 if (qNormalized.includes(kwNormalized) || kwNormalized.includes(qNormalized)) {
-                    const response = this.selectIntentResponse(intent);
-                    console.log(`✅ Keyword match: "${intent.name}" via "${keyword}"`);
-
-                    return {
-                        found: true,
-                        response: response,
-                        score: 0.8,
-                        source: 'keyword',
-                        intentName: intent.name
-                    };
+                    // Score by keyword length (longer = more specific = better)
+                    const matchScore = 0.8 + (kwNormalized.length / 200);
+                    if (matchScore > bestScore) {
+                        bestScore = matchScore;
+                        bestMatch = {
+                            found: true,
+                            response: this.selectIntentResponse(intent),
+                            score: matchScore,
+                            source: 'keyword',
+                            intentName: intent.name,
+                            matchedKeyword: keyword
+                        };
+                    }
                 }
             }
 
@@ -303,17 +331,25 @@ class KnowledgeService {
             if (intent.question) {
                 const intentQ = intent.question.toLowerCase().replace(/[?!.,]/g, '').replace(/\s+/g, ' ').trim();
                 if (qNormalized.includes(intentQ) || intentQ.includes(qNormalized)) {
-                    const response = this.selectIntentResponse(intent);
-                    console.log(`✅ Question match: "${intent.name}"`);
-                    return {
-                        found: true,
-                        response: response,
-                        score: 0.85,
-                        source: 'question',
-                        intentName: intent.name
-                    };
+                    const matchScore = 0.85 + (intentQ.length / 200);
+                    if (matchScore > bestScore) {
+                        bestScore = matchScore;
+                        bestMatch = {
+                            found: true,
+                            response: this.selectIntentResponse(intent),
+                            score: matchScore,
+                            source: 'question',
+                            intentName: intent.name,
+                            matchedKeyword: intent.question
+                        };
+                    }
                 }
             }
+        }
+
+        if (bestMatch) {
+            console.log(`✅ Keyword match: "${bestMatch.intentName}" via "${bestMatch.matchedKeyword}"`);
+            return bestMatch;
         }
 
         return { found: false, response: null, score: 0, source: 'none' };
