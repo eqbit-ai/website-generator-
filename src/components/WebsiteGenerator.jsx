@@ -1,14 +1,14 @@
 // src/components/WebsiteGenerator.jsx
 
-import React, { useState, useRef } from 'react';
-import { Download, Code, Eye, RefreshCw, Rocket, Sparkles, MousePointer2, X, Send } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Download, Code, Eye, RefreshCw, Rocket, Sparkles, MousePointer2, X, Send, Database, Phone, FileText, Shield } from 'lucide-react';
 import PromptInput from './PromptInput';
 import Preview from './Preview';
 import CodeEditor from './CodeEditor';
 import DeployModal from './DeployModal';
 import { generateWebsite, clearSession, editElement } from '../services/api';
 
-const WebsiteGenerator = () => {
+const WebsiteGenerator = ({ onShowKB, onShowVoice, onShowLogs, onShow2FA }) => {
     const [html, setHtml] = useState('');
     const [css, setCss] = useState('');
     const [js, setJs] = useState('');
@@ -25,16 +25,44 @@ const WebsiteGenerator = () => {
     const [sessionId, setSessionId] = useState(null);
     const [isNewDesign, setIsNewDesign] = useState(true);
     const [designStyle, setDesignStyle] = useState(null);
-    const [loadingMessage, setLoadingMessage] = useState('');
 
     // Prompt history (session-only, clears on refresh)
     const [promptHistory, setPromptHistory] = useState([]);
+
+    // Generation phase: 'idle' | 'analyzing' | 'fetching' | 'compiling' | 'writing' | 'done'
+    const [genPhase, setGenPhase] = useState('idle');
+
+    // Refs for timers and abort
+    const viewSwitchTimeoutRef = useRef(null);
+    const typewriterIntervalRef = useRef(null);
+    const abortControllerRef = useRef(null);
+    const phaseTimeoutsRef = useRef([]);
+
+    // Clean up on unmount
+    useEffect(() => {
+        return () => {
+            if (viewSwitchTimeoutRef.current) clearTimeout(viewSwitchTimeoutRef.current);
+            if (typewriterIntervalRef.current) clearInterval(typewriterIntervalRef.current);
+            phaseTimeoutsRef.current.forEach(t => clearTimeout(t));
+            if (abortControllerRef.current) abortControllerRef.current.abort();
+        };
+    }, []);
 
     // NEW: Element editing mode
     const [editMode, setEditMode] = useState(false);
     const [selectedElement, setSelectedElement] = useState(null);
     const [elementPrompt, setElementPrompt] = useState('');
     const [isEditingElement, setIsEditingElement] = useState(false);
+
+    // Start phase cycling during generation
+    const startPhases = useCallback(() => {
+        setGenPhase('analyzing');
+        const t1 = setTimeout(() => setGenPhase('fetching'), 2000);
+        const t2 = setTimeout(() => setGenPhase('compiling'), 5000);
+        const t3 = setTimeout(() => setGenPhase('writing'), 8000);
+        phaseTimeoutsRef.current = [t1, t2, t3];
+        return [t1, t2, t3];
+    }, []);
 
     const handleGenerate = async (prompt) => {
         // Prevent duplicate calls
@@ -46,7 +74,23 @@ const WebsiteGenerator = () => {
         isGeneratingRef.current = true;
         setIsLoading(true);
         setError(null);
-        setLoadingMessage('Creating your unique design with AI...');
+
+        // Clear any pending view switch or typewriter
+        if (viewSwitchTimeoutRef.current) {
+            clearTimeout(viewSwitchTimeoutRef.current);
+            viewSwitchTimeoutRef.current = null;
+        }
+        if (typewriterIntervalRef.current) {
+            clearInterval(typewriterIntervalRef.current);
+            typewriterIntervalRef.current = null;
+        }
+
+        // Create abort controller
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+
+        // Start phase cycling
+        const phaseTimeouts = startPhases();
 
         // Add prompt to history
         setPromptHistory(prev => [...prev, {
@@ -55,12 +99,19 @@ const WebsiteGenerator = () => {
         }]);
 
         try {
-            const result = await generateWebsite(prompt, sessionId);
+            const result = await generateWebsite(prompt, sessionId, abortController.signal);
+
+            // Clear phase timeouts
+            phaseTimeouts.forEach(t => clearTimeout(t));
 
             if (result.success) {
-                setHtml(result.website.html);
-                setCss(result.website.css);
-                setJs(result.website.js || '');
+                const fullHtml = result.website.html;
+                const fullCss = result.website.css;
+                const fullJs = result.website.js || '';
+
+                // Set CSS and JS immediately (not visible in default HTML tab)
+                setCss(fullCss);
+                setJs(fullJs);
 
                 // Update session info
                 setSessionId(result.sessionId);
@@ -72,18 +123,56 @@ const WebsiteGenerator = () => {
                 } else {
                     console.log(`🔄 Design updated (maintaining ${result.style} style)`);
                 }
+
+                // Set HTML and switch to preview
+                setHtml(fullHtml);
+                setGenPhase('done');
+
+                viewSwitchTimeoutRef.current = setTimeout(() => {
+                    setViewMode('preview');
+                    setGenPhase('idle');
+                    viewSwitchTimeoutRef.current = null;
+                }, 800);
             } else {
+                setGenPhase('idle');
                 setError(result.error || 'Failed to generate website. Please try again.');
             }
         } catch (err) {
-            console.error('Generation error:', err);
-            setError(err.message || 'An error occurred. Please try again.');
+            phaseTimeouts.forEach(t => clearTimeout(t));
+            setGenPhase('idle');
+            if (err.message !== 'Generation cancelled') {
+                console.error('Generation error:', err);
+                setError(err.message || 'An error occurred. Please try again.');
+            }
         } finally {
             setIsLoading(false);
-            setLoadingMessage('');
+            abortControllerRef.current = null;
             isGeneratingRef.current = false;
         }
     };
+
+    const handleStop = useCallback(() => {
+        // Abort the fetch
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+        // Clear all timers
+        if (typewriterIntervalRef.current) {
+            clearInterval(typewriterIntervalRef.current);
+            typewriterIntervalRef.current = null;
+        }
+        if (viewSwitchTimeoutRef.current) {
+            clearTimeout(viewSwitchTimeoutRef.current);
+            viewSwitchTimeoutRef.current = null;
+        }
+        phaseTimeoutsRef.current.forEach(t => clearTimeout(t));
+        phaseTimeoutsRef.current = [];
+        // Reset state
+        setIsLoading(false);
+        setGenPhase('idle');
+        isGeneratingRef.current = false;
+    }, []);
 
     // NEW: Handle element selection
     const handleElementSelect = (element) => {
@@ -260,9 +349,6 @@ ${js}
                         <Wand2Icon />
                         AI Website Generator
                     </h1>
-                    <p className="generator-subtitle">
-                        Describe your dream website and watch it come to life
-                    </p>
                     {designStyle && (
                         <div className="design-status">
                             <Sparkles size={14} />
@@ -272,8 +358,23 @@ ${js}
                     )}
                 </div>
                 <div className="header-actions">
+                    <div className="header-admin-buttons">
+                        <button className="admin-icon-button" onClick={onShowKB} title="Knowledge Base">
+                            <Database size={16} />
+                        </button>
+                        <button className="admin-icon-button" onClick={onShowVoice} title="Voice Agent">
+                            <Phone size={16} />
+                        </button>
+                        <button className="admin-icon-button" onClick={onShowLogs} title="View Logs">
+                            <FileText size={16} />
+                        </button>
+                        <button className="admin-icon-button" onClick={onShow2FA} title="2FA Setup">
+                            <Shield size={16} />
+                        </button>
+                    </div>
                     {html && (
                         <>
+                            <div className="header-divider" />
                             <button
                                 className={`action-button ${editMode ? 'active edit-mode-active' : ''}`}
                                 onClick={() => {
@@ -311,8 +412,9 @@ ${js}
                 <aside className="generator-sidebar">
                     <PromptInput
                         onGenerate={handleGenerate}
+                        onStop={handleStop}
                         isLoading={isLoading}
-                        loadingMessage={loadingMessage}
+                        genPhase={genPhase}
                         promptHistory={promptHistory}
                     />
 
@@ -643,9 +745,6 @@ ${js}
                     to { transform: rotate(360deg); }
                 }
 
-                .content-area {
-                    position: relative;
-                }
             `}</style>
         </div>
     );

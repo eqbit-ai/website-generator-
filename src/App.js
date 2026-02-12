@@ -2,7 +2,6 @@
 // Main App with all modals properly connected
 
 import React, { useState } from 'react';
-import { Database, Phone, FileText, Shield } from 'lucide-react';
 import WebsiteGenerator from './components/WebsiteGenerator';
 import Chatbot from './components/Chatbot';
 import KnowledgeBase from './components/KnowledgeBase';
@@ -21,48 +20,12 @@ function App() {
   return (
     <div className="app">
       {/* Main Content */}
-      <WebsiteGenerator />
-
-      {/* Bottom Left - Admin Buttons */}
-      <div className="bottom-left-buttons">
-        {/* Knowledge Base Button */}
-        <button
-          className="fab-button kb-button"
-          onClick={() => setShowKB(true)}
-          title="Knowledge Base"
-        >
-          <Database size={22} />
-        </button>
-
-        {/* Voice Agent Button */}
-        <button
-          className="fab-button voice-button"
-          onClick={() => setShowVoice(true)}
-          title="Voice Agent"
-        >
-          <Phone size={22} />
-        </button>
-
-        {/* Logs Button */}
-        <button
-          className="fab-button logs-button"
-          onClick={() => setShowLogs(true)}
-          title="View Logs"
-        >
-          <FileText size={22} />
-        </button>
-      </div>
-
-      {/* Bottom Right - 2FA Button */}
-      <div className="bottom-right-buttons">
-        <button
-          className="twofa-fab"
-          onClick={() => setShow2FA(true)}
-          title="2FA Setup"
-        >
-          <Shield size={22} />
-        </button>
-      </div>
+      <WebsiteGenerator
+        onShowKB={() => setShowKB(true)}
+        onShowVoice={() => setShowVoice(true)}
+        onShowLogs={() => setShowLogs(true)}
+        onShow2FA={() => setShow2FA(true)}
+      />
 
       {/* Chatbot - Renders its own button */}
       <Chatbot />
@@ -91,17 +54,6 @@ function App() {
             <button
               className="modal-close-button"
               onClick={() => setShow2FA(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                color: '#666',
-                zIndex: 1
-              }}
             >
               ×
             </button>

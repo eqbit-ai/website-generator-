@@ -391,11 +391,8 @@ router.post('/message', async (req, res) => {
 
     let response = null;
 
-    // 1️⃣ Small talk
-    response = getConversationalResponse(message, session.name);
-
-    // 2️⃣ Call intent - Trigger call immediately since we have all info
-    if (!response && wantsCall(message)) {
+    // 1️⃣ Call intent fast-path — trigger Vapi immediately (no AI needed)
+    if (wantsCall(message)) {
         response = `Perfect! Connecting you with our voice agent now...`;
 
         // Trigger call asynchronously - we already have name, email, phone from session
@@ -412,125 +409,105 @@ router.post('/message', async (req, res) => {
         response += `\n\nOur voice agent will call you at ${session.phone} in a few moments. Please answer the call to proceed with verification. You'll receive an SMS with a verification code shortly.`;
     }
 
-    // 5️⃣ Smart RAG Search: Vector + AI for semantic understanding
-    // This allows questions like "do i have to come myself" to match "physical presence"
-    if (!response && knowledgeService) {
+    // 2️⃣ AI-powered conversational response with KB context + conversation history
+    if (!response) {
         try {
-            const searchResult = await knowledgeService.unifiedSearch(message, {
-                vectorThreshold: 0.3, // Lower threshold to catch more semantic matches
-                keywordFallback: false
-            });
+            // Gather KB context
+            let kbContext = '';
 
-            if (searchResult.found) {
-                if (searchResult.score >= 0.5) {
-                    // HIGH confidence (>= 0.5): Return directly
-                    console.log(`✅ High confidence match: "${searchResult.intentName}" (${searchResult.source}, score: ${searchResult.score.toFixed(3)})`);
-                    response = searchResult.response;
-                } else if (searchResult.score >= 0.3 && anthropic) {
-                    // MEDIUM confidence (0.3-0.5): Use AI to verify semantic match
-                    console.log(`🤔 Medium confidence match: "${searchResult.intentName}" (score: ${searchResult.score.toFixed(3)}) - verifying with AI`);
-
-                    const verifyPrompt = `USER QUESTION: "${message}"
-
-POTENTIAL ANSWER FROM KNOWLEDGE BASE:
-Topic: ${searchResult.intentName}
-Answer: ${searchResult.response}
-
-TASK: Does this knowledge base answer address the user's question? The user might phrase the question differently but mean the same thing.
-- "do i have to come myself" = "physical presence required"
-- "how much money do i need" = "capital requirements"
-- "can i work from home" = "physical presence"
-
-If the answer is RELEVANT to the question (even if worded differently), respond with ONLY the answer text.
-If the answer is NOT relevant, respond with exactly: "NOT_RELEVANT"`;
-
-                    const verification = await anthropic.messages.create({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 200,
-                        temperature: 0.1,
-                        messages: [{ role: 'user', content: verifyPrompt }]
+            if (knowledgeService) {
+                // Try unified search for best match
+                try {
+                    const searchResult = await knowledgeService.unifiedSearch(message, {
+                        vectorThreshold: 0.3,
+                        keywordFallback: false
                     });
 
-                    const aiResponse = verification.content[0].text.trim();
-
-                    if (aiResponse !== 'NOT_RELEVANT' && !aiResponse.includes('NOT_RELEVANT')) {
-                        console.log(`✅ AI verified semantic match for "${searchResult.intentName}"`);
-                        response = searchResult.response;
-                    } else {
-                        console.log(`❌ AI rejected match - not semantically relevant`);
+                    if (searchResult.found) {
+                        console.log(`📚 KB match: "${searchResult.intentName}" (score: ${searchResult.score.toFixed(3)})`);
+                        kbContext = `Topic: ${searchResult.intentName}\n${searchResult.response}`;
                     }
+                } catch (e) {
+                    console.log('⚠️ Unified search error:', e.message);
+                }
+
+                // Also get top 3 matches for broader context
+                try {
+                    const topMatches = await knowledgeService.getTopMatches(message, 3);
+                    if (topMatches && topMatches.length > 0) {
+                        console.log(`📚 Top matches: ${topMatches.map(m => `${m.intentName} (${m.score.toFixed(3)})`).join(', ')}`);
+                        kbContext += '\n\nRelated topics:\n' + topMatches.map(m =>
+                            `- ${m.intentName}: ${m.response.substring(0, 200)}`
+                        ).join('\n');
+                    }
+                } catch (e) {
+                    console.log('⚠️ Top matches error:', e.message);
                 }
             }
-        } catch (e) {
-            console.log('⚠️ Unified search error:', e.message);
-        }
-    }
 
-    // 5.5️⃣ Fall back to keyword-based intent check
-    if (!response) {
-        response = checkIntent(message);
-    }
+            // Build conversation history (last 10 messages for context window efficiency)
+            // Ensure messages start with 'user' role (Claude API requirement)
+            let recentMessages = session.messages.slice(-10).map(m => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: m.content
+            }));
+            // Drop leading assistant messages so the array starts with a user message
+            while (recentMessages.length > 0 && recentMessages[0].role === 'assistant') {
+                recentMessages.shift();
+            }
 
-    // 6️⃣ RAG with AI: Get top KB matches and let AI answer creatively
-    if (!response && anthropic && knowledgeService) {
-        try {
-            // Get top 3 vector matches regardless of score
-            const topMatches = await knowledgeService.getTopMatches(message, 3);
+            if (anthropic) {
+                // Build system prompt
+                const systemPrompt = `You are a helpful assistant for Meydan Free Zone Dubai. Your name is Meydan Assistant.
 
-            if (topMatches && topMatches.length > 0) {
-                console.log(`🧠 RAG Mode: Found ${topMatches.length} potential matches`);
-                topMatches.forEach((m, i) => console.log(`   ${i + 1}. ${m.intentName} (score: ${m.score.toFixed(3)})`));
+RULES:
+- Be conversational and friendly — this is a live chat, not a FAQ page
+- Keep responses concise (2-4 sentences) unless the user asks for detail
+- ONLY answer from the KNOWLEDGE BASE CONTEXT provided. Never make up information about Meydan, pricing, services, or policies
+- If no relevant KB context is provided, say you don't have that specific information and offer to connect them with the team
+- Use the conversation history to understand follow-up questions ("more options", "tell me more", "what about pricing")
+- Address the user by name occasionally
+- When listing multiple items, use bullet points
+- If the user asks something vague, ask a clarifying question
+- For greetings, respond naturally and offer to help
+- For thanks/goodbye, respond warmly
 
-                // Build context from top matches
-                const kbContext = topMatches.map(m =>
-                    `Topic: ${m.intentName}\nAnswer: ${m.response}`
-                ).join('\n\n---\n\n');
+CURRENT USER: ${session.name} (${session.email})` +
+                    (kbContext
+                        ? `\n\nKNOWLEDGE BASE CONTEXT:\n${kbContext}`
+                        : '\n\nNo relevant knowledge base context found for this query.');
 
-                const ragPrompt = `You are a helpful assistant for Meydan Free Zone Dubai.
+                console.log(`🤖 Sending to Claude with ${recentMessages.length} messages of history`);
 
-USER QUESTION: "${message}"
-
-KNOWLEDGE BASE ENTRIES (use these to answer):
-${kbContext}
-
-INSTRUCTIONS:
-1. If ANY of the knowledge base entries can answer the user's question (even if worded differently), provide that answer
-2. Understand semantic meaning: "come myself" = "physical presence", "how old" = "minimum age", etc.
-3. Keep your answer brief (1-2 sentences)
-4. If NONE of the entries are relevant, say exactly: "NO_MATCH"
-5. Do NOT make up information - only use what's in the knowledge base`;
-
-                const ragResponse = await anthropic.messages.create({
+                const aiResponse = await anthropic.messages.create({
                     model: 'claude-sonnet-4-20250514',
-                    max_tokens: 200,
-                    temperature: 0.2,
-                    messages: [{ role: 'user', content: ragPrompt }]
+                    max_tokens: 300,
+                    system: systemPrompt,
+                    messages: recentMessages
                 });
 
-                const aiAnswer = ragResponse.content[0].text.trim();
-
-                if (aiAnswer !== 'NO_MATCH' && !aiAnswer.includes('NO_MATCH')) {
-                    console.log(`✅ RAG AI answered from KB context`);
-                    response = aiAnswer;
-                } else {
-                    console.log(`❌ RAG AI found no relevant KB match`);
-                }
+                response = aiResponse.content[0].text;
+                console.log(`✅ Claude responded conversationally`);
+            } else {
+                // No AI available — fall back to keyword intent check
+                response = checkIntent(message);
             }
         } catch (err) {
-            console.log('⚠️ RAG search error:', err.message);
+            console.log('⚠️ AI response error, falling back to intent check:', err.message);
+            // Fallback to keyword-based intent matching if Claude fails
+            response = checkIntent(message);
         }
     }
 
-    // 7️⃣ Final fallback if no answer found
+    // 3️⃣ Final fallback if nothing worked
     if (!response) {
-        console.log(`❌ No KB match found, offering help`);
-        response = `I can help you with information about:
+        response = `I appreciate your question! I don't have specific information on that topic right now. I can help you with:
 
 • Company setup and business licenses
 • Visa and immigration services
 • Meydan Free Zone facilities and services
 
-What would you like to know? Or if you'd prefer to speak with someone directly, just let me know and I can arrange a call.`;
+What would you like to know? Or if you'd prefer to speak with someone directly, just say "call me" and I'll connect you with our team.`;
     }
 
     // Save assistant response

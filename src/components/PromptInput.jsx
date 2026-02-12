@@ -1,18 +1,28 @@
 // src/components/PromptInput.jsx
 
 import React, { useState } from 'react';
-import { Wand2, Loader2, Clock } from 'lucide-react';
+import { Wand2, Clock, Square, Search, FolderDown, FileCode, Eye } from 'lucide-react';
 
-const PromptInput = ({ onGenerate, isLoading, loadingMessage, promptHistory = [] }) => {
+const PHASE_CONFIG = {
+    analyzing: { icon: Search, label: 'Analyzing prompt...', color: '#818cf8' },
+    fetching:  { icon: FolderDown, label: 'Fetching assets...', color: '#a855f7' },
+    compiling: { icon: FileCode, label: 'Compiling files...', color: '#6366f1' },
+    writing:   { icon: FileCode, label: 'Writing code...', color: '#22c55e' },
+    done:      { icon: Eye, label: 'Launching preview...', color: '#22c55e' },
+};
+
+const PromptInput = ({ onGenerate, onStop, isLoading, genPhase = 'idle', promptHistory = [] }) => {
     const [prompt, setPrompt] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (prompt.trim() && !isLoading) {
             onGenerate(prompt);
-            setPrompt(''); // Clear prompt after submission
+            setPrompt('');
         }
     };
+
+    const phaseInfo = PHASE_CONFIG[genPhase];
 
     const examplePrompts = [
         "A modern pet shop website with adorable animal photos",
@@ -34,23 +44,37 @@ const PromptInput = ({ onGenerate, isLoading, loadingMessage, promptHistory = []
                     rows={4}
                     disabled={isLoading}
                 />
-                <button
-                    type="submit"
-                    className="generate-button"
-                    disabled={!prompt.trim() || isLoading}
-                >
-                    {isLoading ? (
-                        <>
-                            <Loader2 className="icon spinning" size={20} />
-                            {loadingMessage || 'Generating...'}
-                        </>
-                    ) : (
-                        <>
-                            <Wand2 className="icon" size={20} />
-                            Generate Website
-                        </>
-                    )}
-                </button>
+                {isLoading ? (
+                    <div className="generation-controls">
+                        <div className="generation-status">
+                            {phaseInfo && (
+                                <div className="phase-indicator" style={{ '--phase-color': phaseInfo.color }}>
+                                    <phaseInfo.icon className="icon spinning" size={16} />
+                                    <span>{phaseInfo.label}</span>
+                                    <div className="phase-progress" />
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            type="button"
+                            className="stop-button"
+                            onClick={onStop}
+                            title="Stop generation"
+                        >
+                            <Square size={14} />
+                            Stop
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        type="submit"
+                        className="generate-button"
+                        disabled={!prompt.trim()}
+                    >
+                        <Wand2 className="icon" size={20} />
+                        Generate Website
+                    </button>
+                )}
             </form>
 
             {/* Prompt History */}

@@ -3,12 +3,13 @@ import config from '../config';
 const API_BASE_URL = `${config.apiUrl}/api`;
 
 // AI-Driven generator with conversation context
-export const generateWebsite = async (prompt, sessionId = null) => {
+export const generateWebsite = async (prompt, sessionId = null, signal = null) => {
     try {
         const response = await fetch(`${API_BASE_URL}/generator/generate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt, sessionId }),
+            signal,
         });
 
         const data = await response.json();
@@ -19,6 +20,9 @@ export const generateWebsite = async (prompt, sessionId = null) => {
 
         return data;
     } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('Generation cancelled');
+        }
         console.error('API Error:', error);
         throw error;
     }

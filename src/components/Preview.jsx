@@ -139,6 +139,27 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
                 *:hover { outline: 1px dashed rgba(59, 130, 246, 0.5) !important; }
             ` : '';
 
+            // CSS normalization injected AFTER generated CSS to override
+            // common AI-generated overlap issues (hero with position:fixed/absolute)
+            const overlapFix = `
+    /* Fix: hero/section overlap from fixed/absolute positioning */
+    body { overflow-x: hidden !important; }
+    section, [class*="hero"], [class*="Hero"],
+    [id*="hero"], [id*="Hero"] {
+      position: relative !important;
+      z-index: auto !important;
+    }
+    /* Keep nav/header sticky instead of fixed for proper flow */
+    nav, header, [class*="nav"], [class*="navbar"] {
+      position: sticky !important;
+      top: 0;
+      z-index: 1000 !important;
+    }
+    /* Safety: images and sections don't overflow */
+    img { max-width: 100%; height: auto; }
+    section { clear: both; }
+    `;
+
             const fullHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -147,11 +168,28 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
   <title>Preview</title>
   <style>
     ${css || ''}
+    ${overlapFix}
     ${editModeStyles}
   </style>
 </head>
 <body>
-  ${html || '<p style="padding: 20px; color: #666; font-family: sans-serif;">Enter a prompt to generate your website...</p>'}
+  ${html || `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0f;font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden">
+    <div style="text-align:center;position:relative">
+      <div style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(168,85,247,0.18));margin:0 auto 2rem;position:relative;animation:float 6s ease-in-out infinite">
+        <div style="position:absolute;inset:15px;border-radius:50%;border:1.5px dashed rgba(99,102,241,0.3);animation:spin 20s linear infinite"></div>
+        <div style="position:absolute;inset:30px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(168,85,247,0.1));display:flex;align-items:center;justify-content:center">
+          <svg width="32" height="32" fill="none" stroke="rgba(99,102,241,0.7)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <h2 style="color:#fff;font-size:1.5rem;font-weight:700;margin:0 0 0.5rem;letter-spacing:-0.02em">Create Something Amazing</h2>
+      <p style="color:#606070;font-size:0.9375rem;margin:0 0 2rem;max-width:280px;line-height:1.6">Describe your vision and watch it come to life in seconds</p>
+      <div style="display:inline-flex;align-items:center;gap:8px;color:rgba(99,102,241,0.6);font-size:0.8125rem;font-weight:500">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Type a prompt to begin
+      </div>
+    </div>
+    <style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
+  </div>`}
   <script>
     ${js || ''}
   ${'<'}/script>
