@@ -89,6 +89,42 @@ const chatSessions = new Map();
 if (!global.phoneStore) global.phoneStore = new Map();
 if (!global.chatLogs) global.chatLogs = [];
 
+// Cleanup idle chat sessions (1h idle) and cap message arrays
+const CHAT_SESSION_IDLE_TTL = 60 * 60 * 1000; // 1 hour idle
+const CHAT_MAX_MESSAGES = 200; // Max messages per session
+const CHAT_LOGS_MAX = 500;
+
+setInterval(() => {
+    const now = Date.now();
+    let cleaned = 0;
+
+    for (const [sessionId, session] of chatSessions.entries()) {
+        // Find last activity time
+        const lastMsg = session.messages?.[session.messages.length - 1];
+        const lastActivity = lastMsg?.time ? new Date(lastMsg.time).getTime()
+            : (session.createdAt ? new Date(session.createdAt).getTime() : 0);
+
+        // Remove idle sessions
+        if (now - lastActivity > CHAT_SESSION_IDLE_TTL) {
+            chatSessions.delete(sessionId);
+            cleaned++;
+            continue;
+        }
+
+        // Cap messages per session to prevent unbounded growth
+        if (session.messages && session.messages.length > CHAT_MAX_MESSAGES) {
+            session.messages = session.messages.slice(-CHAT_MAX_MESSAGES);
+        }
+    }
+
+    // Cap global chatLogs
+    if (global.chatLogs && global.chatLogs.length > CHAT_LOGS_MAX) {
+        global.chatLogs = global.chatLogs.slice(0, CHAT_LOGS_MAX);
+    }
+
+    if (cleaned > 0) console.log(`🧹 Chat: Cleaned ${cleaned} idle sessions (${chatSessions.size} active)`);
+}, 10 * 60 * 1000); // Every 10 minutes
+
 // For triggering Vapi calls
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
 

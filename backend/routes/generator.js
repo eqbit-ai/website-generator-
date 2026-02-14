@@ -16,8 +16,23 @@ if (process.env.ANTHROPIC_API_KEY) {
     }
 }
 
-// Session storage
+// Session storage with TTL cleanup
 const designSessions = new Map();
+const SESSION_TTL = 2 * 60 * 60 * 1000; // 2 hours
+const SESSION_CLEANUP_INTERVAL = 30 * 60 * 1000; // Every 30 minutes
+
+setInterval(() => {
+    const now = Date.now();
+    let cleaned = 0;
+    for (const [id, session] of designSessions.entries()) {
+        const age = now - new Date(session.createdAt).getTime();
+        if (age > SESSION_TTL) {
+            designSessions.delete(id);
+            cleaned++;
+        }
+    }
+    if (cleaned > 0) console.log(`🧹 Generator: Cleaned ${cleaned} expired sessions (${designSessions.size} active)`);
+}, SESSION_CLEANUP_INTERVAL);
 
 // ============================================
 // NICHE DETECTION — Map business type to design parameters

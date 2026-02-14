@@ -7,6 +7,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
+const rateLimit = require('express-rate-limit');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -14,8 +16,50 @@ const PORT = process.env.PORT || 3001;
 // MIDDLEWARE
 // ============================================
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Request timeout — prevent hung requests from accumulating
+app.use((req, res, next) => {
+    // 5 min default, 8 min for generator (set in generator.js)
+    req.setTimeout(300000);
+    res.setTimeout(300000);
+    next();
+});
+
+// Global rate limit — 100 requests per minute per IP
+const globalLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later' }
+});
+app.use(globalLimiter);
+
+// Strict rate limit for AI-heavy endpoints — 10 requests per minute per IP
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'AI generation rate limit reached. Please wait a moment.' }
+});
+
+// Apply AI rate limit to generation endpoints
+app.use('/api/generator/generate', aiLimiter);
+app.use('/api/generate/website', aiLimiter);
+
+// Moderate rate limit for chat/voice — 30 requests per minute per IP
+const chatVoiceLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please slow down' }
+});
+app.use('/api/chat', chatVoiceLimiter);
+app.use('/api/voice', chatVoiceLimiter);
 
 // ============================================
 // DATABASE
@@ -200,11 +244,23 @@ app.use('/uploads', express.static(uploadsDir));
 // ============================================
 app.get('/health', (req, res) => {
     const embeddingStatus = embeddingService ? embeddingService.getStatus() : { initialized: false };
+    const mem = process.memoryUsage();
 
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
+        uptime: Math.round(process.uptime()) + 's',
+        memory: {
+            heapUsed: Math.round(mem.heapUsed / 1024 / 1024) + 'MB',
+            heapTotal: Math.round(mem.heapTotal / 1024 / 1024) + 'MB',
+            rss: Math.round(mem.rss / 1024 / 1024) + 'MB'
+        },
+        activeSessions: {
+            voiceCalls: typeof callStore !== 'undefined' ? 0 : 'N/A',
+            chatSessions: global.chatLogs?.length || 0,
+            phoneStore: global.phoneStore?.size || 0,
+            verifiedSessions: global.verifiedSessions?.size || 0
+        },
         embeddings: {
             initialized: embeddingStatus.initialized,
             count: embeddingStatus.embeddingsCount || 0,

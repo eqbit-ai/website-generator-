@@ -71,10 +71,50 @@ try {
     console.log('⚠️ Voice: Could not load intents:', e.message);
 }
 
-// Storage
+// Storage with TTL cleanup
 const callStore = new Map();
 if (!global.voiceLogs) global.voiceLogs = [];
 if (!global.verifiedSessions) global.verifiedSessions = new Map();
+
+// Cleanup expired calls (24h), verified sessions (1h), phone store (2h)
+setInterval(() => {
+    const now = Date.now();
+    let cleaned = { calls: 0, sessions: 0, phones: 0 };
+
+    // Clean callStore — remove calls older than 24 hours
+    for (const [id, data] of callStore.entries()) {
+        const created = data.createdAt ? new Date(data.createdAt).getTime() : (data.timestamp || 0);
+        if (now - created > 24 * 60 * 60 * 1000) {
+            callStore.delete(id);
+            cleaned.calls++;
+        }
+    }
+
+    // Clean verifiedSessions — remove sessions older than 1 hour
+    for (const [key, session] of global.verifiedSessions.entries()) {
+        const ts = session.timestamp ? new Date(session.timestamp).getTime() : 0;
+        if (now - ts > 60 * 60 * 1000) {
+            global.verifiedSessions.delete(key);
+            cleaned.sessions++;
+        }
+    }
+
+    // Clean phoneStore — remove entries older than 2 hours
+    if (global.phoneStore) {
+        for (const [key, data] of global.phoneStore.entries()) {
+            const ts = data?.timestamp ? new Date(data.timestamp).getTime() : (typeof data === 'string' ? 0 : now);
+            if (now - ts > 2 * 60 * 60 * 1000 || ts === 0) {
+                global.phoneStore.delete(key);
+                cleaned.phones++;
+            }
+        }
+    }
+
+    const total = cleaned.calls + cleaned.sessions + cleaned.phones;
+    if (total > 0) {
+        console.log(`🧹 Voice: Cleaned ${cleaned.calls} calls, ${cleaned.sessions} sessions, ${cleaned.phones} phone entries`);
+    }
+}, 15 * 60 * 1000); // Every 15 minutes
 
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
