@@ -92,6 +92,76 @@ function detectNiche(prompt) {
             }
         },
         {
+            name: 'pets',
+            keywords: ['pet', 'pets', 'pet shop', 'pet store', 'vet', 'veterinary', 'dog', 'cat', 'puppy', 'kitten', 'pet grooming', 'pet care', 'kennel', 'aquarium', 'animal', 'doggy daycare'],
+            design: {
+                colors: 'Warm playful palette: warm teal (#0D9488), vibrant orange (#F97316), soft cream (#FFF7ED), warm brown (#92400E), light mint surface (#F0FDF4). Friendly and warm.',
+                fonts: 'Heading: Nunito (weight 700, 800). Body: Open Sans (weight 400). Import both from Google Fonts.',
+                imagery: 'Cute dogs and cats, pet store interiors, veterinary care, pets playing, grooming sessions, aquarium fish.',
+                mood: 'Warm, playful, friendly, caring, joyful, trustworthy.'
+            }
+        },
+        {
+            name: 'beauty',
+            keywords: ['beauty', 'salon', 'hair salon', 'nail salon', 'barber', 'barbershop', 'makeup', 'lashes', 'brows', 'facial', 'hairdresser', 'cosmetology', 'aesthetics', 'skincare clinic'],
+            design: {
+                colors: 'Elegant palette: rose gold (#B76E79), soft blush (#FDF2F8), champagne (#F5E6CC), charcoal (#1A1A2E), warm white (#FFFBF5). Luxurious and feminine.',
+                fonts: 'Heading: Cormorant Garamond (weight 500, 600, 700). Body: Lato (weight 300, 400). Import both from Google Fonts.',
+                imagery: 'Salon interiors, hair styling, makeup artistry, nail art, beauty products, spa-like environments.',
+                mood: 'Elegant, luxurious, feminine, polished, sophisticated, pampering.'
+            }
+        },
+        {
+            name: 'homeservices',
+            keywords: ['plumber', 'plumbing', 'electrician', 'hvac', 'cleaning service', 'landscaping', 'roofing', 'handyman', 'painter', 'pest control', 'moving company', 'locksmith', 'home repair', 'pressure washing', 'carpet cleaning', 'garage door'],
+            design: {
+                colors: 'Reliable palette: trustworthy blue (#2563EB), vibrant orange (#F97316), clean white (#FFFFFF), dark slate (#1E293B), light gray surface (#F8FAFC). Professional and dependable.',
+                fonts: 'Heading: Montserrat (weight 600, 700, 800). Body: Open Sans (weight 400). Import both from Google Fonts.',
+                imagery: 'Professional workers on the job, tools and equipment, clean homes, before/after transformations, team photos.',
+                mood: 'Reliable, professional, trustworthy, skilled, dependable, local.'
+            }
+        },
+        {
+            name: 'church',
+            keywords: ['church', 'mosque', 'temple', 'synagogue', 'ministry', 'worship', 'religious', 'faith', 'congregation', 'parish', 'prayer', 'sermon', 'pastor', 'imam', 'rabbi', 'spiritual'],
+            design: {
+                colors: 'Peaceful palette: deep purple (#7C3AED), warm gold (#D4A853), soft lavender (#F5F3FF), warm cream (#FFFBEB), dark navy (#1E1B4B). Serene and welcoming.',
+                fonts: 'Heading: Merriweather (weight 700, 900). Body: Source Sans 3 (weight 400). Import both from Google Fonts.',
+                imagery: 'Beautiful worship spaces, community gatherings, peaceful architecture, nature scenes, volunteers helping.',
+                mood: 'Peaceful, welcoming, warm, hopeful, spiritual, community-focused.'
+            }
+        },
+        {
+            name: 'sports',
+            keywords: ['sports club', 'swimming', 'tennis', 'football', 'basketball', 'cricket', 'golf', 'soccer', 'athletics', 'stadium', 'sports academy', 'league', 'tournament', 'recreation center'],
+            design: {
+                colors: 'Energetic palette: vibrant green (#16A34A), dynamic blue (#2563EB), white (#FFFFFF), dark charcoal (#18181B), light green surface (#F0FDF4). Active and competitive.',
+                fonts: 'Heading: Montserrat (weight 700, 800, 900). Body: Roboto (weight 400). Import both from Google Fonts.',
+                imagery: 'Sports facilities, athletes in action, team celebrations, well-maintained fields and courts, trophy moments.',
+                mood: 'Energetic, competitive, dynamic, team-spirited, active, inspiring.'
+            }
+        },
+        {
+            name: 'food',
+            keywords: ['food truck', 'ice cream', 'juice bar', 'smoothie', 'bakery', 'pastry', 'dessert', 'donut', 'chocolate', 'candy', 'confectionery', 'food delivery', 'cupcake', 'gelato'],
+            design: {
+                colors: 'Appetizing palette: warm pink (#EC4899), rich amber (#F59E0B), cream (#FFF7ED), chocolate brown (#78350F), soft peach surface (#FFF1F2). Fun and delicious.',
+                fonts: 'Heading: Quicksand (weight 600, 700). Body: Lato (weight 400). Import both from Google Fonts.',
+                imagery: 'Colorful food photography, artisan baked goods, ice cream scoops, juice preparations, cozy shop interiors.',
+                mood: 'Appetizing, fun, colorful, artisan, inviting, delightful.'
+            }
+        },
+        {
+            name: 'consulting',
+            keywords: ['consulting', 'consultant', 'advisory', 'strategy', 'management consulting', 'coaching', 'mentoring', 'professional services', 'business consulting', 'life coach', 'career coach'],
+            design: {
+                colors: 'Authoritative palette: deep navy (#1E3A5F), warm gold (#D4A853), clean white (#FFFFFF), slate gray (#475569), light warm surface (#F8F6F3). Sophisticated and credible.',
+                fonts: 'Heading: DM Serif Display (weight 400). Body: Inter (weight 400). Import both from Google Fonts.',
+                imagery: 'Professional meetings, strategy sessions, modern offices, confident professionals, collaborative teamwork.',
+                mood: 'Authoritative, sophisticated, strategic, credible, professional, results-driven.'
+            }
+        },
+        {
             name: 'ecommerce',
             keywords: ['shop', 'store', 'ecommerce', 'e-commerce', 'product', 'buy', 'sell', 'retail', 'fashion', 'clothing', 'jewelry', 'accessories', 'marketplace', 'boutique', 'brand', 'apparel', 'shoes', 'cosmetics'],
             design: {
@@ -652,6 +722,37 @@ body { font-family: var(--font-body); color: var(--color-text); background: var(
 .hero__title { font-family: var(--font-heading); font-size: var(--text-7xl); font-weight: 800; }
 .hero__subtitle { font-size: var(--text-xl); margin-top: var(--space-4); opacity: 0.9; }
 
+/* Section alternating backgrounds */
+.features { background: var(--color-bg); padding: var(--section-spacing) 0; }
+.about { background: var(--color-surface-alt); padding: var(--section-spacing) 0; }
+.stats { background: var(--color-secondary); color: var(--color-text-inverse); padding: var(--section-spacing) 0; }
+.stats h2, .stats p, .stats span { color: var(--color-text-inverse); }
+.gallery { background: var(--color-bg); padding: var(--section-spacing) 0; }
+
+/* h2 section headings — brand colored, NEVER plain black */
+h2 { color: var(--color-primary-dark); }
+h2::before { content: ''; display: block; width: 40px; height: 3px; background: var(--color-primary); margin-bottom: var(--space-4); }
+.stats h2::before { background: var(--color-text-inverse); }
+
+/* Cards — depth + hover lift */
+.features__card, [class*="card"] {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+.features__card:hover, [class*="card"]:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Split image+text layout */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-12); align-items: center; }
+.split--reverse { direction: rtl; }
+.split--reverse > * { direction: ltr; }
+@media (max-width: 768px) { .split { grid-template-columns: 1fr; } }
+
 ...continue styling ALL remaining elements using var() tokens...
 
 // JavaScript
@@ -685,6 +786,17 @@ CSS COVERAGE — EVERY ELEMENT MUST BE STYLED:
 - ALL cards: background, border-radius, box-shadow, padding, transition, hover (lift + shadow increase)
 - ALL sections: padding using var(--section-spacing), alternating backgrounds using var(--color-bg) and var(--color-surface-alt)
 
+VISUAL RHYTHM — MANDATORY SECTION STYLING:
+- ALTERNATING BACKGROUNDS: Section 1 = var(--color-bg) (light), Section 2 = var(--color-surface-alt) (tinted), Section 3 = dark brand color (var(--color-secondary) or var(--color-primary-dark)), Section 4 = light again. NEVER two adjacent sections with the same background color.
+- ONE MANDATORY DARK SECTION: Exactly one content section (e.g. stats/CTA banner) MUST have a dark background (var(--color-secondary) or var(--color-primary-dark)) with ALL text in var(--color-text-inverse) white. This is NON-NEGOTIABLE — every website needs one dark section for visual contrast.
+- HEADING COLORS: All h2 section headings MUST use color: var(--color-primary-dark) on light backgrounds — NEVER plain black (#000) or var(--color-text). Optional: add a decorative accent bar above h2 (40px wide, 3px tall, var(--color-primary), margin-bottom: var(--space-4)).
+- CARD DEPTH: ALL cards MUST have box-shadow: var(--shadow-md) and on hover: transform: translateY(-4px) combined with box-shadow: var(--shadow-xl). Cards should feel like they lift off the page.
+- Example alternating pattern in CSS:
+  .features { background: var(--color-bg); }
+  .about { background: var(--color-surface-alt); }
+  .stats { background: var(--color-secondary); color: var(--color-text-inverse); }
+  .gallery { background: var(--color-bg); }
+
 NAVBAR + HERO SPACING — CRITICAL:
 - Navbar is position: fixed. Body MUST have padding-top: var(--navbar-height) so content never hides behind it.
 - Define --navbar-height: 80px in :root.
@@ -699,6 +811,9 @@ MODERN DESIGN TECHNIQUES:
 - Sticky navigation with backdrop-filter: blur(12px) and subtle border-bottom on scroll
 - Clean section transitions — never abrupt color changes between sections
 - Image treatments: overlays, rounded corners, subtle shadows, hover zoom on gallery images
+- Decorative heading accent bar: 40px × 3px rectangle in var(--color-primary) above section h2 headings for visual polish
+- SVG icons in feature/service cards (inline SVG, NOT emoji) — use simple, clean line icons that match the niche
+- Split content sections: alternate image-left/text-right and image-right/text-left for visual flow
 
 RESPONSIVE DESIGN — MOBILE FIRST:
 - Start with mobile layout, enhance for larger screens
@@ -729,9 +844,16 @@ REQUIRED SECTIONS — YOU MUST GENERATE ALL 5:
    - MUST have white centered text: large heading + subtitle + CTA buttons
    - body must have padding-top: var(--navbar-height) so hero is not behind fixed navbar
 
-3. CONTENT SECTIONS — 3-5 sections (features, services, about, stats, testimonials, gallery, team)
+3. CONTENT SECTIONS — 4-5 sections using DIFFERENT LAYOUTS from this menu:
+   A) Card Grid — 3-column cards with icons/images + title + description (MAX 1x — never repeat this layout)
+   B) Split Image+Text — Two columns: large image on one side + text/bullets on other. Alternate left/right between uses (MAX 2x)
+   C) Dark Stats Banner — Dark background (var(--color-secondary)), 3-4 large stat numbers + labels, white text (MANDATORY 1x — every site needs this)
+   D) Testimonials — Quote cards with name, role, star rating or photo (MAX 1x)
+   E) About/Story — Centered text block + supporting image, more personal tone (MAX 1x)
+   F) Gallery/Showcase — Image grid using provided content images in 3-column CSS grid (MAX 1x)
+   RULES: Must use at least 3 DIFFERENT layouts. Card grid (A) max once. Dark stats (C) mandatory once. NEVER repeat the same layout in adjacent sections.
    - Content images go in a 3-column CSS grid with complete rows (no orphans)
-   - Each section: proper heading, descriptive content, full styling
+   - Each section: proper heading with var(--color-primary-dark), descriptive content, full styling
 
 4. CONTACT FORM — Name input, Email input, Message textarea, Submit button
    - Full JS validation (email regex, required fields, visual error/success feedback)
@@ -783,11 +905,14 @@ EXECUTION CHECKLIST — FOLLOW IN ORDER:
 4. Write <nav class="navbar"> with position: fixed, logo, links, CTA, hamburger
 5. Write <section class="hero" id="home"> with background-image: url(IMAGE_1_URL), ::before overlay, white centered text
 6. Write body { padding-top: var(--navbar-height); } so hero is not behind navbar
-7. Write 3-5 content sections using IMAGES #2+ as <img> tags in 3-column grids
-8. Write <section class="contact"> with validated form
-9. Write <footer> with links, SVG social icons, copyright
-10. Write JS: mobile menu, smooth scroll, scroll reveal, form validation, sticky header
-11. Check: EVERY element has a class, EVERY element is styled, ZERO browser defaults visible
+7. Write 4-5 content sections — EACH with a DIFFERENT layout (A-F). ONE dark background section MANDATORY
+8. ALTERNATING backgrounds: light → tinted → dark → light. NEVER two adjacent sections same color
+9. ALL h2 headings: color: var(--color-primary-dark), NOT black. Optional decorative bar above
+10. ALL cards: box-shadow: var(--shadow-md) + hover: translateY(-4px) + var(--shadow-xl)
+11. Write <section class="contact"> with validated form
+12. Write <footer> with links, SVG social icons, copyright
+13. Write JS: mobile menu, smooth scroll, scroll reveal, form validation, sticky header
+14. FINAL CHECK: EVERY element has a class, EVERY element styled, ZERO browser defaults, NO two adjacent sections same bg color
 
 Return COMPLETE code in EXACT format:
 <!-- HTML -->
@@ -896,7 +1021,7 @@ Return the COMPLETE modified code in format:
         // Generate with Claude
         console.log(`🤖 Calling Claude API... [Niche: ${niche.name}] ${!isNewDesign && isTargetedEdit ? '(Targeted Edit)' : ''}`);
         const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-5-20250929',
             max_tokens: 16000,
             temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7,
             system: systemPrompt,
@@ -1191,7 +1316,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; max-width: 1
             console.log('🔧 JS missing — generating separately...');
             try {
                 const jsResponse = await anthropic.messages.create({
-                    model: 'claude-sonnet-4-20250514',
+                    model: 'claude-sonnet-4-5-20250929',
                     max_tokens: 2000,
                     temperature: 0.3,
                     system: 'You are a frontend JavaScript expert. Generate ONLY vanilla JavaScript code. No explanations, no markdown, no code blocks. Just raw JavaScript.',
@@ -1315,7 +1440,7 @@ USER REQUEST: ${prompt}
 Return the modified element. If you need to add/modify CSS, include COMPLETE CSS rules in a /* ELEMENT_CSS */ block.`;
 
         const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-5-20250929',
             max_tokens: 2000,
             temperature: 0.3,
             system: systemPrompt,

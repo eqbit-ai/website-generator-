@@ -59,6 +59,76 @@ const NICHE_SEARCH_QUERIES = {
         'city skyline business district',
         'professional portrait business'
     ],
+    pets: [
+        'cute dogs playing park',
+        'kittens adorable pets',
+        'pet store interior colorful',
+        'veterinarian dog checkup',
+        'dog playing fetch outdoors',
+        'pet grooming salon dog',
+        'tropical aquarium fish',
+        'puppies golden retriever'
+    ],
+    beauty: [
+        'salon interior modern elegant',
+        'hair styling professional salon',
+        'makeup artist beauty studio',
+        'nail art manicure elegant',
+        'spa facial treatment relaxing',
+        'barbershop classic interior',
+        'beauty products cosmetics display',
+        'salon chair mirror station'
+    ],
+    homeservices: [
+        'plumber fixing pipes repair',
+        'electrician wiring professional',
+        'house cleaning spotless home',
+        'landscaping garden beautiful',
+        'roof repair construction worker',
+        'handyman tools workshop',
+        'pressure washing exterior house',
+        'painting walls home interior'
+    ],
+    church: [
+        'church interior stained glass',
+        'worship service community',
+        'community gathering volunteers',
+        'church exterior architecture',
+        'peaceful prayer meditation',
+        'choir singing worship',
+        'bible study group people',
+        'volunteers community service'
+    ],
+    sports: [
+        'soccer field match game',
+        'swimming pool lanes sports',
+        'tennis court match playing',
+        'basketball court game action',
+        'sports team celebration',
+        'golf course green landscape',
+        'running track athletics',
+        'sports facility gym modern'
+    ],
+    food: [
+        'food truck colorful street',
+        'ice cream cone scoops',
+        'fresh juice bar colorful',
+        'artisan bakery bread pastry',
+        'dessert plating beautiful',
+        'smoothie bowl tropical fruits',
+        'chocolate pastry gourmet',
+        'donut shop colorful display'
+    ],
+    consulting: [
+        'business strategy meeting professional',
+        'consultant presentation boardroom',
+        'corporate office modern interior',
+        'handshake professional deal',
+        'whiteboard planning strategy',
+        'executive portrait professional',
+        'team collaboration workspace',
+        'conference room modern meeting'
+    ],
     ecommerce: [
         'product photography minimal',
         'online shopping lifestyle',
