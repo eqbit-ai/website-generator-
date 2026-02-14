@@ -1,5 +1,5 @@
 // backend/routes/generator.js
-// AI-Driven Premium Website Generator with Context-Aware Images
+// AI-Driven Premium Website Generator with Design System & Niche Intelligence
 
 const express = require('express');
 const router = express.Router();
@@ -16,66 +16,323 @@ if (process.env.ANTHROPIC_API_KEY) {
     }
 }
 
-// Session storage (in production, use Redis or database)
+// Session storage
 const designSessions = new Map();
 
 // ============================================
-// QUALITY GUIDELINES — Creative freedom with high quality standards
+// NICHE DETECTION — Map business type to design parameters
 // ============================================
-const QUALITY_GUIDELINES = `
-QUALITY STANDARDS (follow these principles, but design creatively based on the user's prompt):
+function detectNiche(prompt) {
+    const p = prompt.toLowerCase();
 
-1. DESIGN BASED ON THE PROMPT:
-   - Read the user's prompt carefully — the colors, mood, style, and industry should ALL come from what they asked for
-   - "dark gradient futuristic" = dark backgrounds, neon accents, cyber fonts, glowing effects
-   - "minimal clean" = white space, simple typography, muted colors
-   - "warm cozy restaurant" = warm tones, food imagery, inviting feel
-   - YOU decide the exact colors, fonts, and mood — make it match the prompt perfectly
+    const niches = [
+        {
+            name: 'restaurant',
+            keywords: ['restaurant', 'food', 'cafe', 'bakery', 'pizza', 'sushi', 'dining', 'bistro', 'grill', 'kitchen', 'catering', 'chef', 'menu', 'bar', 'pub', 'brewery', 'coffee shop', 'tea house', 'patisserie', 'deli', 'diner', 'eatery', 'steakhouse', 'buffet'],
+            design: {
+                colors: 'Warm palette: deep burgundy (#722F37), warm amber (#D4A853), terracotta (#C76B4A), olive (#6B7B3A), cream background (#FDF8F0). NEVER use cold blues.',
+                fonts: 'Heading: Playfair Display (weight 700, 800). Body: Lato (weight 300, 400). Import both from Google Fonts.',
+                imagery: 'Close-up food photography, warm restaurant interiors with ambient lighting, plated dishes, fresh ingredients.',
+                mood: 'Warm, inviting, appetizing, cozy, sophisticated.'
+            }
+        },
+        {
+            name: 'technology',
+            keywords: ['tech', 'software', 'saas', 'app', 'startup', 'ai', 'artificial intelligence', 'cloud', 'platform', 'digital', 'cyber', 'data', 'analytics', 'automation', 'api', 'developer', 'code', 'machine learning', 'blockchain', 'devops', 'fintech'],
+            design: {
+                colors: 'Cool palette: electric indigo (#6366F1), deep navy (#0F172A), cyan accent (#06B6D4), subtle gray surfaces (#1E293B, #334155). Neon gradients on dark backgrounds.',
+                fonts: 'Heading: Inter (weight 700, 800) or Space Grotesk (weight 600, 700). Body: Inter (weight 400). Import from Google Fonts.',
+                imagery: 'Abstract tech visuals, gradient abstract shapes, dashboard mockups, minimal geometric illustrations.',
+                mood: 'Cutting-edge, futuristic, clean, innovative, trustworthy.'
+            }
+        },
+        {
+            name: 'health',
+            keywords: ['health', 'medical', 'doctor', 'clinic', 'hospital', 'dental', 'dentist', 'therapy', 'therapist', 'wellness', 'fitness', 'gym', 'yoga', 'spa', 'nutrition', 'pharmacy', 'physiotherapy', 'mental health', 'skincare', 'dermatology'],
+            design: {
+                colors: 'Calming palette: soft teal (#0D9488), gentle sage (#86EFAC), clean white (#FFFFFF), light mint surface (#F0FDF4), warm blue accent (#3B82F6). Avoid harsh reds.',
+                fonts: 'Heading: Nunito (weight 700, 800). Body: Open Sans (weight 400). Import from Google Fonts.',
+                imagery: 'Smiling medical professionals, clean clinical spaces, nature/wellness imagery, people exercising, calming environments.',
+                mood: 'Trustworthy, clean, calming, professional, caring.'
+            }
+        },
+        {
+            name: 'legal',
+            keywords: ['law', 'legal', 'attorney', 'lawyer', 'firm', 'advocate', 'justice', 'court', 'litigation', 'paralegal', 'barrister', 'solicitor', 'notary'],
+            design: {
+                colors: 'Authoritative palette: deep navy (#1E3A5F), charcoal (#2D3748), gold accent (#C9A84C), rich mahogany (#6B3A2A), ivory surface (#FFFFF0).',
+                fonts: 'Heading: Libre Baskerville (weight 700) or Cormorant Garamond (weight 600, 700). Body: Source Sans 3 (weight 400). Import from Google Fonts.',
+                imagery: 'Professional office interiors, confident attorneys, cityscapes, law books, scales of justice.',
+                mood: 'Authoritative, trustworthy, sophisticated, established, prestigious.'
+            }
+        },
+        {
+            name: 'ecommerce',
+            keywords: ['shop', 'store', 'ecommerce', 'e-commerce', 'product', 'buy', 'sell', 'retail', 'fashion', 'clothing', 'jewelry', 'accessories', 'marketplace', 'boutique', 'brand', 'apparel', 'shoes', 'cosmetics'],
+            design: {
+                colors: 'Clean palette: pure white surface (#FFFFFF), light gray (#F8FAFC), bold CTA (coral #FF6B6B or emerald #10B981), charcoal text (#1A1A2E). Minimal, let products shine.',
+                fonts: 'Heading: Montserrat (weight 600, 700) or Poppins (weight 600, 700). Body: Inter (weight 400). Import from Google Fonts.',
+                imagery: 'Clean product photography on white backgrounds, lifestyle shots, model photography, flat lay compositions.',
+                mood: 'Clean, shoppable, visual-first, conversion-focused, modern.'
+            }
+        },
+        {
+            name: 'realestate',
+            keywords: ['real estate', 'property', 'realty', 'homes', 'apartment', 'housing', 'mortgage', 'broker', 'agent', 'listing', 'rental', 'construction', 'builder', 'architect', 'interior design'],
+            design: {
+                colors: 'Sophisticated palette: slate blue (#475569), warm gold (#D4A853), clean white (#FFFFFF), charcoal (#1E293B), soft warm gray surface (#F8F6F3).',
+                fonts: 'Heading: DM Serif Display (weight 400) or Playfair Display (weight 700). Body: Work Sans (weight 400) or Poppins (weight 400). Import from Google Fonts.',
+                imagery: 'Luxury property exteriors, modern interiors, aerial neighborhood views, architectural details, happy families.',
+                mood: 'Prestigious, aspirational, trustworthy, professional, warm.'
+            }
+        },
+        {
+            name: 'education',
+            keywords: ['school', 'university', 'college', 'education', 'academy', 'learning', 'course', 'training', 'tutor', 'student', 'e-learning', 'online class', 'institute', 'coaching', 'workshop'],
+            design: {
+                colors: 'Energetic palette: vibrant blue (#3B82F6), warm orange accent (#F59E0B), fresh green (#22C55E), clean white (#FFFFFF), light blue surface (#EFF6FF).',
+                fonts: 'Heading: Nunito (weight 700, 800) or Quicksand (weight 600, 700). Body: Open Sans (weight 400). Import from Google Fonts.',
+                imagery: 'Students learning collaboratively, campus life, classrooms, graduation, books, digital learning.',
+                mood: 'Inspiring, accessible, growth-oriented, welcoming, energetic.'
+            }
+        },
+        {
+            name: 'creative',
+            keywords: ['portfolio', 'designer', 'photographer', 'artist', 'creative', 'studio', 'agency', 'graphic design', 'illustration', 'video', 'film', 'animation', 'music', 'band', 'gallery', 'freelance'],
+            design: {
+                colors: 'Bold palette: monochrome base (pure black #000000, white #FFFFFF) with ONE striking accent. OR unexpected pairings. Dark backgrounds to showcase work.',
+                fonts: 'Heading: Space Grotesk (weight 500, 700) or Syne (weight 600, 700, 800). Body: DM Sans (weight 400). Import from Google Fonts.',
+                imagery: 'Portfolio pieces, creative process shots, studio environments, artistic close-ups, work samples.',
+                mood: 'Creative, bold, distinctive, visual-first, minimal, edgy.'
+            }
+        },
+        {
+            name: 'finance',
+            keywords: ['finance', 'bank', 'investment', 'insurance', 'accounting', 'tax', 'wealth', 'fintech', 'crypto', 'trading', 'fund', 'capital', 'advisory', 'consultant'],
+            design: {
+                colors: 'Trust palette: deep blue (#1E40AF), forest green (#166534), silver-gray (#94A3B8), subtle gold (#B8860B), clean white surface (#FFFFFF).',
+                fonts: 'Heading: DM Serif Display (weight 400) or Merriweather (weight 700). Body: Inter (weight 400). Import from Google Fonts.',
+                imagery: 'Modern offices, financial charts/growth imagery, handshakes, city skylines, professional team photos.',
+                mood: 'Trustworthy, stable, professional, growth-oriented, secure.'
+            }
+        },
+        {
+            name: 'travel',
+            keywords: ['travel', 'hotel', 'resort', 'tourism', 'vacation', 'flight', 'booking', 'adventure', 'tour', 'cruise', 'destination', 'hostel', 'lodge', 'trip'],
+            design: {
+                colors: 'Vibrant palette: ocean blue (#0EA5E9), sunset coral (#FB923C), sandy warm (#D4A574), lush green (#16A34A), warm white surface (#FFFBF5).',
+                fonts: 'Heading: Playfair Display (weight 700) or Josefin Sans (weight 600, 700). Body: Lato (weight 400). Import from Google Fonts.',
+                imagery: 'Stunning landscapes, beach scenes, cultural landmarks, people exploring, aerial destination views.',
+                mood: 'Adventurous, aspirational, warm, exciting, luxurious.'
+            }
+        },
+        {
+            name: 'nonprofit',
+            keywords: ['nonprofit', 'non-profit', 'charity', 'foundation', 'ngo', 'donation', 'volunteer', 'cause', 'community', 'humanitarian', 'social impact', 'welfare'],
+            design: {
+                colors: 'Hopeful palette: warm earth tones (#92400E), vibrant orange (#EA580C), deep teal (#0F766E), warm cream surface (#FEF3C7), trust blue (#2563EB).',
+                fonts: 'Heading: Nunito (weight 700) or Merriweather (weight 700). Body: Source Sans 3 (weight 400). Import from Google Fonts.',
+                imagery: 'People being helped, community activities, volunteers in action, impactful moments, diverse groups, nature.',
+                mood: 'Compassionate, hopeful, trustworthy, impactful, warm, inspiring.'
+            }
+        },
+        {
+            name: 'automotive',
+            keywords: ['car', 'auto', 'vehicle', 'motor', 'dealer', 'dealership', 'garage', 'mechanic', 'motorcycle', 'truck', 'fleet', 'detailing', 'racing'],
+            design: {
+                colors: 'Bold palette: jet black (#0A0A0A), racing red (#DC2626), metallic silver (#CBD5E1), midnight blue (#1E293B). High contrast, dramatic.',
+                fonts: 'Heading: Rajdhani (weight 600, 700) or Oswald (weight 500, 600). Body: Inter (weight 400) or Roboto (weight 400). Import from Google Fonts.',
+                imagery: 'Sleek vehicle photography, showroom interiors, road/racing scenes, engine details, dramatic angles.',
+                mood: 'Dynamic, powerful, sleek, premium, exciting, bold.'
+            }
+        },
+        {
+            name: 'wedding',
+            keywords: ['wedding', 'bridal', 'event planning', 'florist', 'venue', 'celebration', 'planner', 'marriage', 'engagement'],
+            design: {
+                colors: 'Romantic palette: blush pink (#FBCFE8), soft gold (#D4A853), ivory (#FFFFF0), sage green (#86EFAC), champagne (#F5E6CC).',
+                fonts: 'Heading: Cormorant Garamond (weight 500, 600) or Playfair Display (weight 400, 700). Body: Lato (weight 300, 400). Import from Google Fonts.',
+                imagery: 'Elegant wedding scenes, floral arrangements, couples, venues, decorations, ceremony details.',
+                mood: 'Romantic, elegant, timeless, joyful, dreamy, sophisticated.'
+            }
+        },
+        {
+            name: 'gaming',
+            keywords: ['gaming', 'esports', 'game', 'gamer', 'stream', 'twitch', 'xbox', 'playstation', 'nintendo', 'rpg', 'mmorpg'],
+            design: {
+                colors: 'Electric palette: neon purple (#A855F7), electric cyan (#22D3EE), hot pink (#EC4899), deep black (#09090B), dark surface (#18181B). Glowing neon effects.',
+                fonts: 'Heading: Rajdhani (weight 700) or Orbitron (weight 700, 800). Body: Inter (weight 400). Import from Google Fonts.',
+                imagery: 'Gaming setups, esports events, game screenshots, controllers, neon-lit environments.',
+                mood: 'High-energy, futuristic, bold, immersive, competitive, electric.'
+            }
+        }
+    ];
 
-2. POLISH & QUALITY:
-   - Use CSS custom properties for colors and fonts (easy to maintain)
-   - Import Google Fonts that match the mood (2 fonts: heading + body)
-   - Every element must be fully styled — NO default browser styling visible
-   - Smooth transitions on hover states (buttons, cards, links)
-   - Scroll reveal animations using IntersectionObserver
-   - Hero section entrance animations
-   - Sticky navigation with backdrop-filter blur
-   - Responsive design (mobile hamburger menu, fluid typography, flexible grids)
+    for (const niche of niches) {
+        if (niche.keywords.some(kw => p.includes(kw))) {
+            console.log(`🎯 Niche detected: ${niche.name}`);
+            return niche;
+        }
+    }
 
-3. VISUAL IMPACT:
-   - Hero section should be attention-grabbing and full viewport height
-   - Use gradients, shadows, and depth to create visual hierarchy
-   - Images should have proper treatments (overlays, rounded corners, shadows)
-   - Buttons should feel clickable (hover lift effect, color change)
-   - Cards should have hover effects (lift, shadow increase)
-   - Use spacing consistently throughout
+    return {
+        name: 'general',
+        design: {
+            colors: 'Analyze the business type and choose psychologically appropriate colors. Apply the 60-30-10 rule: 60% dominant surface color, 30% secondary, 10% accent for CTAs.',
+            fonts: 'Choose two complementary Google Fonts — one distinctive heading font (personality) and one highly readable body font (clarity). Import both.',
+            imagery: 'Professional, relevant imagery that matches the business context and target audience.',
+            mood: 'Professional, polished, trustworthy, modern.'
+        }
+    };
+}
 
-4. TECHNICAL QUALITY:
-   - Semantic HTML5 (nav, header, main, section, footer)
-   - CSS Grid and Flexbox for layouts
-   - Mobile-first responsive breakpoints
-   - Accessible (alt text, ARIA labels, color contrast)
-   - All images: object-fit: cover, loading="lazy"
+// ============================================
+// DESIGN TOKEN SYSTEM
+// ============================================
+const DESIGN_SYSTEM = `
+MANDATORY DESIGN TOKEN SYSTEM — You MUST define these CSS custom properties in :root BEFORE any other styles:
+
+:root {
+  /* Font Families — choose Google Fonts based on niche */
+  --font-heading: '[heading font name]', [serif/sans-serif fallback];
+  --font-body: '[body font name]', sans-serif;
+
+  /* Type Scale (Major Third 1.25 ratio) — use these for ALL font sizes */
+  --text-xs: 0.75rem;    /* 12px — captions, fine print */
+  --text-sm: 0.875rem;   /* 14px — small labels, metadata */
+  --text-base: 1rem;     /* 16px — body text baseline */
+  --text-lg: 1.125rem;   /* 18px — emphasized body, lead text */
+  --text-xl: 1.25rem;    /* 20px — large body, card titles */
+  --text-2xl: 1.5rem;    /* 24px — section subtitles */
+  --text-3xl: 1.875rem;  /* 30px — small section headings */
+  --text-4xl: 2.25rem;   /* 36px — section headings */
+  --text-5xl: 3rem;      /* 48px — page headings */
+  --text-6xl: 3.75rem;   /* 60px — hero heading mobile */
+  --text-7xl: 4.5rem;    /* 72px — hero heading desktop */
+
+  /* Spacing Scale (4px base unit) — use these for ALL margin, padding, gap */
+  --space-1: 0.25rem;    /* 4px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+  --space-24: 6rem;      /* 96px */
+  --space-32: 8rem;      /* 128px */
+
+  /* Color System — 60-30-10 Rule — fill in based on niche/mood */
+  --color-primary: ;         /* Brand color for CTAs, links, highlights */
+  --color-primary-light: ;   /* Lighter tint — hovers, active states, soft backgrounds */
+  --color-primary-dark: ;    /* Darker shade — text on light surfaces, pressed states */
+  --color-secondary: ;       /* Supporting color — 30% of visual weight */
+  --color-accent: ;          /* Pop color — 10% — attention-grabbing highlights */
+  --color-bg: ;              /* Page background */
+  --color-surface: ;         /* Cards, panels, elevated content */
+  --color-surface-alt: ;     /* Alternating section backgrounds */
+  --color-text: ;            /* Primary text */
+  --color-text-muted: ;      /* Secondary/supporting text */
+  --color-text-inverse: ;    /* Text on dark or colored backgrounds */
+  --color-border: ;          /* Subtle borders and dividers */
+
+  /* Elevation — consistent shadow system */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --container-max: 1280px;
+  --section-spacing: var(--space-24);
+}
+
+TOKEN USAGE RULES — MANDATORY:
+- ALWAYS use var(--token) in CSS — NEVER hardcode px, rem, or color values
+- Every heading: font-family: var(--font-heading) + appropriate --text-* size
+- Every body text: font-family: var(--font-body) + --text-base or --text-lg
+- Every spacing: var(--space-*) for margin, padding, gap
+- Every color: var(--color-*) tokens
+- Every shadow: var(--shadow-*) tokens
+- Every border-radius: var(--radius-*) tokens
+- Every transition: var(--transition-*) tokens
+- Container: max-width: var(--container-max) with margin: 0 auto
+- Section padding: var(--section-spacing) 0
 `;
 
+// ============================================
+// OUTPUT SANITIZER — Strip artifacts, validate clean output
+// ============================================
+function sanitizeOutput(html, css, js) {
+    const stripArtifacts = (str) => str
+        .replace(/<!--\s*HTML\s*-->/gi, '')
+        .replace(/\/\*\s*CSS\s*\*\//gi, '')
+        .replace(/\/\/\s*JavaScript\s*/gi, '')
+        .replace(/```(?:html|css|javascript|js)?\s*/gi, '')
+        .replace(/```\s*/g, '');
 
-// Fix escaped HTML that appears as text (common AI generation issue)
+    html = stripArtifacts(html).trim();
+    css = stripArtifacts(css).trim();
+    js = stripArtifacts(js).trim();
+
+    // Remove AI explanation text before first HTML tag
+    if (html && !html.startsWith('<')) {
+        const firstTag = html.indexOf('<');
+        if (firstTag > 0) {
+            html = html.substring(firstTag);
+        }
+    }
+
+    // Remove AI explanation text after last HTML closing tag
+    if (html) {
+        const lastTag = html.lastIndexOf('>');
+        if (lastTag !== -1) {
+            const remainder = html.substring(lastTag + 1).trim();
+            if (remainder && !/^</.test(remainder)) {
+                html = html.substring(0, lastTag + 1);
+            }
+        }
+    }
+
+    // Remove <html>, <head>, <body>, <meta>, <!DOCTYPE> tags from HTML (Preview.jsx handles these)
+    html = html
+        .replace(/<!DOCTYPE[^>]*>/gi, '')
+        .replace(/<\/?html[^>]*>/gi, '')
+        .replace(/<\/?head[^>]*>/gi, '')
+        .replace(/<\/?body[^>]*>/gi, '')
+        .replace(/<meta[^>]*\/?>/gi, '')
+        .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '');
+
+    // Remove @charset from CSS (unnecessary in <style> tags)
+    css = css.replace(/@charset\s+["'][^"']*["']\s*;?/gi, '');
+
+    return { html: html.trim(), css: css.trim(), js: js.trim() };
+}
+
+// Fix escaped HTML that appears as text
 function fixEscapedHtml(content) {
     if (!content) return content;
-
-    // Fix HTML entities that shouldn't be escaped in actual HTML
-    let fixed = content
-        // Fix escaped tags that appear as text like: &lt;span&gt; -> <span>
+    return content
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&amp;/g, '&')
         .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        // Fix cases where tags are rendered as text (visible in rendered output)
-        // This pattern matches text like: <span class="x">text</span> appearing as literal text
-        .replace(/<span([^>]*)>([^<]*)<\/span>/g, '<span$1>$2</span>');
-
-    return fixed;
+        .replace(/&#39;/g, "'");
 }
 
 // Create or get session
@@ -91,6 +348,7 @@ function getSession(sessionId) {
             currentDesign: null,
             style: null,
             palette: null,
+            niche: null,
             createdAt: new Date().toISOString()
         });
     }
@@ -102,7 +360,6 @@ function getSession(sessionId) {
 function wantsNewDesign(prompt) {
     const p = prompt.toLowerCase().trim();
 
-    // Explicit new-design keywords
     const explicitKeywords = [
         'new design', 'start over', 'create new', 'make new',
         'different design', 'another design', 'fresh design',
@@ -110,8 +367,6 @@ function wantsNewDesign(prompt) {
     ];
     if (explicitKeywords.some(keyword => p.includes(keyword))) return true;
 
-    // Patterns that describe a WHOLE website (not a small edit)
-    // e.g., "need a X website", "create a X website", "build a X landing page"
     const fullWebsitePatterns = [
         /(?:need|want|give|create|build|make|design|generate)\s+(?:a|an|me\s+a)\s+.*(?:website|site|page|portfolio|landing|homepage|blog)/i,
         /(?:website|site|page|portfolio|landing|homepage|blog)\s+(?:for|about|with)\s+/i,
@@ -122,7 +377,9 @@ function wantsNewDesign(prompt) {
     return false;
 }
 
-// Generate website
+// ============================================
+// GENERATE WEBSITE
+// ============================================
 router.post('/generate', async (req, res) => {
     try {
         const { prompt, sessionId } = req.body;
@@ -135,14 +392,17 @@ router.post('/generate', async (req, res) => {
             return res.status(500).json({ error: 'AI service not available' });
         }
 
-        // Set timeout to 5 minutes
-        req.setTimeout(300000);
-        res.setTimeout(300000);
+        // 8 minute timeout for safety
+        req.setTimeout(480000);
+        res.setTimeout(480000);
 
         const session = getSession(sessionId);
         const isNewDesign = !session.currentDesign || wantsNewDesign(prompt);
 
-        console.log(`🎨 ${isNewDesign ? 'NEW DESIGN' : 'ITERATING'}: "${prompt.substring(0, 50)}..."`);
+        console.log(`🎨 ${isNewDesign ? 'NEW DESIGN' : 'ITERATING'}: "${prompt.substring(0, 60)}..."`);
+
+        // Detect niche for design intelligence
+        const niche = detectNiche(prompt);
 
         // Get context-aware images from Unsplash
         let contextualImages = [];
@@ -158,279 +418,296 @@ router.post('/generate', async (req, res) => {
         // Build conversation history
         const conversationMessages = [...session.conversationHistory];
 
-        // Create the prompt based on whether it's new or iteration
         let systemPrompt, userMessage;
         let isTargetedEdit = false;
 
         if (isNewDesign) {
             // Reset history for new design
             session.conversationHistory = [];
+            session.niche = niche;
 
-            // Build image list for AI with explicit instructions
+            // Build image list
             const imageUrls = contextualImages.length > 0
-                ? `🚨 MUST USE THESE EXACT URLS IN <img src="..."> TAGS - NO PLACEHOLDERS:\n${contextualImages.map((img, i) =>
-                    `${i + 1}. ${img.url}\n   Alt text: "${img.alt}"`
+                ? `USE THESE EXACT URLS IN <img src="..."> TAGS — NO PLACEHOLDERS:\n${contextualImages.map((img, i) =>
+                    `${i + 1}. ${img.url}\n   Alt: "${img.alt}"\n   Credit: ${img.photographer}`
                 ).join('\n\n')}`
-                : 'No images loaded - use source.unsplash.com URLs with relevant search terms';
+                : 'No pre-loaded images — use direct Unsplash URLs with relevant search terms: https://images.unsplash.com/photo-[id]?w=800&fit=crop';
 
-            systemPrompt = `You are a senior UI/UX and front-end architect who creates stunning, premium websites with UNIQUE layouts.
+            systemPrompt = `You are a world-class UI/UX designer and front-end architect with 20 years of experience. You create stunning, production-ready websites that look like they cost $10,000+ to build. Zero errors, zero visible code, zero unstyled elements.
 
-${QUALITY_GUIDELINES}
+DETECTED NICHE: ${niche.name.toUpperCase()}
 
-LAYOUT SELECTION (CRITICAL):
-You have 8 predefined website layout patterns. Analyze the user's prompt and SELECT ONE layout that best fits:
+NICHE-SPECIFIC DESIGN DIRECTION:
+- Color Psychology: ${niche.design.colors}
+- Font Pairing: ${niche.design.fonts}
+- Image Style: ${niche.design.imagery}
+- Mood & Feel: ${niche.design.mood}
 
-1. **Hero-led SaaS layout**: Large hero with CTA above fold, feature grid below, pricing, testimonials
-   Best for: Software, apps, platforms, tech services
+${DESIGN_SYSTEM}
 
-2. **Split-screen feature layout**: Alternating left/right image-text sections, each feature highlighted
-   Best for: Product showcases, services with multiple benefits
+TYPOGRAPHY HIERARCHY — Apply consistently:
+- h1 (hero): font-family: var(--font-heading); font-size: var(--text-7xl); font-weight: 800; letter-spacing: -0.025em; line-height: 1.1
+  → Mobile: font-size: var(--text-5xl)
+- h2 (section titles): font-family: var(--font-heading); font-size: var(--text-5xl); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2
+  → Mobile: font-size: var(--text-4xl)
+- h3 (subsections): font-family: var(--font-heading); font-size: var(--text-3xl); font-weight: 600; line-height: 1.3
+- h4 (card titles): font-family: var(--font-heading); font-size: var(--text-2xl); font-weight: 600
+- Body text: font-family: var(--font-body); font-size: var(--text-lg); line-height: 1.7; color: var(--color-text)
+- Small/muted: font-size: var(--text-sm); color: var(--color-text-muted)
+- Buttons: font-size: var(--text-base); font-weight: 600; letter-spacing: 0.01em
+- Nav links: font-size: var(--text-sm); font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase
 
-3. **Dashboard-style app layout**: Card-based layout, data visualization feel, metrics/stats prominent
-   Best for: Analytics, SaaS dashboards, data products
+LAYOUT SELECTION — Analyze the prompt and pick the BEST fit:
+1. Hero-led SaaS: big hero + CTA above fold, feature grid, pricing, testimonials, stats
+2. Split-screen features: alternating left/right image-text blocks, each benefit highlighted
+3. Dashboard-style: card-based, metrics/stats prominent, data visualization feel
+4. Minimal portfolio: large whitespace, image-focused, elegant type, simple nav
+5. Content-first blog: article/card grid, sidebar, featured posts, categories
+6. Conversion landing: single column, progressive disclosure, strong CTAs, urgency
+7. Marketplace/catalog: product grid, filters, category navigation, search bar
+8. Storytelling brand: narrative flow, parallax, full-width sections, emotional design
 
-4. **Minimal portfolio layout**: Large white space, image-focused, elegant typography, simple navigation
-   Best for: Creatives, designers, photographers, artists
-
-5. **Content-first blog layout**: Article/card grid, sidebar, featured posts, category filters
-   Best for: Blogs, news, content sites, magazines
-
-6. **Conversion-focused landing page**: Single column, progressive disclosure, strong CTAs, urgency elements
-   Best for: Product launches, lead generation, campaigns
-
-7. **Marketplace/listing layout**: Grid of items/products, filters, search, category navigation
-   Best for: E-commerce, directories, marketplaces, catalogs
-
-8. **Storytelling brand layout**: Narrative flow, parallax, full-width sections, emotional design
-   Best for: Brand sites, luxury products, storytelling businesses
-
-PROCESS:
-1. Analyze the business type from the prompt
-2. SELECT ONE layout from above
-3. Log your choice: "Using Layout #X: [name] because [reason]"
-4. Generate the COMPLETE website using ONLY that layout pattern
-5. DO NOT mix layouts - commit to your choice
+ELEMENT CLASS NAMING — CRITICAL FOR EDITING:
+- Give EVERY element a unique, descriptive class name
+- Use BEM-lite convention: .section-name, .section-name__element, .section-name--modifier
+- Examples: .hero, .hero__title, .hero__subtitle, .hero__cta, .features, .features__card, .features__icon
+- NEVER leave elements without class names — this breaks the element editor
 
 CRITICAL FORMAT REQUIREMENTS (MUST FOLLOW EXACTLY):
 1. Start with EXACTLY: <!-- HTML -->
-2. Then ALL HTML code (body content only, no <html>, <head>, <body> tags)
+2. Then ALL HTML (body content ONLY — NO <html>, <head>, <body>, <link>, <meta>, <!DOCTYPE> tags)
 3. Then EXACTLY: /* CSS */
-4. Then ALL CSS code (complete styles for every element)
+4. Then ALL CSS (start with @import for Google Fonts, then :root tokens, then reset, then all styles)
 5. Then EXACTLY: // JavaScript
-6. Then ALL JavaScript code (complete interactivity)
+6. Then ALL JavaScript (complete interactivity)
 
-EXAMPLE FORMAT:
+FORMAT EXAMPLE:
 <!-- HTML -->
-<nav>...</nav>
-<header>...</header>
-...all HTML here...
+<nav class="navbar">
+  <div class="navbar__container">
+    <a href="#" class="navbar__logo">Brand</a>
+    <ul class="navbar__menu">...</ul>
+  </div>
+</nav>
+<header class="hero">...</header>
+<section class="features">...</section>
+...more sections...
+<section class="contact">
+  <form class="contact__form">...</form>
+</section>
+<footer class="footer">...</footer>
 
 /* CSS */
-* { margin: 0; padding: 0; }
-body { font-family: 'Poppins', sans-serif; }
-...all CSS here...
+@import url('https://fonts.googleapis.com/css2?family=...&display=swap');
+
+:root {
+  --font-heading: 'ChosenFont', sans-serif;
+  --font-body: 'ChosenFont', sans-serif;
+  --text-xs: 0.75rem;
+  ...all design tokens...
+  --color-primary: #...;
+  ...all colors...
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); color: var(--color-text); background: var(--color-bg); }
+...all styles using var() tokens...
 
 // JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-  ...all JS here...
+  try {
+    ...all JS with error handling...
+  } catch(e) { console.warn(e); }
 });
 
-CRITICAL RULES:
-- NO explanations before or after code
+ABSOLUTE RULES — VIOLATION = FAILURE:
+- NO text, explanations, or comments outside the three code sections
 - NO markdown code blocks (\`\`\`html, \`\`\`css, \`\`\`)
-- NO text outside the three sections
-- ALL code must be COMPLETE and PRODUCTION-READY
+- NO <html>, <head>, <body>, <link>, <meta> tags in HTML section
+- ALL code must be COMPLETE — NEVER truncate (finish footer, finish JS)
+- EVERY element MUST have a descriptive class name
+- EVERY element MUST be fully styled — ZERO default browser styling visible
+- NO Times New Roman, NO blue underlined links, NO unstyled bullets, NO browser-default anything
+- NO visible code artifacts, broken elements, or error text in the rendered page
+- NO placeholder text like "Lorem ipsum" — use realistic, contextual content
 
-DESIGN PHILOSOPHY - CREATE PREMIUM, UNIQUE DESIGNS:
-- You have COMPLETE CREATIVE FREEDOM to design based on the user's prompt
-- Analyze the prompt and create a design style that perfectly matches the business/topic
-- Choose colors, fonts, layouts, and animations that fit the brand identity
-- Make it PREMIUM - sophisticated, polished, professional, expensive-looking
-- Make it UNIQUE - avoid generic templates, create something memorable
-- EVERY element must be fully styled - NO unstyled HTML elements
-- NO default browser styling should be visible anywhere
-
-CSS COVERAGE - CRITICAL:
-- Style EVERY SINGLE element: divs, sections, headers, paragraphs, lists, links, buttons, forms, inputs, labels, etc.
-- Set font-family on body AND specific elements
-- Define colors, backgrounds, padding, margins, borders for ALL elements
-- Add hover states, transitions, animations throughout
-- Ensure ALL text has proper typography (size, weight, line-height, letter-spacing)
-- NO element should look like plain HTML
+CSS COVERAGE — EVERY ELEMENT MUST BE STYLED:
+- Universal reset: *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+- Body: font-family, color, background, line-height, -webkit-font-smoothing: antialiased
+- ALL headings (h1-h6): font-family, font-size, font-weight, line-height, letter-spacing, color, margin
+- ALL paragraphs: font-size, line-height, color, margin-bottom, max-width (for readability — max 70ch)
+- ALL links: color, text-decoration: none, transition, hover state with color change
+- ALL buttons: background, color, border, padding, border-radius, font-family, font-weight, cursor: pointer, hover (transform + shadow), active state, transition
+- ALL form inputs/textareas: width, padding, border, border-radius, font-family, font-size, background, color, focus state (outline/ring), placeholder styling, transition
+- ALL images: max-width: 100%, height: auto, object-fit: cover, display: block, border-radius
+- ALL lists: list-style: none, padding: 0
+- ALL cards: background, border-radius, box-shadow, padding, transition, hover (lift + shadow increase)
+- ALL sections: padding using var(--section-spacing), alternating backgrounds using var(--color-bg) and var(--color-surface-alt)
 
 MODERN DESIGN TECHNIQUES:
-- CSS Grid and Flexbox for layouts
-- Glassmorphism, gradients, shadows, backdrop filters
-- Smooth animations (scroll reveals, hover effects, transitions)
-- Modern typography (Google Fonts - choose appropriate fonts for the brand)
-- Micro-interactions and delightful details
-- Parallax effects, image overlays, creative shapes
-- Professional color schemes (analyze the business and choose appropriately)
-- Premium spacing and visual hierarchy
+- CSS Grid and Flexbox for ALL layouts (no floats)
+- Gradients, box-shadows, backdrop-filter for depth
+- Smooth scroll-reveal animations using IntersectionObserver (staggered, not all at once)
+- Hero entrance animations (fade-up, subtle scale)
+- Hover micro-interactions on buttons (lift 2px + shadow), cards (lift 4px + shadow), links (color shift)
+- Sticky navigation with backdrop-filter: blur(12px) and subtle border-bottom on scroll
+- Clean section transitions — never abrupt color changes between sections
+- Image treatments: overlays, rounded corners, subtle shadows, hover zoom on gallery images
 
-RESPONSIVE DESIGN:
-- Mobile-first approach
-- Fluid typography and spacing
-- Responsive images and layouts
-- Mobile navigation (hamburger menu)
-- Touch-friendly buttons and interactive elements
-- Test breakpoints: 320px, 768px, 1024px, 1440px
+RESPONSIVE DESIGN — MOBILE FIRST:
+- Start with mobile layout, enhance for larger screens
+- Breakpoints: @media (min-width: 480px), (min-width: 768px), (min-width: 1024px), (min-width: 1280px)
+- Mobile: single column, stacked layout, touch targets min 44px, hamburger menu
+- Tablet: 2-column grids, adjusted spacing
+- Desktop: full multi-column layouts, max-width container
+- Navigation: full menu on desktop, hamburger toggle on mobile (with slide-in or dropdown animation)
+- Typography: scale down headings on mobile (h1: --text-5xl, h2: --text-4xl)
+- Images: 100% width on mobile, constrained on desktop
+- Cards: 1 column on mobile, 2 on tablet, 3-4 on desktop
+- Form: full width on mobile, max-width 600px centered on desktop
 
 REQUIRED SECTIONS (ALWAYS INCLUDE):
-1. Navigation bar (sticky/fixed)
-2. Hero section (attention-grabbing, full viewport height)
-3. Content sections (features, services, about, etc. - based on prompt)
+1. Navigation bar (sticky top, logo + links + CTA button, mobile hamburger)
+2. Hero section (full viewport height, compelling heading, subheading, CTA button, background image or gradient)
+3. 3-5 content sections appropriate for the niche (features, services, about, stats, testimonials, gallery, team, etc.)
 4. Contact form section with:
-   - Name input field
-   - Email input field
-   - Message/Subject textarea
-   - Submit button
-   - Full form validation (JavaScript)
-   - Beautiful styling
+   - Name input, Email input, Message/Subject textarea, Submit button
+   - Full JavaScript validation (email regex, required fields, visual error/success feedback)
+   - Beautiful styling with focus states and transitions
 5. Footer section with:
-   - Placeholder for company info
-   - Social media links (placeholders)
-   - Copyright notice
-   - Additional footer content as appropriate
+   - Company name and brief description
+   - Quick navigation links
+   - Social media icon links (use inline SVG icons — Facebook, Twitter/X, Instagram, LinkedIn)
+   - Copyright notice with current year
+   - Styled consistently with the design
 
-IMAGES - CRITICAL REQUIREMENT:
-🚨 IMPORTANT: You MUST use the EXACT image URLs provided in the "CONTEXT-AWARE IMAGES PROVIDED" section below
+IMAGES — CRITICAL REQUIREMENT:
+- USE ONLY the exact image URLs provided in the "CONTEXT-AWARE IMAGES" section below
 - DO NOT use placeholder text like "Image Loading..." or "[Image will load here]"
-- DO NOT use generic Unsplash URLs
-- USE ONLY the specific URLs provided below in <img src="..."> tags
-- Images are already contextually relevant to the topic
-- Place them strategically throughout the design (hero section, features, gallery, etc.)
-- Apply professional image treatments (overlays, filters, shapes, rounded corners, shadows, etc.)
-- Ensure images are responsive with proper CSS (max-width: 100%, height: auto)
-- Add loading="lazy" for performance
-- Example: <img src="https://images.unsplash.com/photo-..." alt="..." class="hero-image" loading="lazy">
+- DO NOT use generic source.unsplash.com URLs
+- Every <img> tag MUST have: src, alt, class, loading="lazy"
+- Place images strategically: hero background/feature, feature sections, testimonials, gallery
+- Apply professional treatments: object-fit: cover, border-radius, box-shadow, optional CSS filter or overlay
 
-JAVASCRIPT INTERACTIVITY:
-- Smooth scroll navigation
-- Scroll reveal animations (IntersectionObserver)
-- Mobile menu toggle
-- Form validation (comprehensive)
-- Interactive hover effects
-- Parallax scrolling effects
-- Any other interactions that enhance the experience
+JAVASCRIPT — COMPLETE AND ERROR-FREE:
+- Wrap ALL code in DOMContentLoaded and try-catch
+- Smooth scroll for anchor links (document.querySelectorAll('a[href^="#"]'))
+- Scroll reveal using IntersectionObserver (add .revealed class, stagger with transitionDelay)
+- Mobile menu toggle (hamburger click, close on link click, close on outside click)
+- Form validation (email regex, required fields, show error messages, show success on valid submit)
+- Sticky header effect (add class on scroll for background/shadow change)
+- Counter animation for stats/numbers (if applicable — use IntersectionObserver to trigger)
+- ALL querySelector calls must have null checks
+- NO errors in console — defensive coding throughout
 
 ACCESSIBILITY:
-- Semantic HTML5 tags
-- ARIA labels where appropriate
-- Keyboard navigation support
-- Sufficient color contrast
-- Alt text for images
+- Semantic HTML5 tags (nav, header, main, section, article, footer)
+- ARIA labels on interactive elements (menu button, form inputs, social links)
+- Keyboard navigation support (visible focus states)
+- Sufficient color contrast (4.5:1 minimum for text)
+- Alt text on all images (descriptive, not "image1")
 
 CONTEXT-AWARE IMAGES PROVIDED:
-${imageUrls || 'No images loaded - use fallback Unsplash URLs with relevant search terms'}
+${imageUrls}
 
-Remember: The user should look at this website and be AMAZED. Make it premium, unique, and fully polished.`;
+THE STANDARD: A client should look at this and say "This looks like a $10,000 custom design." Zero errors. Zero unstyled elements. Every pixel intentional.`;
 
-            userMessage = `Create a premium website for: ${prompt}
+            userMessage = `Create a premium ${niche.name !== 'general' ? niche.name + ' ' : ''}website for: ${prompt}
 
-STEP 1 - SELECT LAYOUT (in your mind, don't output this):
-- Analyze the business type
-- Choose ONE of the 8 layouts that fits best
-- If 2 layouts fit equally, pick one randomly
-- Commit to that layout pattern
+EXECUTION CHECKLIST:
+1. Select ONE layout pattern (1-8) that best fits this niche
+2. Apply the ${niche.name} design direction (colors, fonts, mood)
+3. Define ALL CSS custom properties in :root FIRST
+4. Use ONLY var(--token) references throughout CSS — zero hardcoded values
+5. Give every element a unique descriptive class name (BEM-lite)
+6. Use the EXACT Unsplash image URLs provided above
+7. Include contact form with full validation + comprehensive footer
+8. Write complete JavaScript with error handling (try-catch, null checks)
+9. Fully responsive: mobile hamburger, fluid grids, scaled typography
+10. ZERO visible code, ZERO unstyled elements, ZERO browser defaults
 
-STEP 2 - GENERATE:
-1. Use ONLY the chosen layout structure
-2. Design appropriate visual style (colors, fonts, mood) for the business
-3. 🚨 CRITICAL: Use the EXACT Unsplash image URLs provided above in <img src="..."> tags - NO placeholder text!
-4. Ensure EVERY element has complete CSS styling
-5. Include a functional contact form (always required)
-6. Include a comprehensive footer (always required)
-7. Make it fully responsive and interactive
-8. Add smooth animations and modern effects
-
-Generate COMPLETE code with HTML, CSS, and JavaScript.
-
-Return in EXACT format:
+Return COMPLETE code in EXACT format:
 <!-- HTML -->
-[code]
+[body content only — no <html>/<head>/<body> tags]
 
 /* CSS */
-[code]
+[@import Google Fonts → :root tokens → reset → all styles]
 
 // JavaScript
-[code]`;
+[complete interactivity wrapped in DOMContentLoaded + try-catch]`;
 
         } else {
-            // Iteration mode - Detect if it's a targeted edit or full redesign
+            // Iteration mode
             const targetedEditKeywords = [
                 'add image', 'change image', 'replace image', 'update image',
                 'change color', 'update color', 'make bigger', 'make smaller',
                 'change text', 'update text', 'add button', 'change font',
-                'hero section', 'header section', 'footer section',
-                'fix', 'adjust', 'tweak', 'modify'
+                'hero section', 'header section', 'footer section', 'nav section',
+                'change background', 'add section', 'remove section',
+                'fix', 'adjust', 'tweak', 'modify', 'move', 'align',
+                'increase', 'decrease', 'update', 'replace'
             ];
 
             isTargetedEdit = targetedEditKeywords.some(keyword =>
                 prompt.toLowerCase().includes(keyword)
             );
 
-            if (isTargetedEdit) {
-                systemPrompt = `You are an expert front-end developer making TARGETED EDITS to an existing design.
+            const nicheContext = session.niche ? `\nThis is a ${session.niche.name} website using the design token system (var(--color-*), var(--space-*), var(--text-*), etc.).\nMaintain the existing design tokens and niche styling.` : '';
 
-🚨 CRITICAL: This is a SMALL CHANGE request. DO NOT redesign the website!
+            if (isTargetedEdit) {
+                systemPrompt = `You are an expert front-end developer making a TARGETED EDIT to an existing design.
+${nicheContext}
+
+CRITICAL: This is a SMALL CHANGE request. DO NOT redesign the website!
 
 REQUIREMENTS:
-1. Make ONLY the specific change requested by the user
-2. Keep EVERYTHING else EXACTLY the same (layout, colors, fonts, spacing, animations, etc.)
-3. Do NOT regenerate or rewrite sections that weren't mentioned
-4. Return COMPLETE code (with your targeted changes applied)
-5. Maintain the exact same design aesthetic and existing CSS custom properties
-6. Return in EXACT format:
-   <!-- HTML -->
-   [complete HTML with targeted change]
+1. Make ONLY the specific change requested
+2. Keep EVERYTHING else EXACTLY the same (layout, colors, fonts, spacing, animations)
+3. USE existing CSS custom properties (var(--color-*), var(--space-*), etc.) — do NOT hardcode new values
+4. Do NOT regenerate sections that weren't mentioned
+5. Maintain all existing class names
+6. Return COMPLETE code (with your targeted change applied)
 
-   /* CSS */
-   [complete CSS with targeted change]
+Return in EXACT format:
+<!-- HTML -->
+[complete HTML with targeted change]
 
-   // JavaScript
-   [complete JavaScript]
+/* CSS */
+[complete CSS with targeted change]
 
-EXAMPLES OF TARGETED EDITS:
-- "add image to hero" → Only change hero <img src="..."> URL, keep everything else
-- "change color to blue" → Only update color CSS variables, keep layout/content
-- "make heading bigger" → Only adjust font-size in CSS, keep everything else
-- "fix button alignment" → Only tweak button CSS, keep rest intact
+// JavaScript
+[complete JavaScript]
 
-🚨 DO NOT:
+DO NOT:
 - Redesign unrelated sections
-- Change the overall layout
+- Change the overall layout or color scheme
 - Add new sections unless explicitly asked
-- Remove existing features
-- Change color schemes unless asked
-- Modify animations unless asked`;
+- Remove existing features or animations
+- Change fonts or typography unless asked
+- Break the responsive behavior`;
             } else {
                 systemPrompt = `You are an expert front-end developer iterating on an existing design.
+${nicheContext}
 
-CRITICAL REQUIREMENTS:
+REQUIREMENTS:
 1. Modify the existing code based on the user's request
 2. Return COMPLETE code (not just changes)
-3. Return code in this EXACT format:
-   <!-- HTML -->
-   [complete modified HTML]
+3. USE existing CSS custom properties — do NOT replace the design token system
+4. Maintain all element class names unless the change requires modifying them
+5. Keep responsive behavior, animations, and hover effects
+6. Always maintain contact form and footer sections
 
-   /* CSS */
-   [complete modified CSS]
+Return in EXACT format:
+<!-- HTML -->
+[complete modified HTML]
 
-   // JavaScript
-   [complete modified JavaScript]
+/* CSS */
+[complete modified CSS]
 
-4. NO markdown code blocks
-5. NO explanations outside the code
-6. PRESERVE existing CSS custom properties and styles that aren't being changed
+// JavaScript
+[complete modified JavaScript]
 
-WHEN MODIFYING:
-- Make requested changes cleanly and professionally
-- Ensure ALL elements remain fully styled (NO unstyled HTML)
-- Don't break existing functionality
-- Keep responsive behavior
-- Maintain animations and hover effects
-- Always maintain contact form and footer sections`;
+NO markdown code blocks. NO explanations outside code. COMPLETE and PRODUCTION-READY.`;
             }
 
             userMessage = `Current website code:
@@ -438,7 +715,7 @@ ${session.currentDesign}
 
 User request: ${prompt}
 
-${isTargetedEdit ? '🚨 REMINDER: Make ONLY the specific change requested. Keep everything else IDENTICAL!' : ''}
+${isTargetedEdit ? 'REMINDER: Make ONLY the specific change requested. Keep everything else IDENTICAL. Use existing var(--token) values.' : ''}
 
 Return the COMPLETE modified code in format:
 <!-- HTML -->
@@ -454,24 +731,26 @@ Return the COMPLETE modified code in format:
         conversationMessages.push({ role: 'user', content: userMessage });
 
         // Generate with Claude
-        console.log(`🤖 Calling Claude API... ${!isNewDesign && isTargetedEdit ? '(Targeted Edit Mode)' : ''}`);
+        console.log(`🤖 Calling Claude API... [Niche: ${niche.name}] ${!isNewDesign && isTargetedEdit ? '(Targeted Edit)' : ''}`);
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 16000,
-            temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7, // Lower temp for targeted edits = more precise
+            temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7,
             system: systemPrompt,
             messages: conversationMessages
         });
 
         const generatedCode = response.content[0].text;
 
-        // Log first 500 chars to debug format
+        // Log preview for debugging
         console.log('📝 Response preview:', generatedCode.substring(0, 500));
 
-        // Enhanced parsing with multiple pattern attempts
+        // ============================================
+        // PARSE — Multi-method extraction
+        // ============================================
         let html = '', css = '', js = '';
 
-        // Method 1: Try exact delimiters
+        // Method 1: Exact delimiters
         let htmlMatch = generatedCode.match(/<!--\s*HTML\s*-->([\s\S]*?)(?=\/\*\s*CSS\s*\*\/|$)/i);
         let cssMatch = generatedCode.match(/\/\*\s*CSS\s*\*\/([\s\S]*?)(?=\/\/\s*JavaScript|$)/i);
         let jsMatch = generatedCode.match(/\/\/\s*JavaScript([\s\S]*?)$/i);
@@ -480,7 +759,7 @@ Return the COMPLETE modified code in format:
         if (cssMatch) css = cssMatch[1].trim();
         if (jsMatch) js = jsMatch[1].trim();
 
-        // Method 2: Try with markdown code blocks
+        // Method 2: Markdown code blocks
         if (!html || !css) {
             console.log('⚠️ Trying markdown block extraction');
             const htmlBlockMatch = generatedCode.match(/```html\s*([\s\S]*?)```/i);
@@ -492,11 +771,9 @@ Return the COMPLETE modified code in format:
             if (jsBlockMatch && !js) js = jsBlockMatch[1].trim();
         }
 
-        // Method 3: Smart extraction by identifying sections
+        // Method 3: Smart section split
         if (!html || !css) {
             console.log('⚠️ Using smart section extraction');
-
-            // Split by common delimiters
             const sections = generatedCode.split(/(?=<!--\s*HTML\s*-->|\/\*\s*CSS\s*\*\/|\/\/\s*JavaScript)/i);
 
             for (const section of sections) {
@@ -510,21 +787,18 @@ Return the COMPLETE modified code in format:
             }
         }
 
-        // Method 4: Pattern-based fallback extraction
+        // Method 4: Pattern-based fallback
         if (!html || !css) {
             console.log('⚠️ Using pattern-based fallback');
 
-            // Extract HTML: Look for opening tags to end of last closing tag
             if (!html) {
                 const htmlPattern = /<(?:nav|header|div|section|main|footer)[^>]*>[\s\S]*<\/(?:nav|header|div|section|main|footer)>/i;
                 const htmlFallback = generatedCode.match(htmlPattern);
                 if (htmlFallback) html = htmlFallback[0];
             }
 
-            // Extract CSS: Everything between style rules
             if (!css) {
-                // Look for @import or first CSS rule to last closing brace
-                const cssStart = generatedCode.search(/(@import|[.#\w][\w-]*\s*\{)/);
+                const cssStart = generatedCode.search(/(@import|:root\s*\{|[.#\w][\w-]*\s*\{)/);
                 if (cssStart !== -1) {
                     let braceCount = 0;
                     let cssEnd = cssStart;
@@ -548,7 +822,6 @@ Return the COMPLETE modified code in format:
                 }
             }
 
-            // Extract JS: Look for common JS patterns
             if (!js) {
                 const jsPattern = /((?:document\.|window\.|const\s+|let\s+|var\s+|function\s+)[\s\S]*)/;
                 const jsFallback = generatedCode.match(jsPattern);
@@ -556,14 +829,20 @@ Return the COMPLETE modified code in format:
             }
         }
 
-        // Clean up any remaining delimiters or markdown
+        // Clean markdown artifacts
         html = html.replace(/```html\s*/gi, '').replace(/```\s*$/g, '').trim();
         css = css.replace(/```css\s*/gi, '').replace(/```\s*$/g, '').trim();
         js = js.replace(/```(?:javascript|js)\s*/gi, '').replace(/```\s*$/g, '').trim();
 
-        // Fix escaped HTML entities that might appear as text (common AI generation issue)
+        // Fix escaped HTML entities
         html = fixEscapedHtml(html);
         css = fixEscapedHtml(css);
+
+        // Sanitize output — strip all artifacts, validate clean code
+        const sanitized = sanitizeOutput(html, css, js);
+        html = sanitized.html;
+        css = sanitized.css;
+        js = sanitized.js;
 
         // Validate extraction
         console.log('\n📊 EXTRACTION RESULTS:');
@@ -579,9 +858,7 @@ Return the COMPLETE modified code in format:
 
         if (!css) {
             console.error('❌ CRITICAL: No CSS extracted!');
-            console.error('Response length:', generatedCode.length);
-            console.error('Full response sample:');
-            console.error(generatedCode.substring(0, 2000));
+            console.error('Full response sample:', generatedCode.substring(0, 2000));
         } else if (css.length < 500) {
             console.warn('⚠️ WARNING: CSS seems too short (< 500 chars)');
             console.warn('CSS content:', css.substring(0, 200));
@@ -589,9 +866,7 @@ Return the COMPLETE modified code in format:
 
         // CRITICAL: If CSS is missing or too short, return error
         if (!css || css.length < 100) {
-            console.error('\n❌ ABORTING: CSS extraction failed completely');
-            console.error('Cannot return website without CSS - would be unstyled');
-
+            console.error('\n❌ ABORTING: CSS extraction failed');
             return res.status(500).json({
                 success: false,
                 error: 'CSS generation failed',
@@ -613,7 +888,7 @@ Return the COMPLETE modified code in format:
             { role: 'assistant', content: generatedCode }
         );
 
-        console.log(`✅ Generated ${html.length} chars HTML, ${css.length} chars CSS, ${js.length} chars JS\n`);
+        console.log(`✅ Generated: ${html.length} HTML, ${css.length} CSS, ${js.length} JS [Niche: ${niche.name}]\n`);
 
         res.json({
             success: true,
@@ -621,6 +896,7 @@ Return the COMPLETE modified code in format:
             isNewDesign,
             style: 'AI-Generated',
             palette: 'Custom',
+            niche: niche.name,
             website: { html, css, js }
         });
 
@@ -633,7 +909,9 @@ Return the COMPLETE modified code in format:
     }
 });
 
-// Edit a single element (token-efficient)
+// ============================================
+// EDIT SINGLE ELEMENT (token-efficient)
+// ============================================
 router.post('/edit-element', async (req, res) => {
     try {
         const { sessionId, elementHtml, elementPath, prompt, currentHtml, currentCss } = req.body;
@@ -648,17 +926,22 @@ router.post('/edit-element', async (req, res) => {
 
         console.log(`🎯 Element Edit: "${elementPath}" - "${prompt.substring(0, 50)}..."`);
 
-        // Token-efficient prompt - only send the element, not the full page
+        // Detect if design tokens are in use
+        const usesDesignTokens = currentCss && currentCss.includes(':root') && currentCss.includes('--color-');
+
         const systemPrompt = `You are an expert front-end developer making a TARGETED EDIT to a single HTML element.
+${usesDesignTokens ? '\nThis website uses a CSS design token system. USE the existing CSS custom properties (var(--color-primary), var(--space-4), var(--text-lg), etc.) in your edits — do NOT hardcode values.' : ''}
 
 TASK: Modify ONLY the provided element based on the user's request.
 
 RULES:
-1. Return ONLY the modified element HTML - nothing else
-2. If CSS changes are needed, include them in a style attribute OR return a separate CSS block
+1. Return ONLY the modified element HTML — nothing else
+2. If CSS changes are needed, include them in a /* ELEMENT_CSS */ block
 3. Keep the element structure intact unless explicitly asked to change it
 4. Preserve all existing classes, IDs, and attributes unless the change requires modifying them
-5. Be precise - change only what's requested
+5. Ensure the element has a descriptive class name
+6. Be precise — change only what's requested
+7. The modified element must be complete and valid HTML
 
 RESPONSE FORMAT:
 If only HTML changes:
@@ -670,7 +953,9 @@ If CSS changes are also needed:
 <modified element html here>
 
 /* ELEMENT_CSS */
-.selector { property: value; }`;
+.selector { property: value; }
+
+NO explanations, NO markdown, NO extra text — just the element code.`;
 
         const userMessage = `ELEMENT TO EDIT (${elementPath}):
 ${elementHtml}
@@ -699,49 +984,54 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
         if (elementMatch) {
             newElementHtml = elementMatch[1].trim();
         } else {
-            // Fallback: assume the whole response is the element
             newElementHtml = result.replace(/\/\*\s*ELEMENT_CSS\s*\*\/[\s\S]*$/, '').trim();
         }
 
         // Extract CSS if present
-        const cssMatch = result.match(/\/\*\s*ELEMENT_CSS\s*\*\/([\s\S]*?)$/i);
-        if (cssMatch) {
-            newElementCss = cssMatch[1].trim();
+        const editCssMatch = result.match(/\/\*\s*ELEMENT_CSS\s*\*\/([\s\S]*?)$/i);
+        if (editCssMatch) {
+            newElementCss = editCssMatch[1].trim();
         }
 
-        // Clean up any markdown and fix escaped HTML
+        // Clean up markdown and fix escaped HTML
         newElementHtml = newElementHtml.replace(/```html?\s*/gi, '').replace(/```\s*$/g, '').trim();
         newElementCss = newElementCss.replace(/```css?\s*/gi, '').replace(/```\s*$/g, '').trim();
-
-        // Fix escaped HTML entities
         newElementHtml = fixEscapedHtml(newElementHtml);
         newElementCss = fixEscapedHtml(newElementCss);
+
+        // Strip any artifacts from element HTML
+        newElementHtml = newElementHtml
+            .replace(/<!--\s*ELEMENT\s*-->/gi, '')
+            .replace(/<!--\s*HTML\s*-->/gi, '')
+            .trim();
 
         if (!newElementHtml) {
             return res.status(500).json({ error: 'Failed to generate element edit' });
         }
 
-        // Replace the element in the full HTML
+        // ============================================
+        // ELEMENT MATCHING & REPLACEMENT (10 methods)
+        // ============================================
         let updatedHtml = currentHtml;
         let matchFound = false;
 
-        // First, fix any escaped HTML in the current HTML (fixes display issues like <span> showing as text)
+        // Fix escaped HTML in current HTML first
         updatedHtml = fixEscapedHtml(updatedHtml);
         const wasHtmlFixed = updatedHtml !== currentHtml;
         if (wasHtmlFixed) {
             console.log('🔧 Fixed escaped HTML entities in current HTML');
         }
 
-        // Helper: list of void elements (self-closing, no closing tag)
+        // Void elements (self-closing)
         const voidElements = ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
 
-        // Extract tag name and attributes from the element
+        // Extract tag name and attributes
         const openingTagMatch = elementHtml.match(/^<(\w+)([^>]*)>/);
         const tagName = openingTagMatch ? openingTagMatch[1].toLowerCase() : '';
         const attributes = openingTagMatch ? openingTagMatch[2] : '';
         const isVoidElement = voidElements.includes(tagName);
 
-        // Pre-extract useful attributes for matching
+        // Pre-extract attributes for matching
         const srcMatch = attributes.match(/src\s*=\s*["']([^"']+)["']/);
         const hrefMatch = attributes.match(/href\s*=\s*["']([^"']+)["']/);
         const idMatch = attributes.match(/id\s*=\s*["']([^"']+)["']/);
@@ -750,18 +1040,16 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
 
         console.log(`🔍 Element matching: tag=${tagName}, id=${idMatch?.[1]}, class=${classMatch?.[1]}, src=${srcMatch ? 'yes' : 'no'}, void=${isVoidElement}`);
 
-        // Method 1: Try exact match first
+        // Method 1: Exact match
         if (currentHtml.includes(elementHtml)) {
             updatedHtml = currentHtml.replace(elementHtml, newElementHtml);
             matchFound = true;
             console.log('✅ Element replaced via exact match');
         }
 
-        // Method 2: Match by src attribute (for img, video, audio, source, iframe)
+        // Method 2: Match by src attribute (img, video, audio, iframe)
         if (!matchFound && srcMatch) {
-            // Extract a unique portion of the src URL for matching
             const srcUrl = srcMatch[1];
-            // Use the last segment of the URL path as identifier (e.g., photo-1234567)
             const srcIdentifier = srcUrl.split('/').pop().split('?')[0];
             const escapedSrc = srcIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -784,7 +1072,7 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
                 }
             }
 
-            // Fallback: try full src URL match
+            // Fallback: full src URL match
             if (!matchFound) {
                 const fullEscapedSrc = srcUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 let fullSrcPattern;
@@ -848,7 +1136,7 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
         }
 
-        // Method 5: Match by alt text (for images without class/id/unique-src)
+        // Method 5: Match by alt text (images)
         if (!matchFound && altMatch && tagName === 'img') {
             const escapedAlt = altMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const altPattern = new RegExp(`<img[^>]*alt\\s*=\\s*["']${escapedAlt}["'][^>]*/?>`, 'i');
@@ -863,7 +1151,7 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
         }
 
-        // Method 6: Match by href (for links)
+        // Method 6: Match by href (links)
         if (!matchFound && hrefMatch) {
             const escapedHref = hrefMatch[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             let hrefPattern;
@@ -883,7 +1171,7 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
         }
 
-        // Method 7: Try flexible whitespace matching
+        // Method 7: Flexible whitespace matching
         if (!matchFound) {
             const escapedOriginal = elementHtml.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const flexibleRegex = new RegExp(escapedOriginal.replace(/\s+/g, '\\s*'), 'i');
@@ -894,9 +1182,8 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
         }
 
-        // Method 8: Match by text content (for elements with unique text)
+        // Method 8: Match by text content
         if (!matchFound && !isVoidElement && elementHtml) {
-            // Extract text content from the element
             const textContent = elementHtml.replace(/<[^>]*>/g, '').trim();
             if (textContent.length > 10 && textContent.length < 200) {
                 const escapedText = textContent.substring(0, 80).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -913,7 +1200,7 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
         }
 
-        // Method 9: Path-based class match (from elementPath)
+        // Method 9: Path-based class match
         if (!matchFound && elementPath) {
             const pathParts = elementPath.split('.');
             if (pathParts.length > 1) {
@@ -936,9 +1223,8 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
         }
 
-        // Method 10: For void elements with no identifiers, match by tag + position context
+        // Method 10: Void element by tag + position context
         if (!matchFound && isVoidElement) {
-            // Find ALL instances of this tag in the source
             const allTagPattern = new RegExp(`<${tagName}[^>]*/?>`, 'gi');
             const allMatches = [];
             let match;
@@ -947,12 +1233,10 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
             }
 
             if (allMatches.length === 1) {
-                // Only one instance of this tag - safe to replace
                 updatedHtml = currentHtml.replace(allMatches[0].html, newElementHtml);
                 matchFound = true;
                 console.log('✅ Element replaced via single-instance void element match');
             } else if (allMatches.length > 1 && srcMatch) {
-                // Multiple instances but we have a src - try partial src matching
                 const srcDomain = srcMatch[1].split('/').slice(0, 3).join('/');
                 const bestMatch = allMatches.find(m => m.html.includes(srcDomain));
                 if (bestMatch) {
@@ -964,13 +1248,11 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
         }
 
         if (!matchFound) {
-            // If we fixed escaped HTML, still return success even without element match
             if (wasHtmlFixed) {
                 console.log('✅ HTML fixed (escaped entities corrected), returning fixed HTML');
                 matchFound = true;
             } else {
                 console.log('⚠️ Could not find element in HTML');
-                // Instead of failing, return the new element and let the user know
                 return res.json({
                     success: true,
                     warning: 'Could not auto-replace element. Here is the edited element:',
@@ -989,10 +1271,10 @@ Return the modified element. If you need to add/modify CSS, include it in a /* E
         let updatedCss = currentCss;
         if (newElementCss) {
             updatedCss = currentCss + '\n\n/* Element Edit */\n' + newElementCss;
-            console.log('✅ CSS updated');
+            console.log('✅ CSS updated with element edit styles');
         }
 
-        // Update session if it exists
+        // Update session
         if (sessionId) {
             const session = designSessions.get(sessionId);
             if (session) {
@@ -1034,13 +1316,14 @@ router.get('/session/:sessionId', (req, res) => {
             id: session.id,
             style: session.style,
             palette: session.palette,
+            niche: session.niche?.name || null,
             messageCount: session.conversationHistory.length,
             createdAt: session.createdAt
         }
     });
 });
 
-// Clear session (start fresh)
+// Clear session
 router.delete('/session/:sessionId', (req, res) => {
     designSessions.delete(req.params.sessionId);
     res.json({ success: true, message: 'Session cleared' });

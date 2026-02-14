@@ -2,6 +2,36 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 
+// Extract Google Font URLs from CSS @import and HTML <link> tags
+function extractGoogleFonts(cssContent, htmlContent) {
+    const fontUrls = new Set();
+
+    // Extract @import url('...fonts.googleapis.com...')
+    const importRegex = /@import\s+url\(["']?(https:\/\/fonts\.googleapis\.com\/css2[^"')\s]+)["']?\)/gi;
+    let match;
+    while ((match = importRegex.exec(cssContent || '')) !== null) {
+        fontUrls.add(match[1]);
+    }
+
+    // Extract <link href="...fonts.googleapis.com...">
+    const linkRegex = /<link[^>]+href=["'](https:\/\/fonts\.googleapis\.com\/css2[^"']+)["'][^>]*\/?>/gi;
+    while ((match = linkRegex.exec(htmlContent || '')) !== null) {
+        fontUrls.add(match[1]);
+    }
+
+    return Array.from(fontUrls);
+}
+
+// Remove @import for Google Fonts from CSS (they'll be loaded via <link> in head)
+function cleanFontImportsFromCss(cssContent) {
+    return (cssContent || '').replace(/@import\s+url\(["']?https:\/\/fonts\.googleapis\.com[^)]+\)\s*;?/gi, '');
+}
+
+// Remove Google Font <link> tags from HTML body (they'll be in head)
+function cleanFontLinksFromHtml(htmlContent) {
+    return (htmlContent || '').replace(/<link[^>]*href=["']https:\/\/fonts\.googleapis\.com[^"']*["'][^>]*\/?>/gi, '');
+}
+
 const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedElement }) => {
     const iframeRef = useRef(null);
 
@@ -53,14 +83,32 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
                 overlayEl.style.display = 'block';
             }
 
+            // Expanded valid element list — supports ALL common elements for editing
             function isValidElement(el) {
                 if (!el || el === document.body || el === document.documentElement) return false;
                 if (el.id && el.id.startsWith('element-selector')) return false;
                 const tag = el.tagName.toLowerCase();
-                // Allow selection of meaningful elements
-                return ['div', 'section', 'header', 'footer', 'nav', 'main', 'article', 'aside',
-                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'a', 'button', 'img',
-                        'ul', 'ol', 'li', 'form', 'input', 'textarea', 'label', 'figure', 'figcaption'].includes(tag);
+                return [
+                    // Structural
+                    'div', 'section', 'header', 'footer', 'nav', 'main', 'article', 'aside',
+                    // Headings
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                    // Text
+                    'p', 'span', 'a', 'strong', 'em', 'b', 'i', 'u', 'mark', 'small', 'sub', 'sup',
+                    'blockquote', 'cite', 'q', 'code', 'pre', 'time', 'address',
+                    // Interactive
+                    'button', 'input', 'textarea', 'label', 'select', 'option',
+                    // Media
+                    'img', 'video', 'audio', 'picture', 'source', 'figure', 'figcaption', 'svg',
+                    // Lists
+                    'ul', 'ol', 'li', 'dl', 'dt', 'dd',
+                    // Tables
+                    'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'caption',
+                    // Form
+                    'form', 'fieldset', 'legend',
+                    // Other
+                    'details', 'summary', 'hr'
+                ].includes(tag);
             }
 
             document.addEventListener('mousemove', function(e) {
@@ -139,26 +187,33 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
                 *:hover { outline: 1px dashed rgba(59, 130, 246, 0.5) !important; }
             ` : '';
 
-            // CSS normalization injected AFTER generated CSS to override
-            // common AI-generated overlap issues (hero with position:fixed/absolute)
-            const overlapFix = `
-    /* Fix: hero/section overlap from fixed/absolute positioning */
-    body { overflow-x: hidden !important; }
-    section, [class*="hero"], [class*="Hero"],
-    [id*="hero"], [id*="Hero"] {
-      position: relative !important;
-      z-index: auto !important;
-    }
-    /* Keep nav/header sticky instead of fixed for proper flow */
-    nav, header, [class*="nav"], [class*="navbar"] {
-      position: sticky !important;
-      top: 0;
-      z-index: 1000 !important;
-    }
-    /* Safety: images and sections don't overflow */
-    img { max-width: 100%; height: auto; }
-    section { clear: both; }
-    `;
+            // Extract Google Fonts from CSS and HTML, then load via <link> in <head>
+            const fontUrls = extractGoogleFonts(css, html);
+            const fontLinkTags = fontUrls.map(url =>
+                `<link rel="stylesheet" href="${url}">`
+            ).join('\n  ');
+
+            // Clean font @imports from CSS and <link> tags from HTML body to avoid double loading
+            const cleanedCss = cleanFontImportsFromCss(css);
+            const cleanedHtml = cleanFontLinksFromHtml(html);
+
+            // Minimal safety styles — no destructive overrides
+            const safetyStyles = `
+                /* Safety: prevent horizontal overflow */
+                body { overflow-x: hidden !important; }
+                /* Safety: prevent image overflow */
+                img { max-width: 100%; height: auto; }
+            `;
+
+            // Wrap JS in error boundary to prevent console errors from breaking the preview
+            const safeJs = js ? `(function() {
+                'use strict';
+                try {
+                    ${js}
+                } catch(e) {
+                    console.warn('[Website Script]:', e.message);
+                }
+            })();` : '';
 
             const fullHTML = `<!DOCTYPE html>
 <html lang="en">
@@ -166,14 +221,17 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  ${fontLinkTags}
   <style>
-    ${css || ''}
-    ${overlapFix}
+    ${cleanedCss || ''}
+    ${safetyStyles}
     ${editModeStyles}
   </style>
 </head>
 <body>
-  ${html || `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0f;font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden">
+  ${cleanedHtml || `<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a0a0f;font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden">
     <div style="text-align:center;position:relative">
       <div style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(168,85,247,0.18));margin:0 auto 2rem;position:relative;animation:float 6s ease-in-out infinite">
         <div style="position:absolute;inset:15px;border-radius:50%;border:1.5px dashed rgba(99,102,241,0.3);animation:spin 20s linear infinite"></div>
@@ -191,7 +249,7 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
     <style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>
   </div>`}
   <script>
-    ${js || ''}
+    ${safeJs}
   ${'<'}/script>
   ${selectionScript}
 </body>
@@ -206,9 +264,7 @@ const Preview = ({ html, css, js, editMode = false, onElementSelect, selectedEle
         if (iframe.contentDocument?.readyState === 'complete') {
             writeContent();
         } else {
-            // Otherwise wait for load event
             iframe.addEventListener('load', writeContent);
-            // Also try writing after a small delay as fallback
             const timeout = setTimeout(writeContent, 100);
 
             return () => {
