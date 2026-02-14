@@ -600,169 +600,60 @@ CRITICAL FORMAT REQUIREMENTS (MUST FOLLOW EXACTLY):
 5. Then EXACTLY: // JavaScript
 6. Then ALL JavaScript (complete interactivity)
 
-MANDATORY CODE TEMPLATE — COPY THIS STRUCTURE EXACTLY:
+REQUIRED HTML STRUCTURE (use BEM class names — vary everything else per niche):
 
 <!-- HTML -->
-<nav class="navbar" id="navbar">
-  <div class="navbar__container">
-    <a href="#home" class="navbar__logo">BrandName</a>
-    <ul class="navbar__menu">
-      <li><a href="#home" class="navbar__link">Home</a></li>
-      <li><a href="#features" class="navbar__link">Features</a></li>
-      <li><a href="#about" class="navbar__link">About</a></li>
-      <li><a href="#contact" class="navbar__link">Contact</a></li>
-    </ul>
-    <a href="#contact" class="navbar__cta btn btn--primary">Get Started</a>
-    <button class="navbar__toggle" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</nav>
-
-<section class="hero" id="home">
-  <div class="hero__container">
-    <h1 class="hero__title">Main Heading Here</h1>
-    <p class="hero__subtitle">Compelling subheading that describes the value proposition</p>
-    <div class="hero__cta-group">
-      <a href="#contact" class="btn btn--primary hero__btn">Primary CTA</a>
-      <a href="#about" class="btn btn--outline hero__btn">Learn More</a>
-    </div>
-  </div>
-</section>
-
-<section class="features" id="features">
-  ...content with cards/grid...
-</section>
-...3-4 more content sections (about, gallery, testimonials, stats, etc.)...
-<section class="contact" id="contact">
-  <div class="contact__container">
-    <h2 class="contact__title">Get In Touch</h2>
-    <form class="contact__form" id="contactForm">
-      <input type="text" class="contact__input" placeholder="Your Name" required>
-      <input type="email" class="contact__input" placeholder="Your Email" required>
-      <textarea class="contact__textarea" placeholder="Your Message" required></textarea>
-      <button type="submit" class="btn btn--primary contact__submit">Send Message</button>
-    </form>
-  </div>
-</section>
-<footer class="footer">
-  <div class="footer__container">
-    <div class="footer__brand">BrandName</div>
-    <div class="footer__links">...</div>
-    <div class="footer__social">...SVG icons...</div>
-    <p class="footer__copy">2026 BrandName. All rights reserved.</p>
-  </div>
-</footer>
+<nav class="navbar" id="navbar">..logo, links, CTA button, hamburger toggle..</nav>
+<section class="hero" id="home">..h1, subtitle, CTA buttons..</section>
+<section class="features/services" id="features">..content..</section>
+..2-3 more content sections (about, stats, testimonials, gallery)..
+<section class="contact" id="contact">..form with name, email, message, submit..</section>
+<footer class="footer">..brand, links, SVG social icons, copyright 2026..</footer>
 
 /* CSS */
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;500&display=swap');
-
-:root {
-  --font-heading: 'Oswald', sans-serif;
-  --font-body: 'Roboto', sans-serif;
-  --navbar-height: 80px;
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
-  --text-4xl: 2.25rem;
-  --text-5xl: 3rem;
-  --text-6xl: 3.75rem;
-  --text-7xl: 4.5rem;
-  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
-  --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
-  --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
-  --color-primary: #FF6B00;
-  --color-primary-light: #FF8533;
-  --color-primary-dark: #CC5500;
-  --color-secondary: #1A1A1A;
-  --color-accent: #E53E3E;
-  --color-bg: #FFFFFF;
-  --color-surface: #F8FAFC;
-  --color-surface-alt: #F1F5F9;
-  --color-text: #1A1A2E;
-  --color-text-muted: #64748B;
-  --color-text-inverse: #FFFFFF;
-  --color-border: #E2E8F0;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 1rem; --radius-full: 9999px;
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --container-max: 1280px;
-  --section-spacing: var(--space-24);
-}
-
+@import url('https://fonts.googleapis.com/css2?family=[NICHE_FONTS]&display=swap');
+:root { /* ALL design tokens — fonts, type scale, spacing, colors from NICHE direction, shadows, radii, transitions */ }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-body); color: var(--color-text); background: var(--color-bg); padding-top: var(--navbar-height); }
-
-.navbar { position: fixed; top: 0; left: 0; width: 100%; height: var(--navbar-height); z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border); }
-
-.hero {
-  min-height: 100vh;
-  background-image: url('HERO_IMAGE_URL_HERE');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
-  z-index: 1;
-}
-.hero__container { position: relative; z-index: 2; text-align: center; color: var(--color-text-inverse); max-width: var(--container-max); padding: var(--space-8); }
-.hero__title { font-family: var(--font-heading); font-size: var(--text-7xl); font-weight: 800; }
-.hero__subtitle { font-size: var(--text-xl); margin-top: var(--space-4); opacity: 0.9; }
-
-/* Section alternating backgrounds */
-.features { background: var(--color-bg); padding: var(--section-spacing) 0; }
-.about { background: var(--color-surface-alt); padding: var(--section-spacing) 0; }
-.stats { background: var(--color-secondary); color: var(--color-text-inverse); padding: var(--section-spacing) 0; }
-.stats h2, .stats p, .stats span { color: var(--color-text-inverse); }
-.gallery { background: var(--color-bg); padding: var(--section-spacing) 0; }
-
-/* h2 section headings — brand colored, NEVER plain black */
-h2 { color: var(--color-primary-dark); }
-h2::before { content: ''; display: block; width: 40px; height: 3px; background: var(--color-primary); margin-bottom: var(--space-4); }
-.stats h2::before { background: var(--color-text-inverse); }
-
-/* Cards — depth + hover lift */
-.features__card, [class*="card"] {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
-  box-shadow: var(--shadow-md);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-.features__card:hover, [class*="card"]:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-}
-
-/* Split image+text layout */
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-12); align-items: center; }
-.split--reverse { direction: rtl; }
-.split--reverse > * { direction: ltr; }
-@media (max-width: 768px) { .split { grid-template-columns: 1fr; } }
-
-...continue styling ALL remaining elements using var() tokens...
+/* ...then style EVERY element using var() tokens... */
 
 // JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-  try {
-    // Mobile menu, smooth scroll, scroll reveal, form validation, sticky header
-  } catch(e) { console.warn(e); }
-});
+document.addEventListener('DOMContentLoaded', function() { try { /* all interactivity */ } catch(e) { console.warn(e); } });
+
+VISUAL UNIQUENESS PER NICHE — CRITICAL (every niche MUST look completely different):
+
+NAVBAR VARIETY — pick ONE style per niche, NEVER repeat the same across niches:
+  Style A: White bg, logo left, links center, pill-shaped CTA right (corporate/finance/legal)
+  Style B: Transparent over hero, becomes solid on scroll, text-only links, no border (creative/travel)
+  Style C: Dark/colored bg matching brand, light text, squared CTA button (tech/gaming/automotive)
+  Style D: Minimal — centered logo, hamburger menu even on desktop, clean (beauty/wedding/creative)
+  Style E: Two-row — top bar with phone/email, main bar with logo+nav (homeservices/health/church)
+
+HERO OVERLAY — MUST use the NICHE primary color, NOT generic black/gray:
+  - Pet shop: warm teal overlay → linear-gradient(135deg, rgba(13,148,136,0.85), rgba(249,115,22,0.6))
+  - Beauty salon: rose-gold overlay → linear-gradient(135deg, rgba(183,110,121,0.8), rgba(245,230,204,0.5))
+  - Tech: dark navy overlay → linear-gradient(135deg, rgba(15,23,42,0.9), rgba(99,102,241,0.6))
+  - Restaurant: warm burgundy overlay → linear-gradient(135deg, rgba(114,47,55,0.85), rgba(212,168,83,0.5))
+  - Health: soft teal overlay → linear-gradient(135deg, rgba(13,148,136,0.8), rgba(134,239,172,0.4))
+  - Each niche: use YOUR niche's --color-primary and --color-secondary in the gradient. NEVER use plain rgba(0,0,0,0.6).
+
+BUTTON SHAPES — vary per niche mood:
+  - Playful/fun (pets, food, sports): large border-radius (--radius-full), bold colors, slightly oversized padding
+  - Elegant/luxury (beauty, wedding, legal): small radius (--radius-sm) or none, thin borders, refined padding, letter-spacing
+  - Corporate/trust (finance, consulting, health): medium radius (--radius-md), solid fill, professional sizing
+  - Bold/edgy (tech, gaming, automotive, fitness): sharp corners (0 radius), uppercase text, gradient or neon effects
+  - Warm/inviting (restaurant, church, nonprofit): medium-large radius (--radius-lg), warm colors, friendly text
+
+HERO TEXT ALIGNMENT — vary per niche:
+  - Center-aligned: restaurant, wedding, beauty, church, travel (emotional/aspirational)
+  - Left-aligned with image on right: tech, consulting, finance, education (professional/informational)
+  - Left-aligned full-width: fitness, gaming, automotive, sports (bold/energetic)
+
+COLOR APPLICATION — each niche :root must have DIFFERENT actual hex values:
+  - NEVER reuse the same hex colors across different niches
+  - --color-primary, --color-secondary, --color-accent must come from the NICHE DESIGN DIRECTION above
+  - --color-bg and --color-surface should reflect niche warmth (warm niches: cream/ivory, cool niches: pure white/slate)
+  - --color-surface-alt should be a tinted version of the niche primary (e.g., pets: light teal tint, beauty: light pink tint)
 
 ABSOLUTE RULES — VIOLATION = FAILURE:
 - NO text, explanations, or comments outside the three code sections
