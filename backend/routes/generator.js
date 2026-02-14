@@ -75,7 +75,7 @@ function detectNiche(prompt) {
             name: 'health',
             keywords: ['health', 'medical', 'doctor', 'clinic', 'hospital', 'dental', 'dentist', 'therapy', 'therapist', 'wellness', 'spa', 'nutrition', 'pharmacy', 'physiotherapy', 'mental health', 'skincare', 'dermatology'],
             design: {
-                colors: 'Calming palette: soft teal (#0D9488), gentle sage (#86EFAC), clean white (#FFFFFF), light mint surface (#F0FDF4), warm blue accent (#3B82F6). Avoid harsh reds.',
+                colors: 'Calming palette: trust blue (#3B82F6), gentle sky (#BFDBFE), clean white (#FFFFFF), light blue surface (#EFF6FF), soft teal accent (#0D9488). PRIMARY must be blue, NOT teal/green.',
                 fonts: 'Heading: Nunito (weight 700, 800). Body: Open Sans (weight 400). Import from Google Fonts.',
                 imagery: 'Smiling medical professionals, clean clinical spaces, nature/wellness imagery, calming environments.',
                 mood: 'Trustworthy, clean, calming, professional, caring.'
@@ -95,7 +95,7 @@ function detectNiche(prompt) {
             name: 'pets',
             keywords: ['pet', 'pets', 'pet shop', 'pet store', 'vet', 'veterinary', 'dog', 'cat', 'puppy', 'kitten', 'pet grooming', 'pet care', 'kennel', 'aquarium', 'animal', 'doggy daycare'],
             design: {
-                colors: 'Warm playful palette: warm teal (#0D9488), vibrant orange (#F97316), soft cream (#FFF7ED), warm brown (#92400E), light mint surface (#F0FDF4). Friendly and warm.',
+                colors: 'Warm playful palette: vibrant orange (#F97316), sunny yellow (#FACC15), soft cream (#FFF7ED), warm brown (#78350F), warm peach surface (#FFF1F2). Friendly and warm. PRIMARY must be orange, NOT teal/green.',
                 fonts: 'Heading: Nunito (weight 700, 800). Body: Open Sans (weight 400). Import both from Google Fonts.',
                 imagery: 'Cute dogs and cats, pet store interiors, veterinary care, pets playing, grooming sessions, aquarium fish.',
                 mood: 'Warm, playful, friendly, caring, joyful, trustworthy.'
@@ -1090,11 +1090,36 @@ input, textarea, select { font-family: inherit; font-size: inherit; max-width: 1
                 console.log('🔧 Fixed navbar offset injected');
             }
 
-            // Fix 3: Hero overlay for text readability on background images
+            // Fix 3: Hero overlay for text readability on background images — NICHE-COLORED
             if (!css.includes('.hero::before') && !css.includes('.hero:before')) {
-                heroFixes.push('.hero::before, [class*="hero"]::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)); z-index: 1; }');
+                const overlayMap = {
+                    pets: 'linear-gradient(135deg, rgba(249,115,22,0.8), rgba(120,53,15,0.6))',
+                    beauty: 'linear-gradient(135deg, rgba(183,110,121,0.8), rgba(26,26,46,0.6))',
+                    homeservices: 'linear-gradient(135deg, rgba(37,99,235,0.8), rgba(30,41,59,0.6))',
+                    church: 'linear-gradient(135deg, rgba(124,58,237,0.8), rgba(30,27,75,0.6))',
+                    sports: 'linear-gradient(135deg, rgba(22,163,74,0.8), rgba(24,24,27,0.6))',
+                    food: 'linear-gradient(135deg, rgba(236,72,153,0.8), rgba(120,53,15,0.6))',
+                    consulting: 'linear-gradient(135deg, rgba(30,58,95,0.85), rgba(71,85,105,0.6))',
+                    restaurant: 'linear-gradient(135deg, rgba(114,47,55,0.85), rgba(212,168,83,0.5))',
+                    technology: 'linear-gradient(135deg, rgba(15,23,42,0.9), rgba(99,102,241,0.6))',
+                    fitness: 'linear-gradient(135deg, rgba(26,26,26,0.85), rgba(255,107,0,0.5))',
+                    health: 'linear-gradient(135deg, rgba(59,130,246,0.8), rgba(13,148,136,0.5))',
+                    legal: 'linear-gradient(135deg, rgba(30,58,95,0.85), rgba(107,58,42,0.5))',
+                    ecommerce: 'linear-gradient(135deg, rgba(26,26,46,0.8), rgba(16,185,129,0.4))',
+                    realestate: 'linear-gradient(135deg, rgba(71,85,105,0.85), rgba(212,168,83,0.4))',
+                    education: 'linear-gradient(135deg, rgba(59,130,246,0.8), rgba(245,158,11,0.4))',
+                    creative: 'linear-gradient(135deg, rgba(0,0,0,0.85), rgba(0,0,0,0.6))',
+                    finance: 'linear-gradient(135deg, rgba(30,64,175,0.85), rgba(22,101,52,0.5))',
+                    travel: 'linear-gradient(135deg, rgba(14,165,233,0.8), rgba(251,146,60,0.5))',
+                    nonprofit: 'linear-gradient(135deg, rgba(146,64,14,0.8), rgba(15,118,110,0.5))',
+                    automotive: 'linear-gradient(135deg, rgba(10,10,10,0.9), rgba(220,38,38,0.5))',
+                    wedding: 'linear-gradient(135deg, rgba(183,110,121,0.7), rgba(212,168,83,0.4))',
+                    gaming: 'linear-gradient(135deg, rgba(9,9,11,0.9), rgba(168,85,247,0.6))'
+                };
+                const overlay = overlayMap[niche.name] || 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6))';
+                heroFixes.push(`.hero::before, [class*="hero"]::before { content: ""; position: absolute; inset: 0; background: ${overlay}; z-index: 1; }`);
                 heroFixes.push('.hero > *, [class*="hero"] > * { position: relative; z-index: 2; }');
-                console.log('🔧 Hero overlay injected');
+                console.log(`🔧 Hero overlay injected [niche: ${niche.name}]`);
             }
 
             if (heroFixes.length > 0) {
