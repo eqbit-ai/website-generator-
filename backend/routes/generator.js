@@ -578,11 +578,13 @@ LAYOUT SELECTION — Analyze the prompt and pick the BEST fit:
 8. Storytelling brand: narrative flow, parallax, full-width sections, emotional design
 
 SIZE CONSTRAINT — CRITICAL TO AVOID TRUNCATION:
-- Keep HTML to 6-8 sections MAXIMUM (navbar + hero + 4-6 content sections + footer)
-- Do NOT generate excessive cards, list items, or product grids — max 3-4 items per grid/row
-- Keep total HTML under 12000 characters — quality over quantity
+- MAXIMUM 6 sections total: navbar + hero + 3-4 content sections + footer. NEVER more than 4 content sections.
+- Max 3 items per card grid/row. Max 3 testimonials. Max 3 stats. Keep it tight.
+- HARD LIMIT: total HTML under 8000 characters, total CSS under 10000 characters. STOP and simplify if approaching these limits.
 - Prioritize COMPLETE CSS coverage over adding more HTML sections
 - CSS MUST style EVERY element — better to have fewer sections fully styled than many sections half-styled
+- Do NOT include lengthy SVG paths — use simple 24x24 viewBox SVGs with 1-2 path elements max
+- Avoid verbose attribute lists — keep elements lean
 
 ELEMENT CLASS NAMING — CRITICAL FOR EDITING:
 - Give EVERY element a unique, descriptive class name
@@ -844,7 +846,7 @@ REQUIRED SECTIONS — YOU MUST GENERATE ALL 5:
    - MUST have white centered text: large heading + subtitle + CTA buttons
    - body must have padding-top: var(--navbar-height) so hero is not behind fixed navbar
 
-3. CONTENT SECTIONS — 4-5 sections using DIFFERENT LAYOUTS from this menu:
+3. CONTENT SECTIONS — 3-4 sections using DIFFERENT LAYOUTS from this menu:
    A) Card Grid — 3-column cards with icons/images + title + description (MAX 1x — never repeat this layout)
    B) Split Image+Text — Two columns: large image on one side + text/bullets on other. Alternate left/right between uses (MAX 2x)
    C) Dark Stats Banner — Dark background (var(--color-secondary)), 3-4 large stat numbers + labels, white text (MANDATORY 1x — every site needs this)
@@ -905,7 +907,7 @@ EXECUTION CHECKLIST — FOLLOW IN ORDER:
 4. Write <nav class="navbar"> with position: fixed, logo, links, CTA, hamburger
 5. Write <section class="hero" id="home"> with background-image: url(IMAGE_1_URL), ::before overlay, white centered text
 6. Write body { padding-top: var(--navbar-height); } so hero is not behind navbar
-7. Write 4-5 content sections — EACH with a DIFFERENT layout (A-F). ONE dark background section MANDATORY
+7. Write 3-4 content sections — EACH with a DIFFERENT layout (A-F). ONE dark background section MANDATORY
 8. ALTERNATING backgrounds: light → tinted → dark → light. NEVER two adjacent sections same color
 9. ALL h2 headings: color: var(--color-primary-dark), NOT black. Optional decorative bar above
 10. ALL cards: box-shadow: var(--shadow-md) + hover: translateY(-4px) + var(--shadow-xl)
@@ -1022,7 +1024,7 @@ Return the COMPLETE modified code in format:
         console.log(`🤖 Calling Claude API... [Niche: ${niche.name}] ${!isNewDesign && isTargetedEdit ? '(Targeted Edit)' : ''}`);
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-5-20250929',
-            max_tokens: 16000,
+            max_tokens: 16384,
             temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7,
             system: systemPrompt,
             messages: conversationMessages
