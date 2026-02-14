@@ -1024,7 +1024,7 @@ Return the COMPLETE modified code in format:
         console.log(`🤖 Calling Claude API... [Niche: ${niche.name}] ${!isNewDesign && isTargetedEdit ? '(Targeted Edit)' : ''}`);
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-5-20250929',
-            max_tokens: 240000,
+            max_tokens: 64000,
             temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7,
             system: systemPrompt,
             messages: conversationMessages
