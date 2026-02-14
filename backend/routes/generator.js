@@ -528,42 +528,136 @@ CRITICAL FORMAT REQUIREMENTS (MUST FOLLOW EXACTLY):
 5. Then EXACTLY: // JavaScript
 6. Then ALL JavaScript (complete interactivity)
 
-FORMAT EXAMPLE:
+MANDATORY CODE TEMPLATE — COPY THIS STRUCTURE EXACTLY:
+
 <!-- HTML -->
-<nav class="navbar">
+<nav class="navbar" id="navbar">
   <div class="navbar__container">
-    <a href="#" class="navbar__logo">Brand</a>
-    <ul class="navbar__menu">...</ul>
+    <a href="#home" class="navbar__logo">BrandName</a>
+    <ul class="navbar__menu">
+      <li><a href="#home" class="navbar__link">Home</a></li>
+      <li><a href="#features" class="navbar__link">Features</a></li>
+      <li><a href="#about" class="navbar__link">About</a></li>
+      <li><a href="#contact" class="navbar__link">Contact</a></li>
+    </ul>
+    <a href="#contact" class="navbar__cta btn btn--primary">Get Started</a>
+    <button class="navbar__toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
-<header class="hero">...</header>
-<section class="features">...</section>
-...more sections...
-<section class="contact">
-  <form class="contact__form">...</form>
+
+<section class="hero" id="home">
+  <div class="hero__container">
+    <h1 class="hero__title">Main Heading Here</h1>
+    <p class="hero__subtitle">Compelling subheading that describes the value proposition</p>
+    <div class="hero__cta-group">
+      <a href="#contact" class="btn btn--primary hero__btn">Primary CTA</a>
+      <a href="#about" class="btn btn--outline hero__btn">Learn More</a>
+    </div>
+  </div>
 </section>
-<footer class="footer">...</footer>
+
+<section class="features" id="features">
+  ...content with cards/grid...
+</section>
+...3-4 more content sections (about, gallery, testimonials, stats, etc.)...
+<section class="contact" id="contact">
+  <div class="contact__container">
+    <h2 class="contact__title">Get In Touch</h2>
+    <form class="contact__form" id="contactForm">
+      <input type="text" class="contact__input" placeholder="Your Name" required>
+      <input type="email" class="contact__input" placeholder="Your Email" required>
+      <textarea class="contact__textarea" placeholder="Your Message" required></textarea>
+      <button type="submit" class="btn btn--primary contact__submit">Send Message</button>
+    </form>
+  </div>
+</section>
+<footer class="footer">
+  <div class="footer__container">
+    <div class="footer__brand">BrandName</div>
+    <div class="footer__links">...</div>
+    <div class="footer__social">...SVG icons...</div>
+    <p class="footer__copy">2026 BrandName. All rights reserved.</p>
+  </div>
+</footer>
 
 /* CSS */
-@import url('https://fonts.googleapis.com/css2?family=...&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;500&display=swap');
 
 :root {
-  --font-heading: 'ChosenFont', sans-serif;
-  --font-body: 'ChosenFont', sans-serif;
+  --font-heading: 'Oswald', sans-serif;
+  --font-body: 'Roboto', sans-serif;
+  --navbar-height: 80px;
   --text-xs: 0.75rem;
-  ...all design tokens...
-  --color-primary: #...;
-  ...all colors...
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+  --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
+  --color-primary: #FF6B00;
+  --color-primary-light: #FF8533;
+  --color-primary-dark: #CC5500;
+  --color-secondary: #1A1A1A;
+  --color-accent: #E53E3E;
+  --color-bg: #FFFFFF;
+  --color-surface: #F8FAFC;
+  --color-surface-alt: #F1F5F9;
+  --color-text: #1A1A2E;
+  --color-text-muted: #64748B;
+  --color-text-inverse: #FFFFFF;
+  --color-border: #E2E8F0;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 1rem; --radius-full: 9999px;
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --container-max: 1280px;
+  --section-spacing: var(--space-24);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-body); color: var(--color-text); background: var(--color-bg); }
-...all styles using var() tokens...
+body { font-family: var(--font-body); color: var(--color-text); background: var(--color-bg); padding-top: var(--navbar-height); }
+
+.navbar { position: fixed; top: 0; left: 0; width: 100%; height: var(--navbar-height); z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-border); }
+
+.hero {
+  min-height: 100vh;
+  background-image: url('HERO_IMAGE_URL_HERE');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
+  z-index: 1;
+}
+.hero__container { position: relative; z-index: 2; text-align: center; color: var(--color-text-inverse); max-width: var(--container-max); padding: var(--space-8); }
+.hero__title { font-family: var(--font-heading); font-size: var(--text-7xl); font-weight: 800; }
+.hero__subtitle { font-size: var(--text-xl); margin-top: var(--space-4); opacity: 0.9; }
+
+...continue styling ALL remaining elements using var() tokens...
 
 // JavaScript
 document.addEventListener('DOMContentLoaded', function() {
   try {
-    ...all JS with error handling...
+    // Mobile menu, smooth scroll, scroll reveal, form validation, sticky header
   } catch(e) { console.warn(e); }
 });
 
@@ -591,12 +685,10 @@ CSS COVERAGE — EVERY ELEMENT MUST BE STYLED:
 - ALL cards: background, border-radius, box-shadow, padding, transition, hover (lift + shadow increase)
 - ALL sections: padding using var(--section-spacing), alternating backgrounds using var(--color-bg) and var(--color-surface-alt)
 
-NAVBAR + HERO SPACING — CRITICAL (MUST FOLLOW):
-- If the navbar uses position: fixed or position: sticky, the hero/first section MUST have padding-top equal to the navbar height (typically 80px-100px) so content is NEVER hidden behind the navbar
-- Add this rule: .hero { padding-top: calc(var(--navbar-height, 80px) + var(--space-8)); }
-- Define --navbar-height in :root (e.g., --navbar-height: 80px;)
-- The navbar should have a defined height and the hero must account for it — NEVER let content overlap or hide behind the navbar
-- Alternative approach: add body { padding-top: var(--navbar-height, 80px); } when using position: fixed navbar
+NAVBAR + HERO SPACING — CRITICAL:
+- Navbar is position: fixed. Body MUST have padding-top: var(--navbar-height) so content never hides behind it.
+- Define --navbar-height: 80px in :root.
+- The hero uses min-height: 100vh and is the FIRST section after <nav>. It fills the viewport.
 
 MODERN DESIGN TECHNIQUES:
 - CSS Grid and Flexbox for ALL layouts (no floats)
@@ -620,27 +712,32 @@ RESPONSIVE DESIGN — MOBILE FIRST:
 - Cards: 1 column on mobile, 2 on tablet, 3-4 on desktop
 - Form: full width on mobile, max-width 600px centered on desktop
 
-REQUIRED SECTIONS (ALWAYS INCLUDE):
-1. Navigation bar (position: fixed top, logo + links + CTA button, mobile hamburger, z-index: 1000, height stored in --navbar-height)
-2. Hero section — THIS IS THE MOST IMPORTANT SECTION. Apply this EXACT CSS pattern:
-   .hero { min-height: 100vh; background-image: url('HERO_IMAGE_URL'); background-size: cover; background-position: center; background-attachment: fixed; position: relative; display: flex; align-items: center; justify-content: center; padding-top: calc(var(--navbar-height, 80px) + 2rem); }
-   .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 100%); z-index: 1; }
-   .hero__container { position: relative; z-index: 2; text-align: center; color: white; }
-   - The hero FILLS THE ENTIRE SCREEN (100vh) — this is non-negotiable
-   - Use the HERO IMAGE URL from the images section as background-image
-   - White text centered on the overlay: large heading, subheading, 1-2 CTA buttons
-   - NEVER use a plain solid color background — ALWAYS a real photo with overlay
-3. 3-5 content sections appropriate for the niche (features, services, about, stats, testimonials, gallery, team, etc.)
-4. Contact form section with:
-   - Name input, Email input, Message/Subject textarea, Submit button
-   - Full JavaScript validation (email regex, required fields, visual error/success feedback)
-   - Beautiful styling with focus states and transitions
-5. Footer section with:
-   - Company name and brief description
-   - Quick navigation links
-   - Social media icon links (use inline SVG icons — Facebook, Twitter/X, Instagram, LinkedIn)
-   - Copyright notice with current year
-   - Styled consistently with the design
+REQUIRED SECTIONS — YOU MUST GENERATE ALL 5:
+
+1. NAVBAR — position: fixed, height: var(--navbar-height), z-index: 1000, logo + links + CTA + hamburger toggle
+
+2. HERO — THE MOST CRITICAL SECTION. YOU MUST USE THIS EXACT STRUCTURE:
+   HTML: <section class="hero" id="home"> wrapping a <div class="hero__container"> with h1, p, and CTA buttons
+   CSS: .hero must have: min-height: 100vh, background-image: url(HERO_IMAGE_URL), background-size: cover, position: relative, display: flex, align-items: center
+   CSS: .hero::before must have: dark overlay gradient with z-index: 1
+   CSS: .hero__container must have: position: relative, z-index: 2, color: white
+   RULES:
+   - The hero tag MUST be <section class="hero"> — NEVER just a <div>
+   - MUST use background-image with the provided HERO IMAGE URL — NEVER a plain solid color
+   - MUST be 100vh full viewport height
+   - MUST have dark overlay for text readability
+   - MUST have white centered text: large heading + subtitle + CTA buttons
+   - body must have padding-top: var(--navbar-height) so hero is not behind fixed navbar
+
+3. CONTENT SECTIONS — 3-5 sections (features, services, about, stats, testimonials, gallery, team)
+   - Content images go in a 3-column CSS grid with complete rows (no orphans)
+   - Each section: proper heading, descriptive content, full styling
+
+4. CONTACT FORM — Name input, Email input, Message textarea, Submit button
+   - Full JS validation (email regex, required fields, visual error/success feedback)
+   - Beautiful focus states and transitions
+
+5. FOOTER — Company name, nav links, social SVG icons (Facebook, Twitter/X, Instagram, LinkedIn), copyright 2026
 
 IMAGES — CRITICAL REQUIREMENT:
 - USE ONLY the exact image URLs provided below — NO placeholders, NO generic URLs
@@ -679,19 +776,18 @@ THE STANDARD: A client should look at this and say "This looks like a $10,000 cu
 
             userMessage = `Create a premium ${niche.name !== 'general' ? niche.name + ' ' : ''}website for: ${prompt}
 
-EXECUTION CHECKLIST:
-1. Select ONE layout pattern (1-8) that best fits this niche
-2. Apply the ${niche.name} design direction (colors, fonts, mood)
-3. Define ALL CSS custom properties in :root FIRST (including --navbar-height)
-4. Use ONLY var(--token) references throughout CSS — zero hardcoded values
-5. Give every element a unique descriptive class name (BEM-lite)
-6. HERO: Use IMAGE #1 as background-image with dark overlay + white text — NEVER a plain color
-7. CONTENT: Use IMAGES #2+ as <img> tags in feature/gallery sections
-8. Include contact form with full validation + comprehensive footer
-9. Write complete JavaScript with error handling (try-catch, null checks)
-10. Ensure hero has padding-top to clear the fixed navbar — content must NEVER be hidden
-9. Fully responsive: mobile hamburger, fluid grids, scaled typography
-10. ZERO visible code, ZERO unstyled elements, ZERO browser defaults
+EXECUTION CHECKLIST — FOLLOW IN ORDER:
+1. Pick layout pattern (1-8) for this niche
+2. Apply ${niche.name} design direction (colors, fonts, mood)
+3. Write :root with ALL tokens (--navbar-height, --font-*, --text-*, --space-*, --color-*)
+4. Write <nav class="navbar"> with position: fixed, logo, links, CTA, hamburger
+5. Write <section class="hero" id="home"> with background-image: url(IMAGE_1_URL), ::before overlay, white centered text
+6. Write body { padding-top: var(--navbar-height); } so hero is not behind navbar
+7. Write 3-5 content sections using IMAGES #2+ as <img> tags in 3-column grids
+8. Write <section class="contact"> with validated form
+9. Write <footer> with links, SVG social icons, copyright
+10. Write JS: mobile menu, smooth scroll, scroll reveal, form validation, sticky header
+11. Check: EVERY element has a class, EVERY element is styled, ZERO browser defaults visible
 
 Return COMPLETE code in EXACT format:
 <!-- HTML -->
