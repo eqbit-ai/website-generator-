@@ -62,12 +62,22 @@ function detectNiche(prompt) {
             }
         },
         {
+            name: 'fitness',
+            keywords: ['gym', 'fitness', 'workout', 'exercise', 'crossfit', 'bodybuilding', 'personal trainer', 'strength training', 'powerlifting', 'weightlifting', 'athletic', 'sports training', 'muscle', 'boxing', 'martial arts', 'pilates', 'spinning', 'hiit', 'yoga', 'yoga studio'],
+            design: {
+                colors: 'Bold energetic palette: electric orange (#FF6B00), deep charcoal (#1A1A1A), vibrant red (#E53E3E), steel gray (#2D3748), pure white (#FFFFFF). High contrast, powerful.',
+                fonts: 'Heading: Oswald (weight 600, 700) or Montserrat (weight 700, 800, 900). Body: Roboto (weight 400). Import from Google Fonts.',
+                imagery: 'People training in gym, weightlifting, athletic movements, gym equipment, dynamic action shots, motivation.',
+                mood: 'Powerful, energetic, motivating, bold, intense, disciplined.'
+            }
+        },
+        {
             name: 'health',
-            keywords: ['health', 'medical', 'doctor', 'clinic', 'hospital', 'dental', 'dentist', 'therapy', 'therapist', 'wellness', 'fitness', 'gym', 'yoga', 'spa', 'nutrition', 'pharmacy', 'physiotherapy', 'mental health', 'skincare', 'dermatology'],
+            keywords: ['health', 'medical', 'doctor', 'clinic', 'hospital', 'dental', 'dentist', 'therapy', 'therapist', 'wellness', 'spa', 'nutrition', 'pharmacy', 'physiotherapy', 'mental health', 'skincare', 'dermatology'],
             design: {
                 colors: 'Calming palette: soft teal (#0D9488), gentle sage (#86EFAC), clean white (#FFFFFF), light mint surface (#F0FDF4), warm blue accent (#3B82F6). Avoid harsh reds.',
                 fonts: 'Heading: Nunito (weight 700, 800). Body: Open Sans (weight 400). Import from Google Fonts.',
-                imagery: 'Smiling medical professionals, clean clinical spaces, nature/wellness imagery, people exercising, calming environments.',
+                imagery: 'Smiling medical professionals, clean clinical spaces, nature/wellness imagery, calming environments.',
                 mood: 'Trustworthy, clean, calming, professional, caring.'
             }
         },
@@ -419,12 +429,13 @@ router.post('/generate', async (req, res) => {
         // Detect niche for design intelligence
         const niche = detectNiche(prompt);
 
-        // Get context-aware images from Unsplash
+        // Get context-aware images from Unsplash (niche-aware)
+        // Always request 7: 1 for hero background + 6 for content (perfect 3-column x 2-row grid)
         let contextualImages = [];
         if (isNewDesign) {
             try {
-                contextualImages = await unsplashService.getContextualImages(prompt, 8);
-                console.log(`🖼️ Loaded ${contextualImages.length} contextual images`);
+                contextualImages = await unsplashService.getContextualImages(prompt, 7, niche.name);
+                console.log(`🖼️ Loaded ${contextualImages.length} contextual images [niche: ${niche.name}]`);
             } catch (error) {
                 console.error('⚠️ Image loading failed, continuing without:', error.message);
             }
@@ -441,11 +452,25 @@ router.post('/generate', async (req, res) => {
             session.conversationHistory = [];
             session.niche = niche;
 
-            // Build image list
+            // Build image list with explicit usage instructions
+            const contentImages = contextualImages.slice(1);
+            // Ensure content images are a multiple of 3 for perfect grid alignment
+            const gridImages = contentImages.length >= 6 ? contentImages.slice(0, 6)
+                             : contentImages.length >= 3 ? contentImages.slice(0, 3)
+                             : contentImages;
+
             const imageUrls = contextualImages.length > 0
-                ? `USE THESE EXACT URLS IN <img src="..."> TAGS — NO PLACEHOLDERS:\n${contextualImages.map((img, i) =>
-                    `${i + 1}. ${img.url}\n   Alt: "${img.alt}"\n   Credit: ${img.photographer}`
-                ).join('\n\n')}`
+                ? `USE THESE EXACT URLS — NO PLACEHOLDERS, NO OTHER URLS:
+
+HERO IMAGE (USE AS CSS background-image on .hero section — NOT an <img> tag):
+${contextualImages[0].url}
+
+CONTENT IMAGES (USE AS <img> TAGS — place in gallery/features grid):
+${gridImages.map((img, i) =>
+    `${i + 1}. ${img.url}\n   Alt: "${img.alt}"`
+).join('\n')}
+
+GRID RULE: You have ${gridImages.length} content images. Use a ${gridImages.length <= 3 ? '3-column' : '3-column'} CSS grid. NEVER leave an orphan image alone in a row — always fill complete rows of 3.`
                 : 'No pre-loaded images — use direct Unsplash URLs with relevant search terms: https://images.unsplash.com/photo-[id]?w=800&fit=crop';
 
             systemPrompt = `You are a world-class UI/UX designer and front-end architect with 20 years of experience. You create stunning, production-ready websites that look like they cost $10,000+ to build. Zero errors, zero visible code, zero unstyled elements.
@@ -481,6 +506,13 @@ LAYOUT SELECTION — Analyze the prompt and pick the BEST fit:
 6. Conversion landing: single column, progressive disclosure, strong CTAs, urgency
 7. Marketplace/catalog: product grid, filters, category navigation, search bar
 8. Storytelling brand: narrative flow, parallax, full-width sections, emotional design
+
+SIZE CONSTRAINT — CRITICAL TO AVOID TRUNCATION:
+- Keep HTML to 6-8 sections MAXIMUM (navbar + hero + 4-6 content sections + footer)
+- Do NOT generate excessive cards, list items, or product grids — max 3-4 items per grid/row
+- Keep total HTML under 12000 characters — quality over quantity
+- Prioritize COMPLETE CSS coverage over adding more HTML sections
+- CSS MUST style EVERY element — better to have fewer sections fully styled than many sections half-styled
 
 ELEMENT CLASS NAMING — CRITICAL FOR EDITING:
 - Give EVERY element a unique, descriptive class name
@@ -559,6 +591,13 @@ CSS COVERAGE — EVERY ELEMENT MUST BE STYLED:
 - ALL cards: background, border-radius, box-shadow, padding, transition, hover (lift + shadow increase)
 - ALL sections: padding using var(--section-spacing), alternating backgrounds using var(--color-bg) and var(--color-surface-alt)
 
+NAVBAR + HERO SPACING — CRITICAL (MUST FOLLOW):
+- If the navbar uses position: fixed or position: sticky, the hero/first section MUST have padding-top equal to the navbar height (typically 80px-100px) so content is NEVER hidden behind the navbar
+- Add this rule: .hero { padding-top: calc(var(--navbar-height, 80px) + var(--space-8)); }
+- Define --navbar-height in :root (e.g., --navbar-height: 80px;)
+- The navbar should have a defined height and the hero must account for it — NEVER let content overlap or hide behind the navbar
+- Alternative approach: add body { padding-top: var(--navbar-height, 80px); } when using position: fixed navbar
+
 MODERN DESIGN TECHNIQUES:
 - CSS Grid and Flexbox for ALL layouts (no floats)
 - Gradients, box-shadows, backdrop-filter for depth
@@ -582,8 +621,15 @@ RESPONSIVE DESIGN — MOBILE FIRST:
 - Form: full width on mobile, max-width 600px centered on desktop
 
 REQUIRED SECTIONS (ALWAYS INCLUDE):
-1. Navigation bar (sticky top, logo + links + CTA button, mobile hamburger)
-2. Hero section (full viewport height, compelling heading, subheading, CTA button, background image or gradient)
+1. Navigation bar (position: fixed top, logo + links + CTA button, mobile hamburger, z-index: 1000, height stored in --navbar-height)
+2. Hero section — THIS IS THE MOST IMPORTANT SECTION. Apply this EXACT CSS pattern:
+   .hero { min-height: 100vh; background-image: url('HERO_IMAGE_URL'); background-size: cover; background-position: center; background-attachment: fixed; position: relative; display: flex; align-items: center; justify-content: center; padding-top: calc(var(--navbar-height, 80px) + 2rem); }
+   .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 100%); z-index: 1; }
+   .hero__container { position: relative; z-index: 2; text-align: center; color: white; }
+   - The hero FILLS THE ENTIRE SCREEN (100vh) — this is non-negotiable
+   - Use the HERO IMAGE URL from the images section as background-image
+   - White text centered on the overlay: large heading, subheading, 1-2 CTA buttons
+   - NEVER use a plain solid color background — ALWAYS a real photo with overlay
 3. 3-5 content sections appropriate for the niche (features, services, about, stats, testimonials, gallery, team, etc.)
 4. Contact form section with:
    - Name input, Email input, Message/Subject textarea, Submit button
@@ -597,12 +643,16 @@ REQUIRED SECTIONS (ALWAYS INCLUDE):
    - Styled consistently with the design
 
 IMAGES — CRITICAL REQUIREMENT:
-- USE ONLY the exact image URLs provided in the "CONTEXT-AWARE IMAGES" section below
-- DO NOT use placeholder text like "Image Loading..." or "[Image will load here]"
-- DO NOT use generic source.unsplash.com URLs
+- USE ONLY the exact image URLs provided below — NO placeholders, NO generic URLs
+- HERO IMAGE: Use as CSS background-image on the .hero section (NOT as an <img> tag)
+- CONTENT IMAGES: Use as <img> tags in content sections. ALWAYS place in a 3-column CSS grid.
+- GRID ALIGNMENT RULE: NEVER leave an orphan image in a row. If you have 6 images, use 3+3. If 3, use 3. The grid must always have COMPLETE rows of 3.
+  → .gallery__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
+  → Each image: aspect-ratio: 4/3; object-fit: cover; border-radius: var(--radius-lg); width: 100%;
+  → Mobile: grid-template-columns: 1fr (stack)
+  → Tablet: grid-template-columns: repeat(2, 1fr)
 - Every <img> tag MUST have: src, alt, class, loading="lazy"
-- Place images strategically: hero background/feature, feature sections, testimonials, gallery
-- Apply professional treatments: object-fit: cover, border-radius, box-shadow, optional CSS filter or overlay
+- Professional treatments: border-radius, box-shadow, hover zoom transform (scale 1.05), transition, overflow: hidden on container
 
 JAVASCRIPT — COMPLETE AND ERROR-FREE:
 - Wrap ALL code in DOMContentLoaded and try-catch
@@ -632,12 +682,14 @@ THE STANDARD: A client should look at this and say "This looks like a $10,000 cu
 EXECUTION CHECKLIST:
 1. Select ONE layout pattern (1-8) that best fits this niche
 2. Apply the ${niche.name} design direction (colors, fonts, mood)
-3. Define ALL CSS custom properties in :root FIRST
+3. Define ALL CSS custom properties in :root FIRST (including --navbar-height)
 4. Use ONLY var(--token) references throughout CSS — zero hardcoded values
 5. Give every element a unique descriptive class name (BEM-lite)
-6. Use the EXACT Unsplash image URLs provided above
-7. Include contact form with full validation + comprehensive footer
-8. Write complete JavaScript with error handling (try-catch, null checks)
+6. HERO: Use IMAGE #1 as background-image with dark overlay + white text — NEVER a plain color
+7. CONTENT: Use IMAGES #2+ as <img> tags in feature/gallery sections
+8. Include contact form with full validation + comprehensive footer
+9. Write complete JavaScript with error handling (try-catch, null checks)
+10. Ensure hero has padding-top to clear the fixed navbar — content must NEVER be hidden
 9. Fully responsive: mobile hamburger, fluid grids, scaled typography
 10. ZERO visible code, ZERO unstyled elements, ZERO browser defaults
 
@@ -756,9 +808,16 @@ Return the COMPLETE modified code in format:
         });
 
         const generatedCode = response.content[0].text;
+        const stopReason = response.stop_reason;
+        const wasTruncated = stopReason === 'max_tokens';
 
         // Log preview for debugging
-        console.log('📝 Response preview:', generatedCode.substring(0, 500));
+        console.log(`📝 Response preview (stop_reason: ${stopReason}, truncated: ${wasTruncated}):`);
+        console.log(generatedCode.substring(0, 500));
+
+        if (wasTruncated) {
+            console.warn('⚠️ RESPONSE TRUNCATED — hit max_tokens limit. CSS/JS may be incomplete.');
+        }
 
         // ============================================
         // PARSE — Multi-method extraction
@@ -859,6 +918,141 @@ Return the COMPLETE modified code in format:
         css = sanitized.css;
         js = sanitized.js;
 
+        // ============================================
+        // TRUNCATION RECOVERY — Fix incomplete CSS/JS
+        // ============================================
+        if (wasTruncated) {
+            // Fix truncated CSS — close any unclosed braces
+            if (css) {
+                let openBraces = 0;
+                for (const ch of css) {
+                    if (ch === '{') openBraces++;
+                    else if (ch === '}') openBraces--;
+                }
+                if (openBraces > 0) {
+                    console.log(`🔧 Fixing ${openBraces} unclosed CSS brace(s) from truncation`);
+                    css += '\n' + '}'.repeat(openBraces);
+                }
+            }
+        }
+
+        // CSS SAFETY NET — Ensure critical elements always have base styles
+        // This prevents giant unstyled elements when AI CSS is incomplete
+        const cssSafetyNet = `
+/* Safety net — base styles for elements the AI may have missed */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; padding: 0; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img { max-width: 100%; height: auto; display: block; object-fit: cover; }
+button, .btn, [class*="btn"], [class*="cta"] { cursor: pointer; font-family: inherit; }
+a { text-decoration: none; color: inherit; }
+ul, ol { list-style: none; padding: 0; margin: 0; }
+h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 1.2; overflow-wrap: break-word; }
+p { margin: 0; }
+section, .section { overflow: hidden; }
+input, textarea, select { font-family: inherit; font-size: inherit; max-width: 100%; }
+`;
+        // Only prepend safety net if CSS doesn't already have a universal reset
+        if (css && !css.includes('*, *::before, *::after')) {
+            css = cssSafetyNet + '\n' + css;
+            console.log('🛡️ CSS safety net prepended');
+        }
+
+        // HERO FIX — Ensure hero is always full viewport height with proper navbar offset
+        if (html && css) {
+            const hasFixedNav = css.includes('position: fixed') || css.includes('position:fixed') ||
+                                css.includes('position: sticky') || css.includes('position:sticky');
+
+            const heroFixes = [];
+
+            // Fix 1: Hero must be full viewport height
+            if (!css.includes('.hero') || !(/\.hero[^{]*\{[^}]*min-height\s*:\s*100vh/i.test(css))) {
+                heroFixes.push('.hero, [class*="hero"] { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }');
+                console.log('🔧 Hero min-height: 100vh injected');
+            }
+
+            // Fix 2: Fixed navbar offset
+            if (hasFixedNav) {
+                heroFixes.push('.hero, [class*="hero"], section:first-of-type { padding-top: 100px; }');
+                console.log('🔧 Fixed navbar offset injected');
+            }
+
+            // Fix 3: Hero overlay for text readability on background images
+            if (!css.includes('.hero::before') && !css.includes('.hero:before')) {
+                heroFixes.push('.hero::before, [class*="hero"]::before { content: ""; position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)); z-index: 1; }');
+                heroFixes.push('.hero > *, [class*="hero"] > * { position: relative; z-index: 2; }');
+                console.log('🔧 Hero overlay injected');
+            }
+
+            if (heroFixes.length > 0) {
+                css += '\n/* Auto-fix: hero section guarantees */\n' + heroFixes.join('\n') + '\n';
+            }
+        }
+
+        // HERO STRUCTURE GUARANTEE — Ensure hero ALWAYS has proper wrapper and background image
+        if (html && isNewDesign && contextualImages.length > 0) {
+            const heroImageUrl = contextualImages[0].url;
+
+            // Check if HTML has a proper hero section/header/main wrapper with "hero" in class
+            const hasHeroSection = /<(?:section|header|main)\s+[^>]*class\s*=\s*["'][^"']*hero/i.test(html);
+
+            if (!hasHeroSection) {
+                // Look for orphaned hero content (div with "hero" in class but no section wrapper)
+                const heroContentRegex = /<div\s+[^>]*class\s*=\s*["'][^"']*hero[^"']*["'][^>]*>/i;
+                const heroContentMatch = html.match(heroContentRegex);
+
+                if (heroContentMatch) {
+                    const startIndex = html.indexOf(heroContentMatch[0]);
+                    let depth = 1; // Already found the opening <div
+                    let searchFrom = startIndex + heroContentMatch[0].length;
+                    let endIndex = -1;
+
+                    while (searchFrom < html.length) {
+                        const nextOpen = html.indexOf('<div', searchFrom);
+                        const nextClose = html.indexOf('</div>', searchFrom);
+
+                        if (nextClose === -1) break;
+
+                        if (nextOpen !== -1 && nextOpen < nextClose) {
+                            depth++;
+                            searchFrom = nextOpen + 4;
+                        } else {
+                            depth--;
+                            if (depth === 0) {
+                                endIndex = nextClose + 6;
+                                break;
+                            }
+                            searchFrom = nextClose + 6;
+                        }
+                    }
+
+                    if (endIndex !== -1) {
+                        const heroContent = html.substring(startIndex, endIndex);
+                        const heroWrapper = `<section class="hero" id="home">\n${heroContent}\n</section>`;
+                        html = html.substring(0, startIndex) + heroWrapper + html.substring(endIndex);
+                        console.log('🔧 Hero wrapper injected — wrapped orphaned hero content in <section class="hero">');
+                    }
+                } else {
+                    // No hero content found at all — inject after navbar
+                    const navEnd = html.match(/<\/nav>/i);
+                    if (navEnd) {
+                        const insertAt = html.indexOf(navEnd[0]) + navEnd[0].length;
+                        const heroSection = `\n<section class="hero" id="home">\n  <div class="hero__container">\n    <h1 class="hero__title">Welcome</h1>\n    <p class="hero__subtitle">Experience excellence in everything we do</p>\n    <a href="#contact" class="hero__cta">Get Started</a>\n  </div>\n</section>`;
+                        html = html.substring(0, insertAt) + heroSection + html.substring(insertAt);
+                        console.log('🔧 Hero section injected — no hero found, added after navbar');
+                    }
+                }
+            }
+
+            // Ensure CSS has hero background-image
+            const hasHeroBgInHtml = /class\s*=\s*["'][^"']*hero[^"']*["'][^>]*style\s*=\s*["'][^"']*background-image/i.test(html);
+            const hasHeroBgInCss = /\.hero[^}]*background-image\s*:\s*url/i.test(css);
+
+            if (!hasHeroBgInHtml && !hasHeroBgInCss && css) {
+                css += `\n/* Auto-fix: hero background image */\n.hero, [class*="hero-section"], [class*="hero-banner"] {\n  background-image: url('${heroImageUrl}');\n  background-size: cover;\n  background-position: center;\n  background-attachment: fixed;\n}\n`;
+                console.log('🔧 Hero background-image injected from contextual images');
+            }
+        }
+
         // Validate extraction
         console.log('\n📊 EXTRACTION RESULTS:');
         console.log(`HTML: ${html.length} chars ${html ? '✅' : '❌'}`);
@@ -894,6 +1088,32 @@ Return the COMPLETE modified code in format:
                     responseSample: generatedCode.substring(0, 500)
                 }
             });
+        }
+
+        // JS RECOVERY — If JS is missing (usually from truncation), generate it separately
+        if (!js && html && isNewDesign) {
+            console.log('🔧 JS missing — generating separately...');
+            try {
+                const jsResponse = await anthropic.messages.create({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 2000,
+                    temperature: 0.3,
+                    system: 'You are a frontend JavaScript expert. Generate ONLY vanilla JavaScript code. No explanations, no markdown, no code blocks. Just raw JavaScript.',
+                    messages: [{
+                        role: 'user',
+                        content: `Add interactivity to this website HTML. Include: mobile menu toggle, smooth scroll for anchor links, scroll-triggered animations (fade-in on scroll using IntersectionObserver), and active nav link highlighting. Wrap everything in DOMContentLoaded and try-catch.\n\nHTML structure:\n${html.substring(0, 3000)}`
+                    }]
+                });
+
+                js = jsResponse.content[0].text
+                    .replace(/```(?:javascript|js)?\s*/gi, '')
+                    .replace(/```\s*/g, '')
+                    .trim();
+
+                console.log(`✅ JS recovered separately: ${js.length} chars`);
+            } catch (jsErr) {
+                console.warn('⚠️ JS recovery failed:', jsErr.message);
+            }
         }
 
         // Store in session
@@ -950,13 +1170,16 @@ ${usesDesignTokens ? '\nThis website uses a CSS design token system. USE the exi
 TASK: Modify ONLY the provided element based on the user's request.
 
 RULES:
-1. Return ONLY the modified element HTML — nothing else
-2. If CSS changes are needed, include them in a /* ELEMENT_CSS */ block
+1. Return ONLY the modified element with its SAME tag — do not change the outer tag type or wrap it in a parent
+2. If CSS changes are needed, include them in a /* ELEMENT_CSS */ block with COMPLETE property declarations
 3. Keep the element structure intact unless explicitly asked to change it
 4. Preserve all existing classes, IDs, and attributes unless the change requires modifying them
 5. Ensure the element has a descriptive class name
 6. Be precise — change only what's requested
 7. The modified element must be complete and valid HTML
+8. If the user asks about spacing, overlap, or positioning issues, provide COMPLETE CSS rules that fix the root cause (padding, margin, z-index, position, top, etc.) — not just a single property
+9. If removing an element, replace it with an empty <div> with the SAME class and style="display:none" — do NOT change the tag type
+10. NEVER return a parent container when only the child element was selected — keep scope tight
 
 RESPONSE FORMAT:
 If only HTML changes:
@@ -968,16 +1191,32 @@ If CSS changes are also needed:
 <modified element html here>
 
 /* ELEMENT_CSS */
-.selector { property: value; }
+.selector {
+  property: value;
+  property: value;
+}
 
 NO explanations, NO markdown, NO extra text — just the element code.`;
+
+        // Extract relevant CSS rules for this element to give AI context
+        let relevantCss = '';
+        const elementClassMatch = elementHtml.match(/class\s*=\s*["']([^"']+)["']/);
+        if (currentCss && elementClassMatch) {
+            const className = elementClassMatch[1].split(/\s+/)[0];
+            const cssRuleRegex = new RegExp(`\\.${className.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^{]*\\{[^}]*\\}`, 'gi');
+            const cssMatches = currentCss.match(cssRuleRegex);
+            if (cssMatches) {
+                relevantCss = cssMatches.join('\n');
+            }
+        }
 
         const userMessage = `ELEMENT TO EDIT (${elementPath}):
 ${elementHtml}
 
+${relevantCss ? `CURRENT CSS FOR THIS ELEMENT:\n${relevantCss}\n` : ''}
 USER REQUEST: ${prompt}
 
-Return the modified element. If you need to add/modify CSS, include it in a /* ELEMENT_CSS */ block.`;
+Return the modified element. If you need to add/modify CSS, include COMPLETE CSS rules in a /* ELEMENT_CSS */ block.`;
 
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
