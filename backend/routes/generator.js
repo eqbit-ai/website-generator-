@@ -1130,6 +1130,20 @@ h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 1.2; overflow-wrap: break-word;
 p { margin: 0; }
 section, .section { overflow: hidden; width: 100%; }
 input, textarea, select { font-family: inherit; font-size: inherit; max-width: 100%; }
+/* Navbar guaranteed styles */
+.navbar { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 0.75rem 0; }
+.navbar__container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+.navbar__brand { font-weight: 700; font-size: 1.25rem; color: #fff; }
+.navbar__menu { display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0; }
+.navbar__link { color: rgba(255,255,255,0.85); font-size: 0.9rem; transition: color 0.25s ease; }
+.navbar__link:hover { color: #fff; }
+.navbar__toggle { display: none; background: none; border: none; cursor: pointer; padding: 0.5rem; }
+.navbar__toggle-line { display: block; width: 24px; height: 2px; background: #fff; margin: 5px 0; transition: 0.3s; }
+@media (max-width: 768px) {
+  .navbar__toggle { display: block; }
+  .navbar__menu { display: none; position: absolute; top: 100%; left: 0; width: 100%; flex-direction: column; background: rgba(0,0,0,0.95); padding: 1rem; }
+  .navbar__menu.active { display: flex; }
+}
 `;
         // Only prepend safety net if CSS doesn't already have a universal reset
         if (css && !css.includes('*, *::before, *::after')) {
