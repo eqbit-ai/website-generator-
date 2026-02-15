@@ -4,15 +4,16 @@
 const express = require('express');
 const router = express.Router();
 const unsplashService = require('../services/unsplashService');
+const { SECTION_META, assembleSkeleton, replacePlaceholders, getPlaceholderKeys, getPlaceholderDescriptions } = require('../templates');
 
-let anthropic = null;
-if (process.env.ANTHROPIC_API_KEY) {
+let openai = null;
+if (process.env.OPENAI_API_KEY) {
     try {
-        const Anthropic = require('@anthropic-ai/sdk');
-        anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 10 * 60 * 1000 });
-        console.log('✅ Generator: Anthropic ready');
+        const OpenAI = require('openai');
+        openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 10 * 60 * 1000 });
+        console.log('✅ Generator: OpenAI ready');
     } catch (e) {
-        console.log('⚠️ Generator: Anthropic not available');
+        console.log('⚠️ Generator: OpenAI not available');
     }
 }
 
@@ -419,6 +420,73 @@ function sanitizeOutput(html, css, js) {
     return { html: html.trim(), css: css.trim(), js: js.trim() };
 }
 
+// ============================================
+// PARSE CONTENT RESPONSE — Extract key-value content + CSS + JS from template format
+// ============================================
+function parseContentResponse(response) {
+    try {
+        // Look for <!-- CONTENT --> marker
+        const contentStart = response.indexOf('<!-- CONTENT -->');
+        if (contentStart === -1) return null;
+
+        // Find CSS section
+        const cssStart = response.indexOf('/* CSS */', contentStart);
+        // Find JS section
+        const jsStart = response.indexOf('// JavaScript', cssStart !== -1 ? cssStart : contentStart);
+
+        // Extract content section (between <!-- CONTENT --> and /* CSS */)
+        const contentEnd = cssStart !== -1 ? cssStart : (jsStart !== -1 ? jsStart : response.length);
+        const contentSection = response.substring(contentStart + '<!-- CONTENT -->'.length, contentEnd).trim();
+
+        // Parse key-value pairs (one per line, KEY: value)
+        const contentMap = {};
+        const lines = contentSection.split('\n');
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('#')) continue;
+
+            const colonIndex = trimmed.indexOf(':');
+            if (colonIndex > 0) {
+                const key = trimmed.substring(0, colonIndex).trim();
+                const value = trimmed.substring(colonIndex + 1).trim();
+                // Only accept UPPER_CASE keys (our placeholder format)
+                if (/^[A-Z][A-Z0-9_]+$/.test(key) && value) {
+                    contentMap[key] = value;
+                }
+            }
+        }
+
+        // Validate: must have NAV_BRAND + HERO_HEADLINE
+        if (!contentMap.NAV_BRAND || !contentMap.HERO_HEADLINE) {
+            console.warn('⚠️ Content parse: missing NAV_BRAND or HERO_HEADLINE');
+            return null;
+        }
+
+        // Extract CSS
+        let css = '';
+        if (cssStart !== -1) {
+            const cssEnd = jsStart !== -1 ? jsStart : response.length;
+            css = response.substring(cssStart + '/* CSS */'.length, cssEnd).trim();
+        }
+
+        // Extract JS
+        let js = '';
+        if (jsStart !== -1) {
+            js = response.substring(jsStart + '// JavaScript'.length).trim();
+        }
+
+        // Clean markdown artifacts from CSS and JS
+        css = css.replace(/```(?:css)?\s*/gi, '').replace(/```\s*$/g, '').trim();
+        js = js.replace(/```(?:javascript|js)?\s*/gi, '').replace(/```\s*$/g, '').trim();
+
+        console.log(`✅ Content parsed: ${Object.keys(contentMap).length} keys, ${css.length} CSS chars, ${js.length} JS chars`);
+        return { contentMap, css, js };
+    } catch (err) {
+        console.warn('⚠️ Content parse failed:', err.message);
+        return null;
+    }
+}
+
 // Fix escaped HTML that appears as text
 function fixEscapedHtml(content) {
     if (!content) return content;
@@ -473,6 +541,170 @@ function wantsNewDesign(prompt) {
 }
 
 // ============================================
+// LAYOUT RANDOMIZER — forces structural variety
+// ============================================
+function getRandomLayout() {
+    const heroStyles = [
+        {
+            id: 'A',
+            name: 'Split Hero',
+            blueprint: `HERO LAYOUT: Split (50/50 CSS Grid)
+   - Left: headline + subtitle + CTA, vertically centered
+   - Right: full-bleed hero image as <img> (NOT background-image)
+   - Use display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh
+   - Image side: overflow hidden, object-fit cover
+   - On mobile: stack vertically, image on top
+   - Headline: clamp(2.5rem, 6vw, 5rem), weight 800, tight tracking
+   - CTA button: large pill shape (border-radius: 50px), padding 1rem 2.5rem, niche accent color bg, white text, hover scale(1.05) + shadow-lg`
+        },
+        {
+            id: 'B',
+            name: 'Full-Screen Cinematic',
+            blueprint: `HERO LAYOUT: Full-Screen Cinematic
+   - Full viewport background-image with dark overlay (niche brand color, 60% opacity)
+   - Minimal centered text: just headline + one-line subtitle + CTA
+   - Headline: clamp(3.5rem, 10vw, 9rem), ultra-bold, tight tracking, white text
+   - Keep text minimal — let the image dominate
+   - Subtle scroll-down indicator at bottom
+   - CTA button: ghost/outline style (transparent bg, 2px white border, white text), hover fills solid white with dark text, padding 1rem 3rem, letter-spacing 0.1em, uppercase`
+        },
+        {
+            id: 'C',
+            name: 'Asymmetric Hero',
+            blueprint: `HERO LAYOUT: Asymmetric Split
+   - Left 65%: oversized headline stacked vertically, massive font, subtitle below
+   - Right 35%: hero image peeking in, offset vertically (margin-top: 15vh), rounded corners
+   - Use display: grid; grid-template-columns: 1.8fr 1fr; align-items: center
+   - CTA button aligned left under text
+   - Feels editorial, magazine-like
+   - Headline: clamp(3rem, 9vw, 7rem), weight 900, line-height 0.95, niche primary-dark color
+   - CTA button: sharp rectangle (border-radius: 0), bold text, niche accent bg, padding 1.2rem 2.5rem, hover translateX(8px) + arrow icon appears`
+        },
+        {
+            id: 'D',
+            name: 'Editorial Stack',
+            blueprint: `HERO LAYOUT: Editorial Stack (image above text)
+   - Top: large hero image spanning full width, max-height: 60vh, object-fit cover
+   - Below image: bold headline + subtitle + CTA in a contained text block
+   - NO overlay on the image — clean separation
+   - Text block has generous padding, left-aligned
+   - Feels like a magazine article opening
+   - Headline: clamp(2.5rem, 7vw, 6rem), weight 800, niche primary-dark color
+   - CTA button: underline-style text link (no bg), bold, font-size 1.1rem, niche accent color, hover underline animates width 0→100%, with right arrow →`
+        },
+        {
+            id: 'E',
+            name: 'Text-Only Bold',
+            blueprint: `HERO LAYOUT: Text-Only Bold (NO hero image)
+   - NO background-image, NO <img> in hero
+   - Instead: abstract CSS gradient or solid niche brand color background
+   - Headline fills viewport: font-size clamp(4rem, 12vw, 12rem), font-weight 900, niche primary color or white (depending on bg darkness)
+   - Minimal subtitle
+   - Use the hero image as the first content section image instead
+   - CTA button: oversized (padding 1.5rem 3.5rem), rounded corners (border-radius: 12px), niche accent bg, white text, font-size 1.2rem, hover scale(1.08) + shadow-xl`
+        },
+        {
+            id: 'F',
+            name: 'Cards Hero',
+            blueprint: `HERO LAYOUT: Cards Hero
+   - Left: headline + subtitle + CTA, vertically centered
+   - Right: 2-3 floating preview cards/images, overlapping each other with rotation (transform: rotate(-3deg))
+   - Cards have border-radius: 16px, box-shadow, slight tilt
+   - Use CSS grid or absolute positioning for overlapping effect
+   - Hero image used as one of the floating cards
+   - Headline: clamp(2.5rem, 6vw, 5rem), weight 800, niche primary-dark color
+   - CTA button: pill shape (border-radius: 50px), niche accent bg, white text, padding 1rem 2.5rem, hover magnetic effect (subtle translateY(-2px) toward cursor) + shadow-lg`
+        }
+    ];
+
+    const sectionTypes = [
+        {
+            id: 1,
+            name: 'Card Grid',
+            blueprint: `CARD GRID: 2 or 3 columns, each card has image + title + text + hover lift effect (translateY(-8px) + shadow-xl)`
+        },
+        {
+            id: 2,
+            name: 'Split Image+Text',
+            blueprint: `SPLIT IMAGE+TEXT: alternating sides each row (image left/text right, then flip). Use CSS grid 1fr 1fr, gap: var(--space-8)`
+        },
+        {
+            id: 3,
+            name: 'Full-Width Image Break',
+            blueprint: `FULL-WIDTH IMAGE BREAK: edge-to-edge image with overlay text (centered headline + subtitle). Height: 50vh, background-attachment: fixed for parallax feel`
+        },
+        {
+            id: 4,
+            name: 'Dark Stats Banner',
+            blueprint: `DARK STATS BANNER: dark niche brand color background, white text. 3-4 large numbers with labels in a row. Use countUp animation with ScrollTrigger`
+        },
+        {
+            id: 5,
+            name: 'Testimonials',
+            blueprint: `TESTIMONIALS: large quote text (clamp(1.2rem, 2.5vw, 1.8rem)), author name + role below. Either single rotating quote or 2-3 column layout with quote marks`
+        },
+        {
+            id: 6,
+            name: 'Bento Grid',
+            blueprint: `BENTO GRID: mixed-size tiles using grid-template-areas or spanning. 1 large tile (2x2) + 2-4 small tiles. Each tile has image or icon + text`
+        },
+        {
+            id: 7,
+            name: 'Zigzag Staggered',
+            blueprint: `ZIGZAG STAGGERED: items alternate left and right with vertical offset. Each item: image + heading + text. Use CSS grid with offset rows or flexbox with margin-top shifts`
+        },
+        {
+            id: 8,
+            name: 'Feature Spotlight',
+            blueprint: `FEATURE SPOTLIGHT: one hero-sized item — large image (60% width) + text block (40%). Big heading, detailed description, CTA link. Feels like a magazine feature`
+        }
+    ];
+
+    // Pick 1 random hero
+    const hero = heroStyles[Math.floor(Math.random() * heroStyles.length)];
+
+    // Pick 3-4 random section types with image budget enforcement
+    // Budget: 6 content images (7 for Hero E which doesn't use a hero image)
+    const isHeroE = hero.id === 'E';
+    const imageBudget = isHeroE ? 7 : 6;
+    const numSections = Math.random() < 0.5 ? 3 : 4;
+
+    // Always guarantee Dark Stats (section 4, 0 images)
+    const darkStats = sectionTypes[3]; // id: 4
+    const otherSections = sectionTypes.filter(s => s.id !== 4);
+    const shuffled = [...otherSections].sort(() => Math.random() - 0.5);
+
+    // Greedy pick: add sections that fit within image budget
+    let picked = [darkStats];
+    let usedImages = 0;
+
+    for (const section of shuffled) {
+        if (picked.length >= numSections) break;
+        const sectionImageCount = SECTION_META[section.id]?.imageCount ?? 0;
+        if (usedImages + sectionImageCount <= imageBudget) {
+            picked.push(section);
+            usedImages += sectionImageCount;
+        }
+    }
+
+    // Shuffle the final pick so dark stats isn't always first
+    picked = picked.sort(() => Math.random() - 0.5);
+
+    return {
+        hero,
+        sections: picked,
+        prompt: `
+THIS GENERATION'S LAYOUT BLUEPRINT (follow exactly):
+
+HERO → Style ${hero.id}: ${hero.name}
+${hero.blueprint}
+
+CONTENT SECTIONS (in this order):
+${picked.map((s, i) => `Section ${i + 1} → ${s.name}\n${s.blueprint}`).join('\n\n')}`
+    };
+}
+
+// ============================================
 // GENERATE WEBSITE
 // ============================================
 router.post('/generate', async (req, res) => {
@@ -483,7 +715,7 @@ router.post('/generate', async (req, res) => {
             return res.status(400).json({ error: 'Prompt is required' });
         }
 
-        if (!anthropic) {
+        if (!openai) {
             return res.status(500).json({ error: 'AI service not available' });
         }
 
@@ -522,185 +754,101 @@ router.post('/generate', async (req, res) => {
             session.conversationHistory = [];
             session.niche = niche;
 
-            // Build image list with explicit usage instructions
-            const contentImages = contextualImages.slice(1);
-            // Ensure content images are a multiple of 3 for perfect grid alignment
-            const gridImages = contentImages.length >= 6 ? contentImages.slice(0, 6)
-                             : contentImages.length >= 3 ? contentImages.slice(0, 3)
-                             : contentImages;
+            // Get random layout blueprint for this generation
+            const layout = getRandomLayout();
+            console.log(`🎲 Layout: Hero ${layout.hero.id} (${layout.hero.name}) + ${layout.sections.map(s => s.name).join(', ')}`);
 
-            const imageUrls = contextualImages.length > 0
-                ? `USE THESE EXACT URLS — NO PLACEHOLDERS, NO OTHER URLS:
+            // Build HTML skeleton with images baked in
+            const { skeleton, placeholderKeys, cssHints, bemClasses } = assembleSkeleton(layout, contextualImages);
+            console.log(`🏗️ Skeleton: ${skeleton.length} chars, ${placeholderKeys.length} placeholders, ${cssHints.length} CSS hints`);
 
-HERO IMAGE (USE AS CSS background-image on .hero section — NOT an <img> tag):
-${contextualImages[0].url}
+            // Store skeleton on session for parsing step
+            session._skeleton = skeleton;
+            session._cssHints = cssHints;
+            session._layout = layout;
 
-CONTENT IMAGES (USE AS <img> TAGS — place in gallery/features grid):
-${gridImages.map((img, i) =>
-    `${i + 1}. ${img.url}\n   Alt: "${img.alt}"`
-).join('\n')}
+            const placeholderDescriptions = getPlaceholderDescriptions(layout);
 
-GRID RULE: You have ${gridImages.length} content images. Use a ${gridImages.length <= 3 ? '3-column' : '3-column'} CSS grid. NEVER leave an orphan image alone in a row — always fill complete rows of 3.`
-                : 'No pre-loaded images — use direct Unsplash URLs with relevant search terms: https://images.unsplash.com/photo-[id]?w=800&fit=crop';
+            systemPrompt = `You are an expert front-end developer. You have been given a pre-built HTML skeleton for a ${niche.name} website.
+Your job: fill in ALL text content placeholders, write complete CSS, and write JavaScript.
 
-            systemPrompt = `Role: You are an Awwwards-winning Front-end Developer and UI/UX Designer. You create "Site of the Day" quality websites — NOT generic corporate templates.
-
-DETECTED NICHE: ${niche.name.toUpperCase()}
-
-NICHE-SPECIFIC DESIGN DIRECTION:
-- Color Psychology: ${niche.design.colors}
-- Font Pairing: ${niche.design.fonts}
-- Image Style: ${niche.design.imagery}
-- Mood & Feel: ${niche.design.mood}
-
-ANIMATION LIBRARIES (pre-loaded in environment — use directly):
-- GSAP 3.12 + ScrollTrigger — for ALL animations (entrance, scroll, parallax, text reveals)
-- Lenis — for buttery smooth scrolling
-- Do NOT add <script> CDN tags — libraries are already loaded globally.
-
-DESIGN PHILOSOPHY — "Awwwards" quality means:
-
-1. TYPOGRAPHY — Go bold and dramatic:
-   - Hero headline: massive viewport-sized type (font-size: clamp(3rem, 8vw, 8rem)), tight letter-spacing (-0.04em), font-weight 800-900
-   - Section headings: large and expressive (clamp(2rem, 5vw, 4rem))
-   - Body text: generous line-height (1.8), good readability
-   - Each niche gets a UNIQUE Google Font pairing from the niche direction above
-
-2. LAYOUT — Forget boring grids. Think editorial:
-   - Asymmetric CSS Grid layouts with overlapping elements
-   - Generous whitespace — let content breathe (padding: clamp(4rem, 10vw, 10rem))
-   - Full-width sections mixed with contained sections
-   - Staggered/offset image placements, not everything centered
-   - Each section should feel like a different "scene"
-
-3. COLOR — EACH NICHE IS VISUALLY DISTINCT:
-   - Use the EXACT hex colors from the niche direction above
-   - NEVER default to teal/green for everything
-   - Dark sections use the niche's secondary/primary-dark color, not generic black
-   - Backgrounds should alternate: light → tinted → dark brand → light. No two adjacent same color.
-
-4. SCROLL ANIMATIONS (use GSAP + ScrollTrigger):
-   - Hero elements: staggered fade-up entrance on load using gsap.from() with stagger
-   - Section headings: reveal/clip animation triggered on scroll
-   - Images: parallax movement (y: -50 on scroll), or scale from 0.8 to 1
-   - Cards/items: stagger in from bottom as user scrolls
-   - Stats/numbers: countUp animation triggered by ScrollTrigger
-   - Use scrub for smooth scroll-linked animations where appropriate
-
-5. MICRO-INTERACTIONS:
-   - Custom cursor: a small circle (20px) that follows the mouse, scales up on hover over links/buttons
-   - Buttons: magnetic hover effect (subtle translate toward cursor) OR scale+shadow lift
-   - Images: reveal on hover with clip-path or overlay transition
-   - Links: underline animation (width from 0 to 100% on hover)
-
-6. SMOOTH SCROLLING (use Lenis):
-   - Initialize Lenis with default settings
-   - Sync with GSAP ScrollTrigger via lenis.on('scroll', ScrollTrigger.update)
-   - Use requestAnimationFrame loop for Lenis
-
-NICHE ADAPTATION — design must MATCH the business type:
-- Luxury/Fashion/Beauty/Wedding: high contrast, serif fonts, black/white space, slow elegant animations, minimal
-- Tech/Startup/Gaming: dark mode backgrounds, gradients, glassmorphism, grotesque sans-serifs, sharp edges
-- Food/Restaurant/Bakery/Pets: warm colors, organic rounded shapes, soft shadows, playful cursor effects
-- Professional/Legal/Finance/Consulting: structured layouts, muted palettes, subtle animations, trust-building
-- Sports/Fitness/Automotive: bold typography, high energy colors, dynamic angles, fast animations
-- Health/Church/Nonprofit: calming colors, gentle animations, warm and welcoming feel
+NICHE: ${niche.name.toUpperCase()}
+- Colors: ${niche.design.colors}
+- Fonts: ${niche.design.fonts}
+- Mood: ${niche.design.mood}
 
 ${DESIGN_SYSTEM}
 
-SIZE CONSTRAINT — CRITICAL:
-- MAXIMUM 6 sections: navbar + hero + 3-4 content + footer
-- Max 3 cards per row. Max 3 stats. Keep it tight but impactful.
-- Simple SVG icons only (24x24 viewBox, 1-2 paths max)
-- Quality over quantity — fewer sections, more polish
+SKELETON BEM CLASSES (target these in your CSS):
+${bemClasses}
 
-ELEMENT CLASS NAMING (CRITICAL FOR EDITING):
-- BEM-lite: .section-name, .section-name__element, .section-name--modifier
-- EVERY element MUST have a descriptive class name
+HERO STYLE: ${layout.hero.id} — ${layout.hero.name}
+${layout.hero.blueprint}
 
-FORMAT (MUST FOLLOW EXACTLY):
-1. Start with EXACTLY: <!-- HTML -->
-2. Then ALL HTML (body content ONLY — NO <html>, <head>, <body>, <link>, <meta>, <script>, <!DOCTYPE>)
-3. Then EXACTLY: /* CSS */
-4. Then ALL CSS (@import Google Fonts, then :root tokens, then styles)
-5. Then EXACTLY: // JavaScript
-6. Then ALL JavaScript
+SECTIONS:
+${layout.sections.map((s, i) => `${i + 1}. ${s.name}\n${s.blueprint}`).join('\n\n')}
 
-REQUIRED SECTIONS:
+LIBRARIES (pre-loaded globally — do NOT add <script> CDN tags):
+- GSAP 3.12 + ScrollTrigger
+- Lenis smooth scroll
 
-1. NAVBAR — position: fixed, z-index: 1000, backdrop-filter: blur, transparent or niche-colored
-   - Hamburger toggle for mobile with animated open/close
-   - Style must match niche personality
+CSS REQUIREMENTS:
+- @import Google Fonts matching niche direction
+- Define ALL :root design tokens (colors, fonts, spacing, shadows, radii, transitions)
+- Use var(--token) for ALL values — NEVER hardcode
+- Alternate section backgrounds: light → tinted → dark brand → light
+- Dark stats section: niche brand color background, white text
+- Hero: min-height 100vh, follow the hero style blueprint
+- Cards: shadow-md + hover translateY(-4px) + shadow-xl transition
+- Responsive: mobile-first with @media breakpoints
+- Section heading h2: color var(--color-primary-dark)
 
-2. HERO — Full viewport, background-image from provided URL, niche-colored overlay
-   - .hero::before overlay MUST use niche brand colors (NOT generic black/gray)
-   - Massive headline with GSAP entrance animation
-   - Staggered subtitle and CTA button animations
-   - body padding-top for fixed navbar offset
-
-3. CONTENT SECTIONS — 3-4 sections, each with DIFFERENT layout:
-   - Use mix of: cards with hover effects, split image+text, dark stats banner, testimonials, gallery
-   - ONE dark section mandatory (use niche secondary color, NOT black)
-   - Images in grids with parallax or reveal effects
-   - Alternating backgrounds — NEVER two same-color adjacent sections
-
-4. CONTACT — Form with name, email, message, submit. JS validation. Beautiful focus states.
-
-5. FOOTER — Brand, links, SVG social icons (FB, X, Instagram, LinkedIn), copyright 2026
-
-IMAGES:
-- Use ONLY the exact URLs provided below — NO placeholders
-- HERO: CSS background-image on .hero (NOT <img>)
-- CONTENT: <img> tags with src, alt, class, loading="lazy"
-- Apply parallax, hover zoom, or reveal effects on images
-- Grid images: 3-column, complete rows only (no orphans)
-
-JAVASCRIPT — GSAP + LENIS + INTERACTIVITY:
-- Initialize Lenis smooth scroll and sync with ScrollTrigger
+JAVASCRIPT REQUIREMENTS:
+- Lenis init + sync with ScrollTrigger (lenis.on('scroll', ScrollTrigger.update) + rAF loop)
 - gsap.registerPlugin(ScrollTrigger)
-- Hero entrance: gsap.from() with stagger on title, subtitle, buttons
-- Scroll reveals: ScrollTrigger.batch() for cards, images, text blocks
-- Parallax: gsap.to(image, { y: -50, scrollTrigger: { scrub: true } })
-- Custom cursor: small circle div, gsap.to for smooth follow on mousemove
-- Mobile menu toggle with GSAP timeline for smooth open/close
-- Form validation (email regex, required fields, visual feedback)
-- Sticky header class on scroll
-- Number counter animation for stats using ScrollTrigger
-- ALL querySelector calls: null checks. Wrap everything in try-catch.
-- NO console errors.
+- Hero entrance: gsap.from() with stagger on .hero__title, .hero__subtitle, .hero__cta
+- Scroll reveals: ScrollTrigger.batch() for cards/images/text blocks
+- Mobile menu: toggle .navbar__menu open/close with GSAP timeline
+- Form validation on #contact-form submit
+- Stats countUp: read .stats__number text, animate from 0 to parsed number
+- Sticky header: add class on scroll for navbar background
+- Wrap ALL code in try-catch IIFE
+- ALL querySelector calls: null-check before use
 
-CONTEXT-AWARE IMAGES PROVIDED:
-${imageUrls}
-
-ABSOLUTE RULES:
-- NO text/explanations outside code sections. NO markdown blocks.
-- NO <html>/<head>/<body>/<link>/<meta>/<script src> tags in HTML
-- EVERY element: class name + fully styled. ZERO browser defaults.
-- NO placeholder text — realistic, contextual content only.
-- COMPLETE code — never truncate.`;
-
-            userMessage = `Create an Awwwards-quality ${niche.name !== 'general' ? niche.name + ' ' : ''}website for: ${prompt}
-
-EXECUTION CHECKLIST:
-1. Choose niche-appropriate Google Font pairing from direction above
-2. Set :root with ALL tokens using EXACT niche hex colors (NOT teal/green unless niche specifies it)
-3. Write navbar with niche-appropriate style (transparent, dark, minimal, etc.)
-4. Write hero with background-image, niche-colored ::before overlay, massive headline
-5. Write 3-4 content sections — EACH different layout, ONE dark section mandatory
-6. Alternating backgrounds: light → tinted → dark brand → light
-7. Write contact form + footer with SVG social icons
-8. Write JS: Lenis smooth scroll → GSAP ScrollTrigger → hero animations → scroll reveals → parallax → custom cursor → form validation → mobile menu
-9. VERIFY: every niche looks COMPLETELY different (colors, fonts, layout, button shapes, animations)
-
-Return COMPLETE code:
-<!-- HTML -->
-[body content — no wrapper tags, no script CDN tags]
-
+RESPONSE FORMAT (follow EXACTLY — no deviations):
+<!-- CONTENT -->
+KEY: value
+KEY: value
+...
 /* CSS */
-[@import fonts → :root tokens → reset → all styles with niche colors]
-
+[complete CSS: @import, :root tokens, all component styles, responsive]
 // JavaScript
-[Lenis + GSAP + ScrollTrigger + all interactivity in try-catch]`;
+[complete JS in try-catch IIFE]
+
+CRITICAL RULES:
+- Do NOT output any HTML — the skeleton is pre-built
+- Do NOT include HTML tags in content values
+- Do NOT add explanatory text outside the format
+- Do NOT use placeholder/lorem ipsum — write realistic, niche-specific content
+- Fill in EVERY placeholder key listed below`;
+
+            userMessage = `Create content and styling for a ${niche.name !== 'general' ? niche.name + ' ' : ''}website: ${prompt}
+
+HTML SKELETON (pre-built — do NOT modify, just style it):
+${skeleton}
+
+PLACEHOLDER KEYS TO FILL (ALL required):
+${placeholderDescriptions}
+
+${cssHints.length > 0 ? `PRE-BUILT CSS RULES (include these in your CSS output):
+${cssHints.join('\n')}\n` : ''}
+Return in EXACT format:
+<!-- CONTENT -->
+[all KEY: value pairs, one per line]
+/* CSS */
+[complete CSS]
+// JavaScript
+[complete JS]`;
 
         } else {
             // Iteration mode
@@ -796,19 +944,18 @@ Return the COMPLETE modified code in format:
 
         conversationMessages.push({ role: 'user', content: userMessage });
 
-        // Generate with Claude
-        console.log(`🤖 Calling Claude API... [Niche: ${niche.name}] ${!isNewDesign && isTargetedEdit ? '(Targeted Edit)' : ''}`);
-        const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-5-20250929',
-            max_tokens: 64000,
+        // Generate with OpenAI
+        console.log(`🤖 Calling OpenAI API... [Niche: ${niche.name}] ${!isNewDesign && isTargetedEdit ? '(Targeted Edit)' : ''}`);
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            max_tokens: 16384,
             temperature: !isNewDesign && isTargetedEdit ? 0.3 : 0.7,
-            system: systemPrompt,
-            messages: conversationMessages
+            messages: [{ role: 'system', content: systemPrompt }, ...conversationMessages]
         });
 
-        const generatedCode = response.content[0].text;
-        const stopReason = response.stop_reason;
-        const wasTruncated = stopReason === 'max_tokens';
+        const generatedCode = response.choices[0].message.content;
+        const stopReason = response.choices[0].finish_reason;
+        const wasTruncated = stopReason === 'length';
 
         // Log preview for debugging
         console.log(`📝 Response preview (stop_reason: ${stopReason}, truncated: ${wasTruncated}):`);
@@ -819,97 +966,126 @@ Return the COMPLETE modified code in format:
         }
 
         // ============================================
-        // PARSE — Multi-method extraction
+        // PARSE — Template-based (preferred) or multi-method fallback
         // ============================================
         let html = '', css = '', js = '';
+        let usedTemplateParsing = false;
 
-        // Method 1: Exact delimiters
-        let htmlMatch = generatedCode.match(/<!--\s*HTML\s*-->([\s\S]*?)(?=\/\*\s*CSS\s*\*\/|$)/i);
-        let cssMatch = generatedCode.match(/\/\*\s*CSS\s*\*\/([\s\S]*?)(?=\/\/\s*JavaScript|$)/i);
-        let jsMatch = generatedCode.match(/\/\/\s*JavaScript([\s\S]*?)$/i);
+        // Try template-based parsing first (new design with skeleton)
+        if (isNewDesign && session._skeleton) {
+            const contentResult = parseContentResponse(generatedCode);
+            if (contentResult) {
+                html = replacePlaceholders(session._skeleton, contentResult.contentMap);
+                css = contentResult.css;
+                js = contentResult.js;
 
-        if (htmlMatch) html = htmlMatch[1].trim();
-        if (cssMatch) css = cssMatch[1].trim();
-        if (jsMatch) js = jsMatch[1].trim();
+                // Prepend cssHints (background-image rules for Hero B, Full-Width Break, etc.)
+                if (session._cssHints && session._cssHints.length > 0) {
+                    css = '/* Pre-built background images */\n' + session._cssHints.join('\n') + '\n\n' + css;
+                }
 
-        // Method 2: Markdown code blocks
-        if (!html || !css) {
-            console.log('⚠️ Trying markdown block extraction');
-            const htmlBlockMatch = generatedCode.match(/```html\s*([\s\S]*?)```/i);
-            const cssBlockMatch = generatedCode.match(/```css\s*([\s\S]*?)```/i);
-            const jsBlockMatch = generatedCode.match(/```(?:javascript|js)\s*([\s\S]*?)```/i);
-
-            if (htmlBlockMatch && !html) html = htmlBlockMatch[1].trim();
-            if (cssBlockMatch && !css) css = cssBlockMatch[1].trim();
-            if (jsBlockMatch && !js) js = jsBlockMatch[1].trim();
+                usedTemplateParsing = true;
+                console.log('✅ Template-based parsing succeeded');
+            } else {
+                console.log('⚠️ Template parsing failed, falling back to traditional parser');
+            }
         }
 
-        // Method 3: Smart section split
-        if (!html || !css) {
-            console.log('⚠️ Using smart section extraction');
-            const sections = generatedCode.split(/(?=<!--\s*HTML\s*-->|\/\*\s*CSS\s*\*\/|\/\/\s*JavaScript)/i);
+        // Clean up temporary session properties
+        delete session._skeleton;
+        delete session._cssHints;
+        delete session._layout;
 
-            for (const section of sections) {
-                if (/<!--\s*HTML\s*-->/i.test(section) && !html) {
-                    html = section.replace(/<!--\s*HTML\s*-->/i, '').trim();
-                } else if (/\/\*\s*CSS\s*\*\//i.test(section) && !css) {
-                    css = section.replace(/\/\*\s*CSS\s*\*\//i, '').trim();
-                } else if (/\/\/\s*JavaScript/i.test(section) && !js) {
-                    js = section.replace(/\/\/\s*JavaScript/i, '').trim();
+        // Fallback: traditional multi-method parsing
+        if (!usedTemplateParsing) {
+            // Method 1: Exact delimiters
+            let htmlMatch = generatedCode.match(/<!--\s*HTML\s*-->([\s\S]*?)(?=\/\*\s*CSS\s*\*\/|$)/i);
+            let cssMatch = generatedCode.match(/\/\*\s*CSS\s*\*\/([\s\S]*?)(?=\/\/\s*JavaScript|$)/i);
+            let jsMatch = generatedCode.match(/\/\/\s*JavaScript([\s\S]*?)$/i);
+
+            if (htmlMatch) html = htmlMatch[1].trim();
+            if (cssMatch) css = cssMatch[1].trim();
+            if (jsMatch) js = jsMatch[1].trim();
+
+            // Method 2: Markdown code blocks
+            if (!html || !css) {
+                console.log('⚠️ Trying markdown block extraction');
+                const htmlBlockMatch = generatedCode.match(/```html\s*([\s\S]*?)```/i);
+                const cssBlockMatch = generatedCode.match(/```css\s*([\s\S]*?)```/i);
+                const jsBlockMatch = generatedCode.match(/```(?:javascript|js)\s*([\s\S]*?)```/i);
+
+                if (htmlBlockMatch && !html) html = htmlBlockMatch[1].trim();
+                if (cssBlockMatch && !css) css = cssBlockMatch[1].trim();
+                if (jsBlockMatch && !js) js = jsBlockMatch[1].trim();
+            }
+
+            // Method 3: Smart section split
+            if (!html || !css) {
+                console.log('⚠️ Using smart section extraction');
+                const sections = generatedCode.split(/(?=<!--\s*HTML\s*-->|\/\*\s*CSS\s*\*\/|\/\/\s*JavaScript)/i);
+
+                for (const section of sections) {
+                    if (/<!--\s*HTML\s*-->/i.test(section) && !html) {
+                        html = section.replace(/<!--\s*HTML\s*-->/i, '').trim();
+                    } else if (/\/\*\s*CSS\s*\*\//i.test(section) && !css) {
+                        css = section.replace(/\/\*\s*CSS\s*\*\//i, '').trim();
+                    } else if (/\/\/\s*JavaScript/i.test(section) && !js) {
+                        js = section.replace(/\/\/\s*JavaScript/i, '').trim();
+                    }
                 }
             }
-        }
 
-        // Method 4: Pattern-based fallback
-        if (!html || !css) {
-            console.log('⚠️ Using pattern-based fallback');
+            // Method 4: Pattern-based fallback
+            if (!html || !css) {
+                console.log('⚠️ Using pattern-based fallback');
 
-            if (!html) {
-                const htmlPattern = /<(?:nav|header|div|section|main|footer)[^>]*>[\s\S]*<\/(?:nav|header|div|section|main|footer)>/i;
-                const htmlFallback = generatedCode.match(htmlPattern);
-                if (htmlFallback) html = htmlFallback[0];
-            }
+                if (!html) {
+                    const htmlPattern = /<(?:nav|header|div|section|main|footer)[^>]*>[\s\S]*<\/(?:nav|header|div|section|main|footer)>/i;
+                    const htmlFallback = generatedCode.match(htmlPattern);
+                    if (htmlFallback) html = htmlFallback[0];
+                }
 
-            if (!css) {
-                const cssStart = generatedCode.search(/(@import|:root\s*\{|[.#\w][\w-]*\s*\{)/);
-                if (cssStart !== -1) {
-                    let braceCount = 0;
-                    let cssEnd = cssStart;
-                    let foundOpen = false;
+                if (!css) {
+                    const cssStart = generatedCode.search(/(@import|:root\s*\{|[.#\w][\w-]*\s*\{)/);
+                    if (cssStart !== -1) {
+                        let braceCount = 0;
+                        let cssEnd = cssStart;
+                        let foundOpen = false;
 
-                    for (let i = cssStart; i < generatedCode.length; i++) {
-                        if (generatedCode[i] === '{') {
-                            braceCount++;
-                            foundOpen = true;
-                        } else if (generatedCode[i] === '}') {
-                            braceCount--;
-                            if (foundOpen && braceCount === 0) {
-                                cssEnd = i + 1;
+                        for (let i = cssStart; i < generatedCode.length; i++) {
+                            if (generatedCode[i] === '{') {
+                                braceCount++;
+                                foundOpen = true;
+                            } else if (generatedCode[i] === '}') {
+                                braceCount--;
+                                if (foundOpen && braceCount === 0) {
+                                    cssEnd = i + 1;
+                                }
                             }
                         }
-                    }
 
-                    if (cssEnd > cssStart) {
-                        css = generatedCode.substring(cssStart, cssEnd).trim();
+                        if (cssEnd > cssStart) {
+                            css = generatedCode.substring(cssStart, cssEnd).trim();
+                        }
                     }
+                }
+
+                if (!js) {
+                    const jsPattern = /((?:document\.|window\.|const\s+|let\s+|var\s+|function\s+)[\s\S]*)/;
+                    const jsFallback = generatedCode.match(jsPattern);
+                    if (jsFallback) js = jsFallback[1].trim();
                 }
             }
 
-            if (!js) {
-                const jsPattern = /((?:document\.|window\.|const\s+|let\s+|var\s+|function\s+)[\s\S]*)/;
-                const jsFallback = generatedCode.match(jsPattern);
-                if (jsFallback) js = jsFallback[1].trim();
-            }
+            // Clean markdown artifacts
+            html = html.replace(/```html\s*/gi, '').replace(/```\s*$/g, '').trim();
+            css = css.replace(/```css\s*/gi, '').replace(/```\s*$/g, '').trim();
+            js = js.replace(/```(?:javascript|js)\s*/gi, '').replace(/```\s*$/g, '').trim();
+
+            // Fix escaped HTML entities
+            html = fixEscapedHtml(html);
+            css = fixEscapedHtml(css);
         }
-
-        // Clean markdown artifacts
-        html = html.replace(/```html\s*/gi, '').replace(/```\s*$/g, '').trim();
-        css = css.replace(/```css\s*/gi, '').replace(/```\s*$/g, '').trim();
-        js = js.replace(/```(?:javascript|js)\s*/gi, '').replace(/```\s*$/g, '').trim();
-
-        // Fix escaped HTML entities
-        html = fixEscapedHtml(html);
-        css = fixEscapedHtml(css);
 
         // Sanitize output — strip all artifacts, validate clean code
         const sanitized = sanitizeOutput(html, css, js);
@@ -1013,7 +1189,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; max-width: 1
         }
 
         // HERO STRUCTURE GUARANTEE — Ensure hero ALWAYS has proper wrapper and background image
-        if (html && isNewDesign && contextualImages.length > 0) {
+        // Skip for template-parsed designs (skeleton already guarantees hero structure)
+        if (html && isNewDesign && contextualImages.length > 0 && !usedTemplateParsing) {
             const heroImageUrl = contextualImages[0].url;
 
             // Check if HTML has a proper hero section/header/main wrapper with "hero" in class
@@ -1118,18 +1295,17 @@ input, textarea, select { font-family: inherit; font-size: inherit; max-width: 1
         if (!js && html && isNewDesign) {
             console.log('🔧 JS missing — generating separately...');
             try {
-                const jsResponse = await anthropic.messages.create({
-                    model: 'claude-sonnet-4-5-20250929',
+                const jsResponse = await openai.chat.completions.create({
+                    model: 'gpt-4o',
                     max_tokens: 2000,
                     temperature: 0.3,
-                    system: 'You are a frontend JavaScript expert. Generate ONLY vanilla JavaScript code. No explanations, no markdown, no code blocks. Just raw JavaScript.',
-                    messages: [{
-                        role: 'user',
-                        content: `Add interactivity to this website HTML. Include: mobile menu toggle, smooth scroll for anchor links, scroll-triggered animations (fade-in on scroll using IntersectionObserver), and active nav link highlighting. Wrap everything in DOMContentLoaded and try-catch.\n\nHTML structure:\n${html.substring(0, 3000)}`
-                    }]
+                    messages: [
+                        { role: 'system', content: 'You are a frontend JavaScript expert. Generate ONLY vanilla JavaScript code. No explanations, no markdown, no code blocks. Just raw JavaScript.' },
+                        { role: 'user', content: `Add interactivity to this website HTML. Include: mobile menu toggle, smooth scroll for anchor links, scroll-triggered animations (fade-in on scroll using IntersectionObserver), and active nav link highlighting. Wrap everything in DOMContentLoaded and try-catch.\n\nHTML structure:\n${html.substring(0, 3000)}` }
+                    ]
                 });
 
-                js = jsResponse.content[0].text
+                js = jsResponse.choices[0].message.content
                     .replace(/```(?:javascript|js)?\s*/gi, '')
                     .replace(/```\s*/g, '')
                     .trim();
@@ -1140,11 +1316,12 @@ input, textarea, select { font-family: inherit; font-size: inherit; max-width: 1
             }
         }
 
-        // Store in session
-        session.currentDesign = generatedCode;
+        // Store in session — use assembled HTML+CSS+JS for iteration compatibility
+        const assembledDesign = `<!-- HTML -->\n${html}\n\n/* CSS */\n${css}\n\n// JavaScript\n${js}`;
+        session.currentDesign = assembledDesign;
         session.conversationHistory.push(
             { role: 'user', content: userMessage },
-            { role: 'assistant', content: generatedCode }
+            { role: 'assistant', content: assembledDesign }
         );
 
         console.log(`✅ Generated: ${html.length} HTML, ${css.length} CSS, ${js.length} JS [Niche: ${niche.name}]\n`);
@@ -1179,7 +1356,7 @@ router.post('/edit-element', async (req, res) => {
             return res.status(400).json({ error: 'Element HTML, prompt, and current HTML are required' });
         }
 
-        if (!anthropic) {
+        if (!openai) {
             return res.status(500).json({ error: 'AI service not available' });
         }
 
@@ -1242,15 +1419,14 @@ USER REQUEST: ${prompt}
 
 Return the modified element. If you need to add/modify CSS, include COMPLETE CSS rules in a /* ELEMENT_CSS */ block.`;
 
-        const response = await anthropic.messages.create({
-            model: 'claude-sonnet-4-5-20250929',
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
             max_tokens: 2000,
             temperature: 0.3,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: userMessage }]
+            messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }]
         });
 
-        const result = response.content[0].text;
+        const result = response.choices[0].message.content;
         console.log('📝 Element edit response:', result.substring(0, 200));
 
         // Parse the response
@@ -1611,7 +1787,7 @@ router.delete('/session/:sessionId', (req, res) => {
 router.get('/health', (req, res) => {
     res.json({
         ok: true,
-        ai: !!anthropic,
+        ai: !!openai,
         sessions: designSessions.size
     });
 });
