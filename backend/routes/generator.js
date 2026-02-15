@@ -802,6 +802,10 @@ CSS REQUIREMENTS:
 - Cards: shadow-md + hover translateY(-4px) + shadow-xl transition
 - Responsive: mobile-first with @media breakpoints
 - Section heading h2: color var(--color-primary-dark)
+- HERO TEXT CONTRAST: white (#fff) text on dark/image heroes, var(--color-primary-dark) on light heroes. Text must ALWAYS be clearly readable.
+- IMAGES: Do NOT apply CSS filter, opacity, tint, or color overlay to <img> elements. Images must display at full natural color.
+- SECTIONS: Each <section> must be width: 100%. Use inner container (max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-6)) for centering.
+- NAVBAR: position fixed, width 100%, z-index 1000, backdrop-filter blur, background semi-transparent on scroll
 
 JAVASCRIPT REQUIREMENTS:
 - Lenis init + sync with ScrollTrigger (lenis.on('scroll', ScrollTrigger.update) + rAF loop)
@@ -991,7 +995,8 @@ Return the COMPLETE modified code in format:
             }
         }
 
-        // Clean up temporary session properties
+        // Preserve template hero ID for post-processing, then clean up
+        const templateHeroId = session._layout?.hero?.id || null;
         delete session._skeleton;
         delete session._cssHints;
         delete session._layout;
@@ -1123,7 +1128,7 @@ a { text-decoration: none; color: inherit; }
 ul, ol { list-style: none; padding: 0; margin: 0; }
 h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 1.2; overflow-wrap: break-word; }
 p { margin: 0; }
-section, .section { overflow: hidden; }
+section, .section { overflow: hidden; width: 100%; }
 input, textarea, select { font-family: inherit; font-size: inherit; max-width: 100%; }
 `;
         // Only prepend safety net if CSS doesn't already have a universal reset
@@ -1152,7 +1157,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; max-width: 1
             }
 
             // Fix 3: Hero overlay for text readability on background images — NICHE-COLORED
-            if (!css.includes('.hero::before') && !css.includes('.hero:before')) {
+            // Only for: non-template designs, OR template Hero B (cinematic bg-image)
+            // Skip for template Hero A/C/D/E/F — overlay tints images and conflicts with AI styling
+            const needsHeroOverlay = !usedTemplateParsing || templateHeroId === 'B';
+            if (needsHeroOverlay && !css.includes('.hero::before') && !css.includes('.hero:before')) {
                 const overlayMap = {
                     pets: 'linear-gradient(135deg, rgba(249,115,22,0.8), rgba(120,53,15,0.6))',
                     beauty: 'linear-gradient(135deg, rgba(183,110,121,0.8), rgba(26,26,46,0.6))',
